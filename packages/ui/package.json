@@ -1,12 +1,11 @@
 {
   "name": "ui",
-  "version": "0.0.1",
+  "private": true,
   "description": "User interface",
   "author": "Cloud CNC contributors",
   "license": "MIT",
-  "scripts": {
-  },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc#readme",
+  "scripts": {},
+  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/ui",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"

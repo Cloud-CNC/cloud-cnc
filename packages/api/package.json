@@ -1,12 +1,11 @@
 {
   "name": "api",
-  "version": "0.0.1",
+  "private": true,
   "description": "API server",
   "author": "Cloud CNC contributors",
   "license": "MIT",
-  "scripts": {
-  },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc#readme",
+  "scripts": {},
+  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/api",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"

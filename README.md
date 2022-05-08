@@ -1,7 +1,7 @@
 # Cloud CNC
 Core monorepo
 
-## Packages
+## Core Packages
 * [API server](packages/api)
-* [Command forwarder](packages/forwarder)
+* [Command relay](packages/relay)
 * [User interface](packages/ui)

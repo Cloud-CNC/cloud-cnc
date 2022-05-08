@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ESNext",
+
+    /* Modules */
+    "module": "commonjs",
+    "moduleResolution": "node",
+
+    /* Emit */
+    "declaration": true,
+    "outDir": "dist"
+  }
+}

@@ -1,12 +1,11 @@
 {
-  "name": "forwarder",
-  "version": "0.0.1",
-  "description": "Command forwarder",
+  "name": "relay",
+  "private": true,
+  "description": "Command relay",
   "author": "Cloud CNC contributors",
   "license": "MIT",
-  "scripts": {
-  },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc#readme",
+  "scripts": {},
+  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/relay",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"
