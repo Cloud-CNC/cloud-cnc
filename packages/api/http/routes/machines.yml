@@ -1,0 +1,229 @@
+# Machine routes
+
+# Types
+_id:
+  type: string
+  description: Machine ID
+
+name:
+  type: string
+  description: Machine name
+
+relay:
+  type: string
+  description: Relay ID
+
+connection:
+  type: object
+  description: Arbitrary connection information (Consult your plugin's documentation)
+
+labels:
+  description: Machine labels (Not to be confused with relay labels)
+  type: array
+  items:
+    type: string
+
+taints:
+  description: |
+    Machine taints (Not to be confused with relay taints). Well known ones are:
+    * `machine.cloud-cnc/emergency-stopped`: the machine is stopped as a result of an emergency-stop
+    signal<sup>1</sup>
+    * `machine.cloud-cnc/busy`: the machine is currently busy<sup>1</sup>
+    * `machine.cloud-cnc/offline`: the machine is offline<sup>1</sup>
+
+    <sup>1</sup> automatically added and removed
+  type: array
+  items:
+    type: string
+
+# Routes
+all:
+  get:
+    operationId: getAllMachines
+    x-bifurcate-permissions: false
+    x-operation-type: all
+    tags:
+      - machines
+    summary: Get all machines
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                  - 'id'
+                  - 'name'
+                  - 'relay'
+                  - 'connection'
+                  - 'labels'
+                  - 'taints'
+                properties:
+                  id:
+                    $ref: '#/_id'
+                  name:
+                    $ref: '#/name'
+                  relay:
+                    $ref: '#/relay'
+                  connection:
+                    $ref: '#/connection'
+                  labels:
+                    $ref: '#/labels'
+                  taints:
+                    $ref: '#/taints'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+create:
+  post:
+    operationId: createMachine
+    x-bifurcate-permissions: false
+    x-operation-type: create
+    tags:
+      - machines
+    summary: Create a machine
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - 'name'
+              - 'relay'
+              - 'connection'
+              - 'labels'
+              - 'taints'
+            properties:
+              name:
+                $ref: '#/name'
+              relay:
+                $ref: '#/relay'
+              connection:
+                $ref: '#/connection'
+              labels:
+                $ref: '#/labels'
+              taints:
+                $ref: '#/taints'
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - 'id'
+              properties:
+                id:
+                  $ref: '#/_id'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+id:
+  parameters:
+    - name: id
+      description: Machine ID
+      in: path
+      required: true
+      schema:
+        type: string
+  get:
+    operationId: getMachine
+    x-bifurcate-permissions: false
+    x-operation-type: get
+    tags:
+      - machines
+    summary: Get a machine
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - 'name'
+                - 'relay'
+                - 'connection'
+                - 'labels'
+                - 'taints'
+              properties:
+                name:
+                  $ref: '#/name'
+                relay:
+                  $ref: '#/relay'
+                connection:
+                  $ref: '#/connection'
+                labels:
+                  $ref: '#/labels'
+                taints:
+                  $ref: '#/taints'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+  patch:
+    operationId: updateMachine
+    x-bifurcate-permissions: false
+    x-operation-type: update
+    tags:
+      - machines
+    summary: Update a machine
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                $ref: '#/name'
+              relay:
+                $ref: '#/relay'
+              connection:
+                $ref: '#/connection'
+              labels:
+                $ref: '#/labels'
+              taints:
+                $ref: '#/taints'
+    responses:
+      '200':
+        $ref: '../responses.yml#/empty-success'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+  delete:
+    operationId: deleteMachine
+    x-bifurcate-permissions: false
+    x-operation-type: delete
+    tags:
+      - machines
+    summary: Delete a machine
+    responses:
+      '200':
+        $ref: '../responses.yml#/empty-success'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'

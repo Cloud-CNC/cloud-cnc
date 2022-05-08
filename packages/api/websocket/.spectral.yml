@@ -1,0 +1,4 @@
+extends: 'spectral:asyncapi'
+rules:
+  asyncapi-info-contact: off
+  asyncapi-operation-description: off

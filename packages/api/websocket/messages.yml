@@ -1,0 +1,23 @@
+# Common messages
+
+empty-success:
+  messageId: emptySuccess
+  description: OK
+
+bad-request:
+  messageId: badRequest
+  description: Bad request
+  payload:
+    $ref: './schemas.yml#/error'
+
+unauthorized:
+  messageId: unauthorized
+  description: Unauthorized
+  payload:
+    $ref: './schemas.yml#/error'
+
+internal-error:
+  messageId: internalError
+  description: Internal server error
+  payload:
+    $ref: './schemas.yml#/error'

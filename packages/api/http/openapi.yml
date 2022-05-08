@@ -1,0 +1,127 @@
+openapi: 3.0.3
+
+info:
+  title: Cloud CNC HTTP API
+  description: |
+    ## Preface
+    This specification is the canonical source for the Cloud CNC HTTP API. The
+    HTTP API is used between the client and API server(s) for administrative
+    tasks (eg: creating a file, deleting a machine). Some of the concepts in
+    Cloud CNC are based on [Kubernetes](https://kubernetes.io) (Specifically
+    affinities, labels, taints, and tolerations).
+
+    ## Glossary
+    * ACL: Access Control List
+    * MFA: Multi-Factor Authentication
+    * TOTP: Time-based One Time Password ([RFC 6238](https://tools.ietf.org/html/rfc6238))
+    * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule compatible jobs on (eg: working-area dimensions)
+    * Affinities: labels from a machine/relay that a given job would prefer to be scheduled on (eg: GCODE support)
+    * Taints: similar to labels; unfavorable properties about a machine/relay that the job-scheduling algorithm uses to avoid scheduling incompatible jobs (eg: low filament)
+    * Tolerations: similar to affinities; taints from a machine/relay that a given job can tolerate (eg: unheated bed)
+
+    ## Permissions
+    * RBAC is used for route-level permissions while ACLs are used for individual ownable resources
+    (eg: files). For convenience, ACLs accept the same roles the RBAC uses (In addition to regular
+    accounts).
+    * Both the RBAC and ACLs are add-only (Permissions can only be added); by default, users have
+    no permissions.
+    * ACL permission **key** format: `[entity type]:[entity ID]` (eg: `account:6109ba1dc24de13eb8fa0c94`
+    or `role:6109ba287a72978d7d621f97`)
+    * RBAC permission format: `[operationId]<:[variant]>` (eg: `getAllMachines`, `getFile:own`)
+
+    ## Custom route attributes
+    * `x-operation-type` (enum): common operation types (used for code autogeneration). Valid values
+    are: `all` (Get all entity instances), `create` (Create an entity instance), `get` (Get an entity
+    instance by ID), `update` (Update an entity instance by ID), and `delete` (Delete an entity 
+    instance by ID).
+    * `x-bifurcate-permissions`: whether the route permissions should be bifurcated into an `own`
+    variant (For operating upon one's own resources) and an `other` variant (For operating upon
+    other's resources) or left as a single permission.
+  version: 2.0.0
+  license:
+    name: MIT
+    url: https://github.com/cloud-cnc/cloud-cnc/blob/main/LICENSE
+
+tags:
+  - name: sessions
+    description: User sessions
+
+  - name: accounts
+    description: User accounts
+
+  - name: roles
+    description: Account roles
+
+  - name: files
+    description: Model & machine files
+
+  - name: jobs
+    description: Machine jobs
+
+  - name: relays
+    description: Command relays
+
+  - name: machines
+    description: CNC machines
+
+paths:
+  /sessions/login/userpass:
+    $ref: './routes/sessions.yml#/userpass'
+  /sessions/login/mfa:
+    $ref: './routes/sessions.yml#/mfa'
+  /sessions/logout:
+    $ref: './routes/sessions.yml#/logout'
+
+  /accounts/all:
+    $ref: './routes/accounts.yml#/all'
+  /accounts/create:
+    $ref: './routes/accounts.yml#/create'
+  /accounts/{id}/impersonate:
+    $ref: './routes/accounts.yml#/impersonate'
+  /accounts/{id}:
+    $ref: './routes/accounts.yml#/id'
+
+  /roles/all:
+    $ref: './routes/roles.yml#/all'
+  /roles/create:
+    $ref: './routes/roles.yml#/create'
+  /roles/{id}:
+    $ref: './routes/roles.yml#/id'
+
+  /files/all:
+    $ref: './routes/files.yml#/all'
+  /files/create:
+    $ref: './routes/files.yml#/create'
+  /files/{id}:
+    $ref: './routes/files.yml#/id'
+
+  /jobs/all:
+    $ref: './routes/jobs.yml#/all'
+  /jobs/create:
+    $ref: './routes/jobs.yml#/create'
+  /jobs/{id}:
+    $ref: './routes/jobs.yml#/id'
+
+  /relays/all:
+    $ref: './routes/relays.yml#/all'
+  /relays/create:
+    $ref: './routes/relays.yml#/create'
+  /relays/{id}:
+    $ref: './routes/relays.yml#/id'
+
+  /machines/all:
+    $ref: './routes/machines.yml#/all'
+  /machines/create:
+    $ref: './routes/machines.yml#/create'
+  /machines/{id}:
+    $ref: './routes/machines.yml#/id'
+
+components:
+  securitySchemes:
+    jwt:
+      type: apiKey
+      in: cookie
+      name: jwt
+
+security:
+  - jwt: []

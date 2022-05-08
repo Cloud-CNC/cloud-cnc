@@ -1,11 +1,18 @@
 {
   "name": "api",
   "private": true,
-  "description": "API server",
+  "description": "API specifications",
   "author": "Cloud CNC contributors",
   "license": "MIT",
-  "scripts": {},
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/api",
+  "scripts": {
+    "lint": "npm run lint:http && npm run lint:websocket",
+    "lint:http": "spectral lint http/openapi.yml --ruleset=http/.spectral.yml --fail-severity=info",
+    "lint:websocket": "spectral lint websocket/asyncapi.yml --ruleset=websocket/.spectral.yml --fail-severity=info"
+  },
+  "devDependencies": {
+    "@stoplight/spectral-cli": "^6.3.0"
+  },
+  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/relay",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"

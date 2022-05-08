@@ -1,0 +1,56 @@
+asyncapi: 2.4.0
+
+info:
+  title: Cloud CNC Websocket API
+  description: |
+    ## Preface
+    This specification is the canonical source for the Cloud CNC Websocket API.
+    The Websocket API is used between the client, API server(s), and command
+    relays for direct machine/relay communication. Some of the concepts in
+    Cloud CNC are based on [Kubernetes](https://kubernetes.io) (Specifically
+    affinities, labels, taints, and tolerations).
+
+    ## Glossary
+    * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule compatible jobs on (eg: working-area dimensions)
+    * Affinities: labels from a machine/relay that a given job would prefer to be scheduled on (eg: GCODE support)
+    * Taints: similar to labels; unfavorable properties about a machine/relay that the job-scheduling algorithm uses to avoid scheduling incompatible jobs (eg: low filament)
+    * Tolerations: similar to affinities; taints from a machine/relay that a given job can tolerate (eg: unheated bed)
+  version: 2.0.0
+  license:
+    name: MIT
+    url: https://github.com/cloud-cnc/cloud-cnc/blob/main/LICENSE
+
+tags:
+  - name: client
+    description: Client-only channels
+
+  - name: relay
+    description: Relay-only channels
+
+channels:
+  client/io:
+    $ref: './channels/client.yml#/io'
+  relay/{id}/io:
+    $ref: './channels/relay.yml#/io'
+  relay/{id}/metadata:
+    $ref: './channels/relay.yml#/metadata'
+  relay/{id}/status:
+    $ref: './channels/relay.yml#/status'
+
+servers:
+  server:
+    url: 'https://your-cloud-cnc-instance.local'
+    protocol: socketio
+    protocolVersion: '4.5.0'
+    description: The URL is the same one you use to access the Cloud CNC user interface
+
+components:
+  securitySchemes:
+    client:
+      type: httpApiKey
+      in: cookie
+      name: jwt
+      description: The security scheme used by end clients to connect to the SocketIO rooms
+    relay:
+      type: X509
+      description: The security scheme used by command relays to connect to the SocketIO rooms

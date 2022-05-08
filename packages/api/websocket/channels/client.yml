@@ -1,0 +1,50 @@
+# Client channels
+
+# Channels
+io:
+  description: Client input/output
+  publish:
+    operationId: sendClientInput
+    tags:
+      - name: client
+    summary: Send input from the client to the API server
+    security:
+      - client: []
+    message:
+      oneOf:
+        - messageId: clientRawInput
+          description: Input
+          payload:
+            raw:
+              description: Raw input
+              format: binary
+              type: string
+        - messageId: clientFileInput
+          description: Input
+          payload:
+            file:
+              description: File ID (Must have at least `read` ACL permissions on the file)
+              type: string
+        - $ref: '../messages.yml#/bad-request'
+        - $ref: '../messages.yml#/unauthorized'
+        - $ref: '../messages.yml#/internal-error'
+
+  subscribe:
+    operationId: sendClientOutput
+    tags:
+      - name: client
+    summary: Send output from the API server to the client
+    security:
+      - client: []
+    message:
+      oneOf:
+        - messageId: clientOutput
+          description: Output
+          payload:
+            raw:
+              description: Raw output
+              format: binary
+              type: string
+        - $ref: '../messages.yml#/bad-request'
+        - $ref: '../messages.yml#/unauthorized'
+        - $ref: '../messages.yml#/internal-error'

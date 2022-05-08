@@ -1,0 +1,173 @@
+# Role routes
+
+# Types
+_id:
+  type: string
+  description: Role ID
+name:
+  type: string
+  description: Role name
+permissions:
+  description: RBAC role permissions. These permissions will be granted to all role members.
+  type: array
+  items:
+    type: string
+
+# Routes
+all:
+  get:
+    operationId: getAllRoles
+    x-bifurcate-permissions: false
+    x-operation-type: all
+    tags:
+      - roles
+    summary: Get all roles
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                  - 'id'
+                  - 'name'
+                  - 'permissions'
+                properties:
+                  id:
+                    $ref: '#/_id'
+                  name:
+                    $ref: '#/name'
+                  permissions:
+                    $ref: '#/permissions'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+create:
+  post:
+    operationId: createRole
+    x-bifurcate-permissions: false
+    x-operation-type: create
+    tags:
+      - roles
+    summary: Create a role
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - 'name'
+              - 'permissions'
+            properties:
+              name:
+                $ref: '#/name'
+              permissions:
+                $ref: '#/permissions'
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - 'id'
+              properties:
+                id:
+                  $ref: '#/_id'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+id:
+  parameters:
+    - name: id
+      description: Role ID
+      in: path
+      required: true
+      schema:
+        type: string
+  get:
+    operationId: getRole
+    x-bifurcate-permissions: false
+    x-operation-type: get
+    tags:
+      - roles
+    summary: Get a role
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - 'name'
+                - 'permissions'
+              properties:
+                name:
+                  $ref: '#/name'
+                permissions:
+                  $ref: '#/permissions'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+  patch:
+    operationId: updateRole
+    x-bifurcate-permissions: false
+    x-operation-type: update
+    tags:
+      - roles
+    summary: Update a role
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                $ref: '#/name'
+              permissions:
+                $ref: '#/permissions'
+    responses:
+      '200':
+        $ref: '../responses.yml#/empty-success'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+  delete:
+    operationId: deleteRole
+    x-bifurcate-permissions: false
+    x-operation-type: delete
+    tags:
+      - roles
+    summary: Delete a role
+    responses:
+      '200':
+        $ref: '../responses.yml#/empty-success'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'

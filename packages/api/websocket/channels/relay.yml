@@ -1,0 +1,146 @@
+# Relay channels
+
+# Types
+attributes:
+  description: Machine/relay attributes
+  type: object
+  properties:
+    labels:
+      description: Labels
+      type: array
+      items:
+        type: string
+    taints:
+      description: Taints
+      type: array
+      items:
+        type: string
+
+# Channels
+io:
+  description: Relay input/output
+  parameters:
+    id:
+      description: Relay ID
+      location: $message.payload#/target
+      schema:
+        type: string
+  subscribe:
+    operationId: sendRelayInput
+    tags:
+      - name: relay
+    summary: Send input from the API server to the relay
+    security:
+      - relay: []
+    message:
+      oneOf:
+        - messageId: rawRelayInput
+          description: Input
+          payload:
+            raw:
+              description: Raw input
+              format: binary
+              type: string
+        - $ref: '../messages.yml#/bad-request'
+        - $ref: '../messages.yml#/unauthorized'
+        - $ref: '../messages.yml#/internal-error'
+
+  publish:
+    operationId: sendRelayOutput
+    tags:
+      - name: relay
+    summary: Send output from the relay to the API server
+    security:
+      - relay: []
+    message:
+      oneOf:
+        - messageId: relayOutput
+          description: Output
+          payload:
+            raw:
+              description: Raw output
+              format: binary
+              type: string
+        - $ref: '../messages.yml#/bad-request'
+        - $ref: '../messages.yml#/unauthorized'
+        - $ref: '../messages.yml#/internal-error'
+
+metadata:
+  description: Machine/relay metadata
+  parameters:
+    id:
+      description: Relay ID
+      location: $message.payload#/target
+      schema:
+        type: string
+  publish:
+    operationId: getMetadata
+    tags:
+      - name: relay
+    summary: Get the machine/relay's metadata
+    security:
+      - relay: []
+    message:
+      oneOf:
+        - messageId: metadata
+          description: Machine/relay metadata
+          payload:
+            machines:
+              description: Assigned machine metadata
+              type: array
+              item:
+                type: object
+                properties:
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          description: Machine ID
+                          type: string
+                        connection:
+                          description: Arbitrary connection information (Consult your plugin's documentation)
+                          type: object
+                    - $ref: '#/attributes'
+            relay:
+              $ref: '#/attributes'
+
+        - $ref: '../messages.yml#/bad-request'
+        - $ref: '../messages.yml#/unauthorized'
+        - $ref: '../messages.yml#/internal-error'
+
+status:
+  description: Relay/machine status
+  parameters:
+    id:
+      description: Relay ID
+      location: $message.payload#/target
+      schema:
+        type: string
+  publish:
+    operationId: updateRelayStatus
+    tags:
+      - name: relay
+    summary: Send a status update from the relay to the API server
+    security:
+      - relay: []
+    message:
+      oneOf:
+        - messageId: relayStatus
+          description: Status update
+          payload:
+            machines:
+              description: Machine statuses
+              type: array
+              item:
+                type: object
+                properties:
+                  allOf:
+                    - description: Machine ID
+                      type: string
+                    - $ref: '#/attributes'
+            relay:
+              $ref: '#/attributes'
+
+        - $ref: '../messages.yml#/bad-request'
+        - $ref: '../messages.yml#/unauthorized'
+        - $ref: '../messages.yml#/internal-error'

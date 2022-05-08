@@ -2,6 +2,9 @@
 Core monorepo
 
 ## Core Packages
-* [API server](packages/api)
 * [Command relay](packages/relay)
+* [API server](packages/server)
 * [User interface](packages/ui)
+
+## Auxillary Packages
+* [API specifications](packages/api)

@@ -1,0 +1,215 @@
+# Job routes
+
+# Types
+_id:
+  type: string
+  description: Job ID
+
+name:
+  type: string
+  description: Job name
+
+file:
+  type: string
+  description: Job file ID
+
+state:
+  description: |
+    Job lifecycle state
+    * `waiting`: the job is waiting to be scheduled
+    * `processing`: the job is being processed by a machine
+    * `complete`: the job successfully completed
+    * `error`: the job unsuccessfully completed
+  type: string
+  enum:
+    - waiting
+    - processing
+    - complete
+    - error
+
+filter:
+  description: |
+    Label/taint filter written in the Cloud CNC filter Domain-Specific Language (DSL)
+  type: string
+  
+
+# Routes
+all:
+  get:
+    operationId: getAllJobs
+    x-bifurcate-permissions: true
+    x-operation-type: all
+    tags:
+      - jobs
+    summary: Get all files
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                  - 'id'
+                  - 'name'
+                  - 'file'
+                  - 'affinities'
+                  - 'tolerations'
+                properties:
+                  id:
+                    $ref: '#/_id'
+                  name:
+                    $ref: '#/name'
+                  file:
+                    $ref: '#/file'
+                  affinities:
+                    $ref: '#/filter'
+                  tolerations:
+                    $ref: '#/filter'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+create:
+  post:
+    operationId: createJob
+    x-bifurcate-permissions: true
+    x-operation-type: create
+    tags:
+      - jobs
+    summary: Create a job
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - 'name'
+              - 'file'
+              - 'affinities'
+              - 'tolerations'
+            properties:
+              name:
+                $ref: '#/name'
+              file:
+                $ref: '#/file'
+              affinities:
+                $ref: '#/filter'
+              tolerations:
+                $ref: '#/filter'
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - 'id'
+              properties:
+                id:
+                  $ref: '#/_id'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+id:
+  parameters:
+    - name: id
+      description: Job ID
+      in: path
+      required: true
+      schema:
+        type: string
+  get:
+    operationId: getJob
+    x-bifurcate-permissions: true
+    x-operation-type: get
+    tags:
+      - jobs
+    summary: Get a job
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - 'name'
+                - 'file'
+                - 'affinities'
+                - 'tolerations'
+              properties:
+                name:
+                  $ref: '#/name'
+                file:
+                  $ref: '#/file'
+                affinities:
+                  $ref: '#/filter'
+                tolerations:
+                  $ref: '#/filter'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+  patch:
+    operationId: updateJob
+    x-bifurcate-permissions: true
+    x-operation-type: update
+    tags:
+      - jobs
+    summary: Update a job
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                $ref: '#/name'
+              file:
+                $ref: '#/file'
+              affinities:
+                $ref: '#/filter'
+              tolerations:
+                $ref: '#/filter'
+    responses:
+      '200':
+        $ref: '../responses.yml#/empty-success'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+  delete:
+    operationId: deleteJob
+    x-bifurcate-permissions: true
+    x-operation-type: delete
+    tags:
+      - jobs
+    summary: Delete a job
+    responses:
+      '200':
+        $ref: '../responses.yml#/empty-success'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
