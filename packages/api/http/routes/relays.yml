@@ -16,13 +16,18 @@ tls:
     *Note: for security purposes, this will not be revealed after creating the relay,
     even when updating it.*
   type: object
+  required:
+    - certificate
+    - key
   properties:
     certificate:
-      type: string
       description: PEM-encoded mTLS client certificate
-    key:
       type: string
+      format: x509-certificate
+    key:
       description: PEM-encoded mTLS client key
+      type: string
+      format: x509-key
   additionalProperties:
     type: string
 
@@ -62,10 +67,10 @@ all:
               items:
                 type: object
                 required:
-                  - 'id'
-                  - 'name'
-                  - 'labels'
-                  - 'taints'
+                  - id
+                  - name
+                  - labels
+                  - taints
                 properties:
                   id:
                     $ref: '#/_id'
@@ -75,6 +80,8 @@ all:
                     $ref: '#/labels'
                   taints:
                     $ref: '#/taints'
+                  pluginData:
+                    $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -97,7 +104,7 @@ create:
           schema:
             type: object
             required:
-              - 'name'
+              - name
             properties:
               name:
                 $ref: '#/name'
@@ -109,8 +116,8 @@ create:
             schema:
               type: object
               required:
-                - 'id'
-                - 'tls'
+                - id
+                - tls
               properties:
                 id:
                   $ref: '#/_id'
@@ -146,9 +153,9 @@ id:
             schema:
               type: object
               required:
-                - 'name'
-                - 'labels'
-                - 'taints'
+                - name
+                - labels
+                - taints
               properties:
                 name:
                   $ref: '#/name'
@@ -156,6 +163,8 @@ id:
                   $ref: '#/labels'
                 taints:
                   $ref: '#/taints'
+                pluginData:
+                  $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -183,6 +192,8 @@ id:
                 $ref: '#/labels'
               taints:
                 $ref: '#/taints'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         $ref: '../responses.yml#/empty-success'

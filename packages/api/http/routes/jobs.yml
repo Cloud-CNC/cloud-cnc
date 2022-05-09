@@ -2,16 +2,26 @@
 
 # Types
 _id:
-  type: string
   description: Job ID
+  type: string
 
 name:
-  type: string
   description: Job name
+  type: string
 
 file:
-  type: string
   description: Job file ID
+  type: string
+
+filter:
+  description: Label/taint filter written in the Cloud CNC filter Domain-Specific Language (DSL)
+  type: string
+
+priority:
+  description: Job priority (Lower indicates a higher priority)
+  type: integer
+  minimum: 0
+  maximum: 10000
 
 state:
   description: |
@@ -19,19 +29,13 @@ state:
     * `waiting`: the job is waiting to be scheduled
     * `processing`: the job is being processed by a machine
     * `complete`: the job successfully completed
-    * `error`: the job unsuccessfully completed
+    * `aborted`: the job unsuccessfully completed
   type: string
   enum:
     - waiting
     - processing
     - complete
-    - error
-
-filter:
-  description: |
-    Label/taint filter written in the Cloud CNC filter Domain-Specific Language (DSL)
-  type: string
-  
+    - aborted
 
 # Routes
 all:
@@ -41,7 +45,7 @@ all:
     x-operation-type: all
     tags:
       - jobs
-    summary: Get all files
+    summary: Get all jobs
     responses:
       '200':
         description: OK
@@ -52,11 +56,13 @@ all:
               items:
                 type: object
                 required:
-                  - 'id'
-                  - 'name'
-                  - 'file'
-                  - 'affinities'
-                  - 'tolerations'
+                  - id
+                  - name
+                  - file
+                  - affinities
+                  - tolerations
+                  - priority
+                  - state
                 properties:
                   id:
                     $ref: '#/_id'
@@ -68,6 +74,12 @@ all:
                     $ref: '#/filter'
                   tolerations:
                     $ref: '#/filter'
+                  priority:
+                    $ref: '#/priority'
+                  state:
+                    $ref: '#/state'
+                  pluginData:
+                    $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -90,10 +102,12 @@ create:
           schema:
             type: object
             required:
-              - 'name'
-              - 'file'
-              - 'affinities'
-              - 'tolerations'
+              - name
+              - file
+              - affinities
+              - tolerations
+              - priority
+              - state
             properties:
               name:
                 $ref: '#/name'
@@ -103,6 +117,12 @@ create:
                 $ref: '#/filter'
               tolerations:
                 $ref: '#/filter'
+              priority:
+                $ref: '#/priority'
+              state:
+                $ref: '#/state'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         description: OK
@@ -111,7 +131,7 @@ create:
             schema:
               type: object
               required:
-                - 'id'
+                - id
               properties:
                 id:
                   $ref: '#/_id'
@@ -145,10 +165,12 @@ id:
             schema:
               type: object
               required:
-                - 'name'
-                - 'file'
-                - 'affinities'
-                - 'tolerations'
+                - name
+                - file
+                - affinities
+                - tolerations
+                - priority
+                - state
               properties:
                 name:
                   $ref: '#/name'
@@ -158,6 +180,12 @@ id:
                   $ref: '#/filter'
                 tolerations:
                   $ref: '#/filter'
+                priority:
+                  $ref: '#/priority'
+                state:
+                  $ref: '#/state'
+                pluginData:
+                  $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -187,6 +215,12 @@ id:
                 $ref: '#/filter'
               tolerations:
                 $ref: '#/filter'
+              priority:
+                $ref: '#/priority'
+              state:
+                $ref: '#/state'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         $ref: '../responses.yml#/empty-success'

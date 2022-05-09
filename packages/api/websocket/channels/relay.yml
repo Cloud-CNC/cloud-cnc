@@ -4,6 +4,9 @@
 attributes:
   description: Machine/relay attributes
   type: object
+  required:
+    - labels
+    - taints
   properties:
     labels:
       description: Labels
@@ -93,6 +96,9 @@ metadata:
                 properties:
                   allOf:
                     - type: object
+                      required:
+                        - id
+                        - connection
                       properties:
                         id:
                           description: Machine ID
@@ -135,8 +141,13 @@ status:
                 type: object
                 properties:
                   allOf:
-                    - description: Machine ID
-                      type: string
+                    - type: object
+                      required:
+                        - id
+                      properties:
+                        id:
+                          description: Machine ID
+                          type: string
                     - $ref: '#/attributes'
             relay:
               $ref: '#/attributes'

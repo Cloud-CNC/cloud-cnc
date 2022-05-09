@@ -32,9 +32,9 @@ all:
               items:
                 type: object
                 required:
-                  - 'id'
-                  - 'name'
-                  - 'permissions'
+                  - id
+                  - name
+                  - permissions
                 properties:
                   id:
                     $ref: '#/_id'
@@ -42,6 +42,8 @@ all:
                     $ref: '#/name'
                   permissions:
                     $ref: '#/permissions'
+                  pluginData:
+                    $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -64,13 +66,15 @@ create:
           schema:
             type: object
             required:
-              - 'name'
-              - 'permissions'
+              - name
+              - permissions
             properties:
               name:
                 $ref: '#/name'
               permissions:
                 $ref: '#/permissions'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         description: OK
@@ -79,7 +83,7 @@ create:
             schema:
               type: object
               required:
-                - 'id'
+                - id
               properties:
                 id:
                   $ref: '#/_id'
@@ -113,13 +117,15 @@ id:
             schema:
               type: object
               required:
-                - 'name'
-                - 'permissions'
+                - name
+                - permissions
               properties:
                 name:
                   $ref: '#/name'
                 permissions:
                   $ref: '#/permissions'
+                pluginData:
+                  $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -145,6 +151,8 @@ id:
                 $ref: '#/name'
               permissions:
                 $ref: '#/permissions'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         $ref: '../responses.yml#/empty-success'

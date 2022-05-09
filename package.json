@@ -3,6 +3,9 @@
   "private": true,
   "author": "Cloud CNC contributors",
   "license": "MIT",
+  "scripts": {
+    "postinstall": "lerna bootstrap"
+  },
   "devDependencies": {
     "lerna": "^4.0.0",
     "typescript": "^4.6.4"

@@ -8,7 +8,10 @@ info:
     The Websocket API is used between the client, API server(s), and command
     relays for direct machine/relay communication. Some of the concepts in
     Cloud CNC are based on [Kubernetes](https://kubernetes.io) (Specifically
-    affinities, labels, taints, and tolerations).
+    affinities, labels, taints, and tolerations). The key words "MUST",
+    "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+    "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted
+    as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
     ## Glossary
     * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule compatible jobs on (eg: working-area dimensions)

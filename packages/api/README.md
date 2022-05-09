@@ -3,11 +3,6 @@ This package contains the canonical API specifications for Cloud CNC.
 
 ## APIs
 
-### AMQP
-The AMQP API is used between API servers in multi-instance deployments to
-synchronize state and transmit commands. The AMQP API is documented via the
-AsyncAPI V2 specification.
-
 ### HTTP
 The HTTP API is used between the client and API server(s) for administrative
 tasks (eg: creating a file, deleting a machine). The HTTP API is documented via

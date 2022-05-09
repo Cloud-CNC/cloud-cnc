@@ -23,7 +23,7 @@ io:
           description: Input
           payload:
             file:
-              description: File ID (Must have at least `read` ACL permissions on the file)
+              description: File ID (The client MUST have at least `read` ACL permissions on the file)
               type: string
         - $ref: '../messages.yml#/bad-request'
         - $ref: '../messages.yml#/unauthorized'

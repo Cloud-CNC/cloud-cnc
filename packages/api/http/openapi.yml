@@ -8,7 +8,10 @@ info:
     HTTP API is used between the client and API server(s) for administrative
     tasks (eg: creating a file, deleting a machine). Some of the concepts in
     Cloud CNC are based on [Kubernetes](https://kubernetes.io) (Specifically
-    affinities, labels, taints, and tolerations).
+    affinities, labels, taints, and tolerations). The key words "MUST",
+    "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+    "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted
+    as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
     ## Glossary
     * ACL: Access Control List
@@ -32,9 +35,9 @@ info:
     ## Custom route attributes
     * `x-operation-type` (enum): common operation types (used for code autogeneration). Valid values
     are: `all` (Get all entity instances), `create` (Create an entity instance), `get` (Get an entity
-    instance by ID), `update` (Update an entity instance by ID), and `delete` (Delete an entity 
+    instance by ID), `update` (Update an entity instance by ID), and `delete` (Delete an entity
     instance by ID).
-    * `x-bifurcate-permissions`: whether the route permissions should be bifurcated into an `own`
+    * `x-bifurcate-permissions`: whether the route permissions MUST be bifurcated into an `own`
     variant (For operating upon one's own resources) and an `other` variant (For operating upon
     other's resources) or left as a single permission.
   version: 2.0.0

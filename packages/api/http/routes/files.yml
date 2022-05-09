@@ -16,7 +16,7 @@ description:
 state:
   description: |
     File lifecycle state
-    * `present`: the file is present; both the metadata and data is accessible
+    * `present`: the file is present; both the metadata and data are accessible
     * `deleted`: the file is in the trash; only the metadata is accessible
   type: string
   enum:
@@ -41,7 +41,7 @@ acl:
     * Keys: ACL permission keys (Valid for `account` and `role` entity types only)
     * Values: ACL permission values
 
-    *Note: if sending over `multipart/form-data`, this field should be a JSON-encoded string.*
+    *Note: if sending over `multipart/form-data`, this field MUST be a JSON-encoded string.*
   type: object
   additionalProperties:
     $ref: '#/permission'
@@ -70,10 +70,10 @@ all:
               items:
                 type: object
                 required:
-                  - 'id'
-                  - 'name'
-                  - 'lifecycle'
-                  - 'acl'
+                  - id
+                  - name
+                  - lifecycle
+                  - acl
                 properties:
                   id:
                     $ref: '#/_id'
@@ -85,6 +85,8 @@ all:
                     $ref: '#/state'
                   acl:
                     $ref: '#/acl'
+                  pluginData:
+                    $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -108,9 +110,9 @@ create:
           schema:
             type: object
             required:
-              - 'name'
-              - 'acl'
-              - 'raw'
+              - name
+              - acl
+              - raw
             properties:
               name:
                 $ref: '#/name'
@@ -120,6 +122,8 @@ create:
                 $ref: '#/acl'
               raw:
                 $ref: '#/raw'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         description: OK
@@ -128,7 +132,7 @@ create:
             schema:
               type: object
               required:
-                - 'id'
+                - id
               properties:
                 id:
                   $ref: '#/_id'
@@ -162,10 +166,10 @@ id:
             schema:
               type: object
               required:
-                - 'name'
-                - 'state'
-                - 'acl'
-                - 'raw'
+                - name
+                - state
+                - acl
+                - raw
               properties:
                 name:
                   $ref: '#/name'
@@ -177,6 +181,8 @@ id:
                   $ref: '#/acl'
                 raw:
                   $ref: '#/raw'
+                pluginData:
+                  $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -194,7 +200,7 @@ id:
     description: |
       *Note: endpoint accepts `multipart/form-data`, not `application/json`.*
 
-      If the client is implementing a "trash" system, the client should use this endpoint
+      If the client is implementing a "trash" system, the client SHOULD use this endpoint
       and update the file state to `deleted` to signify that the file is pending permanent
       deletion instead of invoking the `DELETE /files/{id}` endpoint.
     requestBody:
@@ -214,6 +220,8 @@ id:
                 $ref: '#/acl'
               raw:
                 $ref: '#/raw'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         $ref: '../responses.yml#/empty-success'
@@ -234,7 +242,7 @@ id:
     description: |
       *Note: this endpoint permanently and irreversibly deletes the file.*
 
-      If the client is implementing a "trash" system, the client should use the `PATCH /files/{id}`
+      If the client is implementing a "trash" system, the client SHOULD use the `PATCH /files/{id}`
       endpoint and update the file state to `deleted` to signify that the file is pending permanent
       deletion instead of invoking this endpoint.
     responses:

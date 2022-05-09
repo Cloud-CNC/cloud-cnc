@@ -8,7 +8,7 @@ userpass:
     tags:
       - sessions
     summary: Log in to an account with a username and password
-    description: The client may need to invoke `/login/mfa` if MFA is enabled.
+    description: The client MUST invoke `/login/mfa` if MFA is enabled.
     security: []
     requestBody:
       required: true
@@ -17,15 +17,16 @@ userpass:
           schema:
             type: object
             required:
-              - 'username'
-              - 'password'
+              - username
+              - password
             properties:
               username:
                 type: string
                 description: The account's username
               password:
-                type: string
                 description: The account's password
+                type: string
+                format: password
     responses:
       '200':
         description: OK
@@ -39,8 +40,8 @@ userpass:
             schema:
               type: object
               required:
-                - 'valid'
-                - 'mfa'
+                - valid
+                - mfa
               properties:
                 valid:
                   type: boolean
@@ -62,7 +63,7 @@ mfa:
     tags:
       - sessions
     summary: Log in to an account with MFA
-    description: The client must always invoke `/login/userpass` prior to invoking this endpoint.
+    description: The client MUST invoke `/login/userpass` prior to invoking this endpoint.
     requestBody:
       required: true
       content:
@@ -70,7 +71,7 @@ mfa:
           schema:
             type: object
             required:
-              - 'totp'
+              - totp
             properties:
               totp:
                 type: string
@@ -88,7 +89,7 @@ mfa:
             schema:
               type: object
               required:
-                - 'valid'
+                - valid
               properties:
                 valid:
                   type: boolean

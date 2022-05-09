@@ -4,14 +4,14 @@ error:
   description: Generic error schema
   type: object
   required:
-    - 'error'
+    - error
   properties:
     error:
       description: Error information
       type: object
       required:
-        - 'name'
-        - 'description'
+        - name
+        - description
       properties:
         name:
           type: string
@@ -19,3 +19,11 @@ error:
         description:
           type: string
           description: Longer message, detailing how to avoid/fix the underlying cause for the error
+
+pluginData:
+  description: |
+    Arbitrary plugin data
+    * Keys: plugin identifier (Plugins SHOULD use an RFC 3986 URN)
+    * Values: arbitrary, plugin-specific data (Plugins SHOULD only modify their respective data)
+  type: object
+  additionalProperties: true

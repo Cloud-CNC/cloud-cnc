@@ -13,10 +13,6 @@ relay:
   type: string
   description: Relay ID
 
-connection:
-  type: object
-  description: Arbitrary connection information (Consult your plugin's documentation)
-
 labels:
   description: Machine labels (Not to be confused with relay labels)
   type: array
@@ -58,7 +54,6 @@ all:
                   - 'id'
                   - 'name'
                   - 'relay'
-                  - 'connection'
                   - 'labels'
                   - 'taints'
                 properties:
@@ -68,12 +63,12 @@ all:
                     $ref: '#/name'
                   relay:
                     $ref: '#/relay'
-                  connection:
-                    $ref: '#/connection'
                   labels:
                     $ref: '#/labels'
                   taints:
                     $ref: '#/taints'
+                  pluginData:
+                    $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -98,7 +93,6 @@ create:
             required:
               - 'name'
               - 'relay'
-              - 'connection'
               - 'labels'
               - 'taints'
             properties:
@@ -106,12 +100,12 @@ create:
                 $ref: '#/name'
               relay:
                 $ref: '#/relay'
-              connection:
-                $ref: '#/connection'
               labels:
                 $ref: '#/labels'
               taints:
                 $ref: '#/taints'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         description: OK
@@ -156,7 +150,6 @@ id:
               required:
                 - 'name'
                 - 'relay'
-                - 'connection'
                 - 'labels'
                 - 'taints'
               properties:
@@ -164,12 +157,12 @@ id:
                   $ref: '#/name'
                 relay:
                   $ref: '#/relay'
-                connection:
-                  $ref: '#/connection'
                 labels:
                   $ref: '#/labels'
                 taints:
                   $ref: '#/taints'
+                pluginData:
+                  $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -195,12 +188,12 @@ id:
                 $ref: '#/name'
               relay:
                 $ref: '#/relay'
-              connection:
-                $ref: '#/connection'
               labels:
                 $ref: '#/labels'
               taints:
                 $ref: '#/taints'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         $ref: '../responses.yml#/empty-success'

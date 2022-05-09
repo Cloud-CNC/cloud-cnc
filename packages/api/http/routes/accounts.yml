@@ -15,7 +15,7 @@ password:
 
 requestMfa:
   type: boolean
-  description: Whether or not to request MFA (Note that the client must invoke `/accounts/verify-mfa` before MFA is enabled)
+  description: Whether or not to request MFA (Note that the client MUST invoke `/accounts/verify-mfa` before MFA is enabled)
 
 mfaEnabled:
   type: boolean
@@ -50,9 +50,9 @@ all:
               items:
                 type: object
                 required:
-                  - 'id'
-                  - 'username'
-                  - 'mfaEnabled'
+                  - id
+                  - username
+                  - mfaEnabled
                   - roles
                 properties:
                   id:
@@ -63,6 +63,8 @@ all:
                     $ref: '#/mfaEnabled'
                   roles:
                     $ref: '#/roles'
+                  pluginData:
+                    $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -78,7 +80,7 @@ create:
     tags:
       - accounts
     summary: Create an account
-    description: The client must invoke `/accounts/mfa-confirm` with a valid TOTP otherwise MFA will be disabled to prevent accidental lockout.
+    description: The client MUST invoke `/accounts/mfa-confirm` with a valid TOTP otherwise MFA will be disabled to prevent accidental lockout.
     requestBody:
       required: true
       content:
@@ -86,9 +88,9 @@ create:
           schema:
             type: object
             required:
-              - 'username'
-              - 'password'
-              - 'requestMfa'
+              - username
+              - password
+              - requestMfa
               - roles
             properties:
               username:
@@ -99,6 +101,8 @@ create:
                 $ref: '#/requestMfa'
               roles:
                 $ref: '#/roles'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
     responses:
       '200':
         description: OK
@@ -107,7 +111,7 @@ create:
             schema:
               type: object
               required:
-                - 'id'
+                - id
               properties:
                 id:
                   $ref: '#/_id'
@@ -141,7 +145,7 @@ impersonate:
           schema:
             type: object
             required:
-              - 'enabled'
+              - enabled
             properties:
               enabled:
                 type: boolean
@@ -179,8 +183,8 @@ id:
             schema:
               type: object
               required:
-                - 'username'
-                - 'mfaEnabled'
+                - username
+                - mfaEnabled
                 - roles
               properties:
                 username:
@@ -189,6 +193,8 @@ id:
                   $ref: '#/mfaEnabled'
                 roles:
                   $ref: '#/roles'
+                pluginData:
+                  $ref: '../schemas.yml#/pluginData'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -218,6 +224,8 @@ id:
                 $ref: '#/requestMfa'
               roles:
                 $ref: '#/roles'
+              pluginData:
+                $ref: '../schemas.yml#/pluginData'
 
     responses:
       '200':
