@@ -1,0 +1,41 @@
+---
+to: src/models/<%- h.changeCase.param(name) %>.ts
+---
+/**
+ * @fileoverview Unified <%- h.changeCase.no(name) %> model
+ */
+
+//Imports
+import Joi from 'joi';
+import {model as createModel, Document} from 'mongoose';
+import joigoose from '../lib/joigoose';
+
+//Typescript interface
+interface typescriptInterface extends Document
+{<% for (const field of fields) { %>
+  /**
+<%- h.multiline(field.description, 3) %>
+   */
+  <%- field.name %>: <%- field.typescriptType %>;
+<% } -%>
+}
+
+//Joi schema
+const joiSchema = Joi.object({
+<% for (const [field, separator] of h.list(fields, ',')) { -%>
+  <%- field.name %>: <%- field.joiType %><%- separator %>
+<% } -%>
+});
+
+//Mongoose schema
+const mongooseSchema = joigoose.convert(joiSchema);
+
+//Mongoose model
+const model = createModel<typescriptInterface>('<%- h.changeCase.camel(name, false) %>', mongooseSchema);
+
+//Export
+export {
+  typescriptInterface as I<%- h.changeCase.pascal(name, false) %>,
+  joiSchema as <%- h.changeCase.pascal(name, false) %>Schema,
+  model as <%- h.changeCase.pascal(name, false) %>
+};

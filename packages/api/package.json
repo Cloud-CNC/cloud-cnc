@@ -9,6 +9,10 @@
     "lint:http": "spectral lint http/openapi.yml --ruleset=http/.spectral.yml --fail-severity=info",
     "lint:websocket": "spectral lint websocket/asyncapi.yml --ruleset=websocket/.spectral.yml --fail-severity=info"
   },
+  "dependencies": {
+    "openapi-types": "^11.0.0",
+    "swagger-parser": "^10.0.3"
+  },
   "devDependencies": {
     "@stoplight/spectral-cli": "^6.3.0"
   },
