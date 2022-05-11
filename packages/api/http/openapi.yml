@@ -24,7 +24,7 @@ info:
 
     ## Permissions
     * RBAC is used for route-level permissions while ACLs are used for individual ownable resources
-    (eg: files). For convenience, ACLs accept the same roles the RBAC uses (In addition to regular
+    (eg: files). For convenience, ACLs accept the same roles that the RBAC uses (In addition to regular
     accounts).
     * Both the RBAC and ACLs are add-only (Permissions can only be added); by default, users have
     no permissions.

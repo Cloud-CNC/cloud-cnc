@@ -47,9 +47,14 @@ acl:
     $ref: '#/permission'
 
 raw:
+  description: Raw file
   type: string
   format: binary
-  description: Raw file
+
+estimate:
+  description: Job processing time estimate (In seconds)
+  type: integer
+  minimum: 0
 
 # Routes
 all:
@@ -74,6 +79,7 @@ all:
                   - name
                   - lifecycle
                   - acl
+                  - estimate
                 properties:
                   id:
                     $ref: '#/_id'
@@ -85,6 +91,8 @@ all:
                     $ref: '#/state'
                   acl:
                     $ref: '#/acl'
+                  estimate:
+                    $ref: '#/estimate'
                   pluginData:
                     $ref: '../schemas.yml#/pluginData'
       '400':
@@ -113,6 +121,7 @@ create:
               - name
               - acl
               - raw
+              - estimate
             properties:
               name:
                 $ref: '#/name'
@@ -122,6 +131,8 @@ create:
                 $ref: '#/acl'
               raw:
                 $ref: '#/raw'
+              estimate:
+                $ref: '#/estimate'
               pluginData:
                 $ref: '../schemas.yml#/pluginData'
     responses:
@@ -170,6 +181,7 @@ id:
                 - state
                 - acl
                 - raw
+                - estimate
               properties:
                 name:
                   $ref: '#/name'
@@ -181,6 +193,8 @@ id:
                   $ref: '#/acl'
                 raw:
                   $ref: '#/raw'
+                estimate:
+                  $ref: '#/estimate'
                 pluginData:
                   $ref: '../schemas.yml#/pluginData'
       '400':
@@ -220,6 +234,8 @@ id:
                 $ref: '#/acl'
               raw:
                 $ref: '#/raw'
+              estimate:
+                $ref: '#/estimate'
               pluginData:
                 $ref: '../schemas.yml#/pluginData'
     responses:

@@ -24,18 +24,33 @@ priority:
   maximum: 10000
 
 state:
-  description: |
-    Job lifecycle state
-    * `waiting`: the job is waiting to be scheduled
-    * `processing`: the job is being processed by a machine
-    * `complete`: the job successfully completed
-    * `aborted`: the job unsuccessfully completed
-  type: string
-  enum:
-    - waiting
-    - processing
-    - complete
-    - aborted
+  description: Job lifecycle state
+  type: object
+  properties:
+    stage:
+      description: |
+        Job lifecycle state stage
+        * `waiting`: the job is waiting to be scheduled
+        * `processing`: the job is being processed by a machine
+        * `complete`: the job successfully completed
+        * `aborted`: the job unsuccessfully completed
+      type: string
+      enum:
+        - waiting
+        - processing
+        - complete
+        - aborted
+    machine:
+      description: Assigned machine ID (During the `waiting` stage, this is an estimate)
+      type: string
+    start:
+      description: Start time (During the `waiting` stage, this is an estimate)
+      type: string
+      format: date-time
+    end:
+      description: End time (During the `waiting` and `processing` stages, this is an estimate)
+      type: string
+      format: date-time
 
 # Routes
 all:
@@ -107,7 +122,6 @@ create:
               - affinities
               - tolerations
               - priority
-              - state
             properties:
               name:
                 $ref: '#/name'
@@ -119,8 +133,6 @@ create:
                 $ref: '#/filter'
               priority:
                 $ref: '#/priority'
-              state:
-                $ref: '#/state'
               pluginData:
                 $ref: '../schemas.yml#/pluginData'
     responses:
@@ -217,8 +229,6 @@ id:
                 $ref: '#/filter'
               priority:
                 $ref: '#/priority'
-              state:
-                $ref: '#/state'
               pluginData:
                 $ref: '../schemas.yml#/pluginData'
     responses:

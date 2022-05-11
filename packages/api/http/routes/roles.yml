@@ -4,14 +4,34 @@
 _id:
   type: string
   description: Role ID
+
 name:
   type: string
   description: Role name
+
 permissions:
   description: RBAC role permissions. These permissions will be granted to all role members.
   type: array
   items:
     type: string
+
+priorityLimits:
+  description: |
+    Job scheduling priority limits (If a user inherits multiple limits, the effective limit is the
+    smallest minimum and greatest maximum, so as to maximize the range of allowed job scheduling
+    priorities)
+  type: object
+  properties:
+    minimum:
+      description: Minimum priority (MUST be less than or equal to the maximum limit)
+      type: integer
+      minimum: 0
+      maximum: 10000
+    maximum:
+      description: Maximum priority (MUST be greater than or equal to the minimum limit)
+      type: integer
+      minimum: 0
+      maximum: 10000
 
 # Routes
 all:
@@ -35,6 +55,7 @@ all:
                   - id
                   - name
                   - permissions
+                  - priorityLimits
                 properties:
                   id:
                     $ref: '#/_id'
@@ -42,6 +63,8 @@ all:
                     $ref: '#/name'
                   permissions:
                     $ref: '#/permissions'
+                  priorityLimits:
+                    $ref: '#/priorityLimits'
                   pluginData:
                     $ref: '../schemas.yml#/pluginData'
       '400':
@@ -68,11 +91,14 @@ create:
             required:
               - name
               - permissions
+              - priorityLimits
             properties:
               name:
                 $ref: '#/name'
               permissions:
                 $ref: '#/permissions'
+              priorityLimits:
+                $ref: '#/priorityLimits'
               pluginData:
                 $ref: '../schemas.yml#/pluginData'
     responses:
@@ -119,11 +145,14 @@ id:
               required:
                 - name
                 - permissions
+                - priorityLimits
               properties:
                 name:
                   $ref: '#/name'
                 permissions:
                   $ref: '#/permissions'
+                priorityLimits:
+                  $ref: '#/priorityLimits'  
                 pluginData:
                   $ref: '../schemas.yml#/pluginData'
       '400':
@@ -151,6 +180,8 @@ id:
                 $ref: '#/name'
               permissions:
                 $ref: '#/permissions'
+              priorityLimits:
+                $ref: '#/priorityLimits'
               pluginData:
                 $ref: '../schemas.yml#/pluginData'
     responses:
