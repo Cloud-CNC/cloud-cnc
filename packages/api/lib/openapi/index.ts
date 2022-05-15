@@ -86,12 +86,6 @@ export const getEntities = async () =>
           const operation = entryValue as OpenAPIV3.OperationObject;
           const body = operation.requestBody as OpenAPIV3.RequestBodyObject;
 
-          //Skip empty bodies
-          if (body == null)
-          {
-            continue;
-          }
-
           //Ensure the operation ID and summary are provided
           if (operation.operationId == null || operation.summary == null)
           {
@@ -99,7 +93,7 @@ export const getEntities = async () =>
           }
 
           //Aggregate operation fields
-          const fields = Object.values(body.content).flatMap(content =>
+          const fields = Object.values(body?.content ?? {}).flatMap(content =>
           {
             //Cast
             const schema = content.schema as OpenAPIV3.SchemaObject;

@@ -1,8 +1,8 @@
 ---
-to: src/controllers/<%- h.changeCase.param(name) %>.ts
+to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 ---
 /**
- * @fileoverview <%- h.changeCase.sentence(name) %> model
+ * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> model
  */
 
 //Imports
@@ -10,88 +10,92 @@ import {ParameterizedContext} from 'koa';
 <% if (entity.operations.find(operation => ['get', 'update', 'delete'].includes(operation.type))) { -%>
 import validate from '../lib/validate';
 <% } -%>
-import {I<%- h.changeCase.pascal(name, false) %>, <%- h.changeCase.pascal(name, false) %>Schema, <%- h.changeCase.pascal(name, false) %>} from '@/models/models/<%- h.changeCase.param(name) %>.ts'
+import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema, <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 
 //Controller context
-export interface <%- h.changeCase.pascal(name, false) %>Context extends ParameterizedContext
-{<% for (const parameter of parameters) { %>
-  /**
-<%- h.multiline(h.inflection.singularize(entity.description), 3) %>
-   */
-  <%- h.changeCase.camel(name) %>: I<%- h.changeCase.pascal(name, false) %>;
+export interface <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context extends ParameterizedContext
+{
+  state: {<% for (const parameter of parameters) { %>
+    /**
+<%- h.multiline(entity.description, 5) %>
+    */
+    <%- h.changeCase.camel(h.inflection.singularize(name)) %>: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
 <% } -%>
+  };
 }
 
 <% for (const operation of entity.operations) { -%>
 /**
 <%- h.multiline(operation.description, 1) %>
  */
-const <%- operation.name %> = <%- ['all', 'create', 'update', 'delete'].includes(operation.type) ? 'async ' : '' %>(ctx: <%- h.changeCase.pascal(name, false) %>Context) =>
+const <%- operation.name %> = <%- ['all', 'create', 'update', 'delete'].includes(operation.type) ? 'async ' : '' %>(ctx: <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context) =>
 {
 <% if (['all', 'create', 'update', 'delete'].includes(operation.type)) { -%>
-  //Ensure the <%- h.changeCase.no(name) %> is valid
-  if (ctx.<%- h.changeCase.camel(name) %> == null)
+  //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> is valid
+  if (ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
   {
     //Log
-    ctx.log.error(ctx, 'Invalid <%- h.changeCase.no(name) %>!');
+    ctx.log.error(ctx, 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!');
 
     //Reject
     ctx.throw({
       error: {
-        name: 'Invalid <%- h.changeCase.no(name) %>!',
-        description: 'The supplied <%- h.changeCase.no(name) %> was invalid.'
+        name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
+        description: 'The supplied <%- h.changeCase.no(h.inflection.singularize(name)) %> was invalid.'
       }
     }, 400);
   }
 
 <% } if (['get', 'update', 'delete'].includes(operation.type)) { -%>
   //Validate the body
-  validate(<%- h.changeCase.pascal(name, false) %>Schema, ctx);
+  validate(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema, ctx);
 
 <% } if (operation.type == 'all') { -%>
-  //Find and return all <%- h.inflection.pluralize(h.changeCase.no(name)) %>
-  ctx.response.body = await <%- h.changeCase.pascal(name, false) %>.find();
+  //Find and return all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
+  ctx.response.body = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.find();
 
   //Log
-  ctx.log.info('Got all <%- h.inflection.pluralize(h.changeCase.no(name)) %>.');
+  ctx.log.info('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
 <% } else if (operation.type == 'create') { -%>
   //Instantiate the model
-  const <%- h.changeCase.camel(name) %> = await <%- h.changeCase.pascal(name, false) %>.create(ctx.request.body);
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.create(ctx.request.body);
 
   //Save the model
-  await <%- h.changeCase.camel(name) %>.save();
+  await <%- h.changeCase.camel(h.inflection.singularize(name)) %>.save();
 
   //Return the model
   ctx.response.body = {
-    id: <%- h.changeCase.camel(name) %>.id
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>.id
   };
 
   //Log
-  ctx.log.info(`Created <%- h.changeCase.no(name) %> ${<%- h.changeCase.camel(name) %>.id}.`);
+  ctx.log.info(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 <% } else if (operation.type == 'get') { -%>
   //Return the model
-  ctx.response.body = ctx.<%- h.changeCase.camel(name) %>;
+  ctx.response.body = ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>;
 
   //Log
-  ctx.log.info(`Got <%- h.changeCase.no(name) %> ${ctx.<%- h.changeCase.camel(name) %>.id}.`);
+  ctx.log.info(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 <% } else if (operation.type == 'update') { -%>
   //Update the model
-  await ctx.<%- h.changeCase.camel(name) %>.update(ctx.request.body as object);
+  await ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.update(ctx.request.body as object);
 
   //Log
-  ctx.log.info(`Updated <%- h.changeCase.no(name) %> ${ctx.<%- h.changeCase.camel(name) %>.id}.`);
+  ctx.log.info(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 <% } else if (operation.type == 'delete') { -%>
   //Delete the model
-  await ctx.<%- h.changeCase.camel(name) %>.delete();
+  await ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.delete();
 
   //Log
-  ctx.log.info(`Deleted <%- h.changeCase.no(name) %> ${ctx.<%- h.changeCase.camel(name) %>.id}.`);
+  ctx.log.info(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+<% } else { -%>
+  //TODO: implement business logic
 <% } -%>
 };
 
 <% } %>
 //Export
-export default {
+export {
 <% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
   <%- operation.name %><%- separator %>
 <% } -%>

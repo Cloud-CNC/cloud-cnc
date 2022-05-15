@@ -7,6 +7,12 @@
     /* Modules */
     "module": "commonjs",
     "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
 
     /* Emit */
     "declaration": true,

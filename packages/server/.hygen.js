@@ -8,10 +8,11 @@ module.exports = {
     /**
      * Format a list with separators
      * @param {any[]} list List to format
-     * @param {string} separator Item separator
+     * @param {string} normalSeparator Normal item separator
+     * @param {string} lastSeparator Last item separator
      * @returns {[any, string][]} Formatted list for use in a for-of loop
      */
-    list: (list, separator) => list.map((item, index) => [item, (index < list.length - 1) ? separator : '']),
+    list: (list, normalSeparator, lastSeparator = '') => list.map((item, index) => [item, (index < list.length - 1) ? normalSeparator : lastSeparator]),
 
     /**
      * Format raw text as a multiline comment

@@ -1,0 +1,65 @@
+---
+to: src/routes/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
+---
+/**
+ * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> routes
+ */
+
+//Imports
+import Router from '@koa/router';
+import {DefaultState} from 'koa';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context, 
+<% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
+  <%- operation.name %><%- separator %>
+<% } -%>
+} from '@/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+
+//Router setup
+const router = new Router<DefaultState, <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context>();
+
+//Register routes
+router
+<% for (const parameter of parameters) { -%>
+  //Route level <%- h.changeCase.no(h.inflection.pluralize(h.inflection.pluralize(name))) %>
+  .param('<%- parameter.name %>', async (<%- parameter.name %>, ctx: <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context, next) =>
+  {
+    //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %> by its <%- parameter.name %>
+<% if (parameter.name == 'id') { -%>
+    const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findById(<%- parameter.name %>);
+<% } else { -%>
+    const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findOne({
+      <%- parameter.name %>
+    });
+<% } -%>
+
+    //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> is valid
+    if (<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
+    {
+      //Log
+      ctx.log.error({ctx, id}, 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> <%- parameter.name %>!');
+
+      //Reject
+      ctx.throw({
+        error: {
+          name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> <%- parameter.name %>!',
+          description: 'The supplied <%- h.changeCase.no(h.inflection.singularize(name)) %> <%- parameter.name %> is invalid.'
+        }
+      }, 400);
+    }
+
+    //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+    ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %> = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+
+    return next();
+  })
+
+<% } for (const [operation, separator] of h.list(entity.operations, '', ';')) { -%>
+  /**
+<%- h.multiline(operation.description, 3) %>
+   */
+  .<%- operation.method %>('<%- operation.path %>', <%- operation.name %>)<%- separator %>
+
+<% } -%>
+//Export
+export default router;

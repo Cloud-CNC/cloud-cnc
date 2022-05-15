@@ -6,25 +6,25 @@
 
 //Imports
 import {getEntities} from '../../../../api/lib/openapi/index';
-import {isEqual, uniqWith} from 'lodash';
+import {uniqWith} from 'lodash';
 
 //Export
 module.exports = {
   params: async ({args}: {args: Record<string, string>}) =>
   {
-    //Get the entity name
-    const entityName = args.entity?.toLowerCase();
+    //Get the name
+    const name = args.name?.toLowerCase();
 
     //Get all entities
     const entities = await getEntities();
 
     //Find the entity
-    const entity = entities.find(entity => entity.name.toLowerCase() == entityName);
+    const entity = entities.find(entity => entity.name.toLowerCase() == name);
 
     //Ensure the entity was found
     if (entity == null)
     {
-      throw new Error(`Failed to find entity with name ${entityName}!`);
+      throw new Error(`Failed to find entity with name ${name}!`);
     }
 
     //Get unique fields

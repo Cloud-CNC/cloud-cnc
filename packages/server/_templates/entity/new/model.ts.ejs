@@ -1,8 +1,8 @@
 ---
-to: src/models/<%- h.changeCase.param(name) %>.ts
+to: src/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 ---
 /**
- * @fileoverview Unified <%- h.changeCase.no(name) %> model
+ * @fileoverview Unified <%- h.changeCase.no(h.inflection.singularize(name)) %> model
  */
 
 //Imports
@@ -31,11 +31,11 @@ const joiSchema = Joi.object({
 const mongooseSchema = joigoose.convert(joiSchema);
 
 //Mongoose model
-const model = createModel<typescriptInterface>('<%- h.changeCase.camel(name, false) %>', mongooseSchema);
+const model = createModel<typescriptInterface>('<%- h.changeCase.camel(h.inflection.singularize(name), false) %>', mongooseSchema);
 
 //Export
 export {
-  typescriptInterface as I<%- h.changeCase.pascal(name, false) %>,
-  joiSchema as <%- h.changeCase.pascal(name, false) %>Schema,
-  model as <%- h.changeCase.pascal(name, false) %>
+  typescriptInterface as I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>,
+  joiSchema as <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema,
+  model as <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
 };
