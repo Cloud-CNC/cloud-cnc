@@ -32,7 +32,7 @@ userpass:
         description: OK
         headers:
           Set-Cookie:
-            description: JWT cookie used for session management
+            description: Session cookie
             schema:
               type: string
         content:
@@ -81,7 +81,7 @@ mfa:
         description: OK
         headers:
           Set-Cookie:
-            description: JWT cookie used for session management
+            description: Session cookie
             schema:
               type: string
         content:
@@ -96,6 +96,21 @@ mfa:
                   description: Whether or not the TOTP was valid
       '400':
         $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
+revoke:
+  post:
+    operationId: revoke
+    x-bifurcate-permissions: false
+    tags:
+      - sessions
+    summary: Revoke all other sessions for the current account
+    responses:
+      '200':
+        description: OK
       '401':
         $ref: '../responses.yml#/unauthorized'
       '500':

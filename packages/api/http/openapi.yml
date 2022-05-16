@@ -72,6 +72,8 @@ paths:
     $ref: './routes/sessions.yml#/userpass'
   /sessions/login/mfa:
     $ref: './routes/sessions.yml#/mfa'
+  /sessions/revoke:
+    $ref: './routes/sessions.yml#/revoke'
   /sessions/logout:
     $ref: './routes/sessions.yml#/logout'
 
@@ -121,10 +123,10 @@ paths:
 
 components:
   securitySchemes:
-    jwt:
+    cookie:
       type: apiKey
       in: cookie
-      name: jwt
+      name: session
 
 security:
   - jwt: []

@@ -8,7 +8,7 @@ to: src/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 //Imports
 import Joi from 'joi';
 import {model as createModel, Document} from 'mongoose';
-import joigoose from '../lib/joigoose';
+import joigoose from '@/lib/joigoose';
 
 //Typescript interface
 interface typescriptInterface extends Document
@@ -31,7 +31,7 @@ const joiSchema = Joi.object({
 const mongooseSchema = joigoose.convert(joiSchema);
 
 //Mongoose model
-const model = createModel<typescriptInterface>('<%- h.changeCase.camel(h.inflection.singularize(name), false) %>', mongooseSchema);
+const model = createModel<typescriptInterface>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', mongooseSchema);
 
 //Export
 export {

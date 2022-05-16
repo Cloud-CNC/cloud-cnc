@@ -4,7 +4,7 @@
 
 //Imports
 import {connect} from 'mongoose';
-import {mongoUrl} from './config';
+import {mongoUrl} from '@/lib/config';
 
 //Export
 export default async () =>

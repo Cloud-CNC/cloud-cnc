@@ -8,7 +8,7 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 //Imports
 import {ParameterizedContext} from 'koa';
 <% if (entity.operations.find(operation => ['get', 'update', 'delete'].includes(operation.type))) { -%>
-import validate from '../lib/validate';
+import validate from '@/lib/validate';
 <% } -%>
 import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema, <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 
@@ -28,7 +28,7 @@ export interface <%- h.changeCase.pascal(h.inflection.singularize(name), false) 
 /**
 <%- h.multiline(operation.description, 1) %>
  */
-const <%- operation.name %> = <%- ['all', 'create', 'update', 'delete'].includes(operation.type) ? 'async ' : '' %>(ctx: <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context) =>
+const <%- operation.name %> = <% if (['all', 'create', 'update', 'delete'].includes(operation.type)) { %>async <% } %>(ctx: <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context) =>
 {
 <% if (['all', 'create', 'update', 'delete'].includes(operation.type)) { -%>
   //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> is valid

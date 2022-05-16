@@ -10,7 +10,6 @@
 //Imports
 import 'dotenv/config';
 import {existsSync, readFileSync} from 'fs';
-import {randomBytes} from 'crypto';
 import log from './log';
 
 //Fatally log and crash
@@ -24,9 +23,6 @@ const panic = (message: string) =>
 };
 
 //Read environment variables
-const auth = {
-  secret: process.env.AUTH_SECRET || ''
-};
 const debug = process.env.NODE_ENV == 'development';
 const http = {
   port: parseInt(process.env.PORT || '', 10) || 80,
@@ -41,16 +37,6 @@ const mongoUrl = process.env.MONGO_URL;
 const redisUrl = process.env.REDIS_URL;
 
 //Validate the config
-const entropy = 64;
-if (Buffer.byteLength(auth.secret) < entropy)
-{
-  //Generate crypto-safe random secret
-  auth.secret = randomBytes(entropy).toString();
-
-  //Log
-  log.warn('Auth secret was either too short or not provided, generating new secret!');
-}
-
 if (http.http2 && !http.tls)
 {
   //Panic with message
@@ -94,7 +80,6 @@ if (redisUrl == null)
 //Export
 export
 {
-  auth,
   debug,
   http,
   pretty,

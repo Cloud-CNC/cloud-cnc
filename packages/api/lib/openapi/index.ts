@@ -84,6 +84,7 @@ export const getEntities = async () =>
         case OpenAPIV3.HttpMethods.TRACE: {
           //Cast
           const operation = entryValue as OpenAPIV3.OperationObject;
+          const operationRecord = entryValue as Record<string, any>;
           const body = operation.requestBody as OpenAPIV3.RequestBodyObject;
 
           //Ensure the operation ID and summary are provided
@@ -119,11 +120,20 @@ export const getEntities = async () =>
             });
           });
 
+          //Generate permissions
+          const permissions = operationRecord['x-bifurcate-permissions'] ? [
+            `${operation.operationId}:own`,
+            `${operation.operationId}:other`
+          ] : [
+            operation.operationId
+          ];
+
           //Add the operation
           operations.push({
             name: operation.operationId,
             description: operation.summary,
-            type: (operation as Record<string, any>)['x-operation-type'],
+            type: operationRecord['x-operation-type'],
+            permissions,
             method: entryName,
             path: pathName,
             parameters,

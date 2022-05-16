@@ -80,9 +80,14 @@ export interface Operation
   description: string;
 
   /**
-  * Operation type (If applicable)
-  */
-  type?: OperationType;
+   * Operation type (If applicable)
+   */
+  type: OperationType;
+
+  /**
+   * 
+   */
+  permissions: string[];
 
   /**
    * HTTP method
