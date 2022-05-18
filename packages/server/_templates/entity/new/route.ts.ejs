@@ -58,7 +58,7 @@ router
   /**
 <%- h.multiline(operation.description, 3) %>
    */
-  .<%- operation.method %>('<%- operation.path %>', <%- if (operation.permissions) { %><% } %><%- operation.name %>)<%- separator %>
+  .<%- operation.method %>('<%- operation.path %>', <% if (operation.permissions) { %><% } %><%- operation.name %>)<%- separator %>
 
 <% } -%>
 //Export

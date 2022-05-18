@@ -4,11 +4,11 @@
 
 //Imports
 import compose from 'koa-compose';
-import session from '@/middleware/session';
-import body from '@/middleware/body';
-import helmet from '@/middleware/helmet';
-import log from '@/middleware/log';
-import sanitize from '@/middleware/sanitize';
+import session from './session';
+import body from './body';
+import helmet from './helmet';
+import log from './log';
+import sanitize from './sanitize';
 
 //Compose middleware
 const middleware = compose([

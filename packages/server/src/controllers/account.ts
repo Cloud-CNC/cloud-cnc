@@ -4,7 +4,7 @@
 
 //Imports
 import {ParameterizedContext} from 'koa';
-import validate from '../lib/validate';
+import validate from '@/middleware/validate';
 import {IAccount, AccountSchema, Account} from '@/models/account';
 
 //Controller context

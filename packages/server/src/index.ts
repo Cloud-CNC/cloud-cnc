@@ -1,34 +1,32 @@
 /**
- * @fileoverview Main app file
+ * @fileoverview Server entrypoint
  */
 
 //Imports
-import Koa from 'koa';
+// import plugin from '@/lib/plugin';
+// import socket from '@/socket';
+import app from '@/routes';
 import generateServer from '@/lib/server';
 import log from '@/lib/log';
-import middleware from '@/middleware';
-import mongoose from '@/lib/mongoose';
-import plugin from '@/lib/plugin';
-import socket from '@/socket';
-import {debug, http} from '@/lib/config';
+import {connect} from 'mongoose';
+import {debug, http, mongoUrl} from '@/lib/config';
 
 const main = async () =>
 {
-  //Koa setup
-  const app = new Koa();
-  app.use(middleware);
+  //Get the app HTTP handler
+  const handler = app.callback();
 
   //Generate the server
-  const server = generateServer(app.callback());
+  const server = generateServer(handler);
 
   //SocketIO setup
-  const io = socket(server);
+  // const io = socket(server);
 
   //Apply plugins
-  await plugin(app, io);
+  // await plugin(app, io);
 
   //Connect to Mongo
-  await mongoose();
+  await connect(mongoUrl!);
 
   //Start the server
   server.listen(http.port);

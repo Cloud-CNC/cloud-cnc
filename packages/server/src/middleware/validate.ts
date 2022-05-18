@@ -3,11 +3,11 @@
  */
 
 //Imports
-import {Context} from 'koa';
+import {ParameterizedContext} from 'koa';
 import {Schema} from 'joi';
 
 //Middleware
-const validate = (schema: Schema, ctx: Context) =>
+const validate = (schema: Schema, ctx: ParameterizedContext) =>
 {
   //Validate the body
   const res = schema.validate(ctx.body);

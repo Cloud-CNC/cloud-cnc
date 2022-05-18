@@ -3,6 +3,22 @@
     /* JavaScript Support */
     "allowJs": true,
     "checkJs": true,
+    
+    /* Modules */
+    "paths": {
+      "api/*": [
+        "../api/*"
+      ],
+      "relay/*": [
+        "../relay/*"
+      ],
+      "server/*": [
+        "../server/*"
+      ],
+      "ui/*": [
+        "../ui/*"
+      ]
+    },
 
     /* Emit */
     "sourceMap": true,
