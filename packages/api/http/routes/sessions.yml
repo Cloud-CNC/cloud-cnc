@@ -4,7 +4,6 @@
 userpass:
   post:
     operationId: loginUserPass
-    x-bifurcate-permissions: false
     tags:
       - sessions
     summary: Log in to an account with a username and password
@@ -59,11 +58,10 @@ userpass:
 mfa:
   post:
     operationId: loginMFA
-    x-bifurcate-permissions: false
     tags:
       - sessions
     summary: Log in to an account with MFA
-    description: The client MUST invoke `/login/userpass` prior to invoking this endpoint.
+    description: The client MUST invoke `/login/userpass` prior to invoking this route.
     requestBody:
       required: true
       content:
@@ -104,7 +102,6 @@ mfa:
 revoke:
   post:
     operationId: revoke
-    x-bifurcate-permissions: false
     tags:
       - sessions
     summary: Revoke all other sessions for the current account
@@ -119,7 +116,6 @@ revoke:
 logout:
   post:
     operationId: logout
-    x-bifurcate-permissions: false
     tags:
       - sessions
     summary: Log out of an account

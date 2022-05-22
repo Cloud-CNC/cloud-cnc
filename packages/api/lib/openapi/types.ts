@@ -80,14 +80,14 @@ export interface Operation
   description: string;
 
   /**
+   * Operation permission name
+   */
+  permission: string;
+
+  /**
    * Operation type (If applicable)
    */
   type: OperationType;
-
-  /**
-   * 
-   */
-  permissions: string[];
 
   /**
    * HTTP method
@@ -100,14 +100,28 @@ export interface Operation
   path: string;
 
   /**
-   * Operation parameters
+   * Operation path parameters
    */
   parameters: Parameter[];
 
   /**
-   * Operation fields
+   * Operation request fields
    */
-  fields: Field[];
+  requestFields: Field[];
+
+  /**
+   * Operation response fields
+   */
+  responseFields: Field[];
+}
+
+/**
+ * Operation variant
+ */
+export enum OperationVariant
+{
+  OWN = 'own',
+  OTHER = 'other'
 }
 
 /**

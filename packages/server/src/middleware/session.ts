@@ -3,8 +3,9 @@
  */
 
 //Imports
-import MongoSessionStore from '@/lib/session-store';
-import session from 'koa-generic-session';
+import redisStore from 'koa-redis';
+import session from 'koa-session-minimal';
+import {redisUrl} from '@/lib/config';
 
 //Middleware
 const middleware = session({
@@ -13,7 +14,9 @@ const middleware = session({
     sameSite: 'strict'
   },
   key: 'session',
-  store: new MongoSessionStore()
+  store: redisStore({
+    url: redisUrl
+  })
 });
 
 //Export

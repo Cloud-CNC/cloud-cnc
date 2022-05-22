@@ -37,7 +37,6 @@ priorityLimits:
 all:
   get:
     operationId: getAllRoles
-    x-bifurcate-permissions: false
     x-operation-type: all
     tags:
       - roles
@@ -77,7 +76,6 @@ all:
 create:
   post:
     operationId: createRole
-    x-bifurcate-permissions: false
     x-operation-type: create
     tags:
       - roles
@@ -130,7 +128,6 @@ id:
         type: string
   get:
     operationId: getRole
-    x-bifurcate-permissions: false
     x-operation-type: get
     tags:
       - roles
@@ -164,7 +161,6 @@ id:
 
   patch:
     operationId: updateRole
-    x-bifurcate-permissions: false
     x-operation-type: update
     tags:
       - roles
@@ -196,7 +192,6 @@ id:
 
   delete:
     operationId: deleteRole
-    x-bifurcate-permissions: false
     x-operation-type: delete
     tags:
       - roles

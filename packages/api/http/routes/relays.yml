@@ -52,7 +52,6 @@ taints:
 all:
   get:
     operationId: getAllRelays
-    x-bifurcate-permissions: false
     x-operation-type: all
     tags:
       - relays
@@ -92,7 +91,6 @@ all:
 create:
   post:
     operationId: createRelay
-    x-bifurcate-permissions: false
     x-operation-type: create
     tags:
       - relays
@@ -140,7 +138,6 @@ id:
         type: string
   get:
     operationId: getRelay
-    x-bifurcate-permissions: false
     x-operation-type: get
     tags:
       - relays
@@ -174,7 +171,6 @@ id:
 
   patch:
     operationId: updateRelay
-    x-bifurcate-permissions: false
     x-operation-type: update
     tags:
       - relays
@@ -206,13 +202,12 @@ id:
 
   delete:
     operationId: deleteRelay
-    x-bifurcate-permissions: false
     x-operation-type: delete
     tags:
       - relays
     summary: Delete a relay
     description: |
-      *Note: this endpoint will kick the relay if it's currently connected and add the client
+      *Note: this route will kick the relay if it's currently connected and add the client
       certificate to an internal Certificate Revocation List (CRL) preventing future connections
       using the same certificate/key.*
     responses:

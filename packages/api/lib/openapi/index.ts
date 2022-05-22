@@ -30,7 +30,7 @@ export const getEntities = async () =>
   } as Entity));
 
   //Aggregate entities by tag
-  for (const [pathName, pathValue] of Object.entries(api.paths ?? []))
+  for (const [pathKey, pathValue] of Object.entries(api.paths ?? []))
   {
     //Skip null paths
     if (pathValue == null)
@@ -55,9 +55,9 @@ export const getEntities = async () =>
     const parameters: Parameter[] = [];
     const operations: Operation[] = [];
 
-    for (const [entryName, entryValue] of Object.entries(pathValue))
+    for (const [entryKey, entryValue] of Object.entries(pathValue))
     {
-      switch (entryName)
+      switch (entryKey)
       {
         //Add parameters
         case 'parameters': {
@@ -85,7 +85,7 @@ export const getEntities = async () =>
           //Cast
           const operation = entryValue as OpenAPIV3.OperationObject;
           const operationRecord = entryValue as Record<string, any>;
-          const body = operation.requestBody as OpenAPIV3.RequestBodyObject;
+          const requestBody = operation.requestBody as OpenAPIV3.RequestBodyObject;
 
           //Ensure the operation ID and summary are provided
           if (operation.operationId == null || operation.summary == null)
@@ -94,52 +94,127 @@ export const getEntities = async () =>
           }
 
           //Aggregate operation fields
-          const fields = Object.values(body?.content ?? {}).flatMap(content =>
+          const requestFields: Field[] = [];
+
+          if (requestBody != null && requestBody.content != null)
           {
-            //Cast
-            const schema = content.schema as OpenAPIV3.SchemaObject;
-
-            //Ensure the schema type is an object
-            if (schema.type != 'object')
-            {
-              throw new Error('Only object request schema types are supported!');
-            }
-
-            return Object.entries(schema.properties ?? []).map(([propertyName, propertyValue]) =>
+            for (const content of Object.values(requestBody.content))
             {
               //Cast
-              const property = propertyValue as OpenAPIV3.SchemaObject;
+              let schema = content.schema as OpenAPIV3.SchemaObject;
 
-              return {
-                name: propertyName,
-                description: property.description,
-                joiType: joiType(property),
-                typescriptType: typescriptType(property),
-                required: schema.required?.includes(propertyName) || false
-              } as Field;
-            });
-          });
+              //Skip empty schemas
+              if (schema == null)
+              {
+                continue;
+              }
 
-          //Generate permissions
-          const permissions = operationRecord['x-bifurcate-permissions'] ? [
-            `${operation.operationId}:own`,
-            `${operation.operationId}:other`
-          ] : [
-            operation.operationId
-          ];
+              //Resolve arrays
+              if (schema.type == 'array')
+              {
+                schema = schema.items as OpenAPIV3.SchemaObject;
+              }
+
+              //Skip non-object-schema or property-less contents
+              if (schema.type != 'object' || schema.properties == null)
+              {
+                continue;
+              }
+
+              //Convert properties
+              const properties = Object.entries(schema.properties).map(([propertyKey, propertyValue]) =>
+              {
+                //Cast
+                const property = propertyValue as OpenAPIV3.SchemaObject;
+
+                return {
+                  name: propertyKey,
+                  description: property.description,
+                  joiType: joiType(property),
+                  typescriptType: typescriptType(property),
+                  required: schema.required?.includes(propertyKey) || false
+                } as Field;
+              });
+
+              //Add
+              requestFields.push(...properties);
+            }
+          }
+
+          const responseFields: Field[] = [];
+
+          for (const [responseKey, responseValue] of Object.entries(operation.responses))
+          {
+            //Cast
+            const response = responseValue as OpenAPIV3.ResponseObject;
+
+            //Parse the status code
+            const statusCode = parseInt(responseKey);
+
+            //Skip non-200 or content-less responses
+            if ((statusCode < 200 || 300 <= statusCode) || response.content == null)
+            {
+              continue;
+            }
+
+            for (const [contentKey, contentValue] of Object.entries(response.content))
+            {
+              //Cast
+              let schema = contentValue.schema as OpenAPIV3.SchemaObject;
+
+              //Skip empty schemas
+              if (schema == null)
+              {
+                continue;
+              }
+
+              //Resolve arrays
+              if (schema.type == 'array')
+              {
+                schema = schema.items as OpenAPIV3.SchemaObject;
+              }
+
+              //Skip non-JSON, non-object-schema, or property-less contents
+              if (contentKey != 'application/json' || schema.type != 'object' || schema.properties == null)
+              {
+                continue;
+              }
+
+              //Convert properties
+              const properties = Object.entries(schema.properties).map(([propertyKey, propertyValue]) =>
+              {
+                //Cast
+                const property = propertyValue as OpenAPIV3.SchemaObject;
+
+                return {
+                  name: propertyKey,
+                  description: property.description,
+                  joiType: joiType(property),
+                  typescriptType: typescriptType(property),
+                  required: schema.required?.includes(propertyKey) || false
+                } as Field;
+              });
+
+              //Add
+              responseFields.push(...properties);
+            }
+          }
+
+          //Convert path parameter format
+          const path = pathKey.replace(/\{(.+)\}/, ':$1');
 
           //Add the operation
           operations.push({
             name: operation.operationId,
             description: operation.summary,
+            permission: operation.operationId,
             type: operationRecord['x-operation-type'],
-            permissions,
-            method: entryName,
-            path: pathName,
+            method: entryKey,
+            path,
             parameters,
-            fields
+            requestFields,
+            responseFields
           });
-
           break;
         }
       }

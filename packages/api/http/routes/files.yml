@@ -46,8 +46,8 @@ acl:
   additionalProperties:
     $ref: '#/permission'
 
-raw:
-  description: Raw file
+binary:
+  description: File binary data
   type: string
   format: binary
 
@@ -60,7 +60,6 @@ estimate:
 all:
   get:
     operationId: getAllFiles
-    x-bifurcate-permissions: true
     x-operation-type: all
     tags:
       - files
@@ -105,12 +104,11 @@ all:
 create:
   post:
     operationId: createFile
-    x-bifurcate-permissions: true
     x-operation-type: create
     tags:
       - files
     summary: Create a file
-    description: '*Note: endpoint accepts `multipart/form-data`, not `application/json`.*'
+    description: '*Note: route accepts `multipart/form-data`, not `application/json`.*'
     requestBody:
       required: true
       content:
@@ -120,7 +118,7 @@ create:
             required:
               - name
               - acl
-              - raw
+              - binary
               - estimate
             properties:
               name:
@@ -129,8 +127,8 @@ create:
                 $ref: '#/description'
               acl:
                 $ref: '#/acl'
-              raw:
-                $ref: '#/raw'
+              binary:
+                $ref: '#/binary'
               estimate:
                 $ref: '#/estimate'
               pluginData:
@@ -154,6 +152,34 @@ create:
       '500':
         $ref: '../responses.yml#/internal-error'
 
+raw:
+  parameters:
+    - name: id
+      description: File ID
+      in: path
+      required: true
+      schema:
+        type: string
+  get:
+    operationId: getRawFile
+    x-operation-type: get
+    tags:
+      - files
+    summary: Get a raw file
+    responses:
+      '200':
+        description: OK
+        content:
+          application/octet-stream:
+            schema:
+              $ref: '#/binary'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
 id:
   parameters:
     - name: id
@@ -164,7 +190,6 @@ id:
         type: string
   get:
     operationId: getFile
-    x-bifurcate-permissions: true
     x-operation-type: get
     tags:
       - files
@@ -180,7 +205,6 @@ id:
                 - name
                 - state
                 - acl
-                - raw
                 - estimate
               properties:
                 name:
@@ -191,8 +215,6 @@ id:
                   $ref: '#/state'
                 acl:
                   $ref: '#/acl'
-                raw:
-                  $ref: '#/raw'
                 estimate:
                   $ref: '#/estimate'
                 pluginData:
@@ -206,17 +228,16 @@ id:
 
   patch:
     operationId: updateFile
-    x-bifurcate-permissions: true
     x-operation-type: update
     tags:
       - files
     summary: Update a file
     description: |
-      *Note: endpoint accepts `multipart/form-data`, not `application/json`.*
+      *Note: route accepts `multipart/form-data`, not `application/json`.*
 
-      If the client is implementing a "trash" system, the client SHOULD use this endpoint
-      and update the file state to `deleted` to signify that the file is pending permanent
-      deletion instead of invoking the `DELETE /files/{id}` endpoint.
+      If the client is implementing a "trash" system, the client SHOULD use this route and update
+      the file state to `deleted` to signify that the file is pending permanent deletion instead of
+      invoking the `DELETE /files/{id}` route.
     requestBody:
       required: true
       content:
@@ -232,8 +253,8 @@ id:
                 $ref: '#/state'
               acl:
                 $ref: '#/acl'
-              raw:
-                $ref: '#/raw'
+              binary:
+                $ref: '#/binary'
               estimate:
                 $ref: '#/estimate'
               pluginData:
@@ -250,17 +271,16 @@ id:
 
   delete:
     operationId: deleteFile
-    x-bifurcate-permissions: true
     x-operation-type: delete
     tags:
       - files
     summary: Delete a file
     description: |
-      *Note: this endpoint permanently and irreversibly deletes the file.*
+      *Note: this route permanently and irreversibly deletes the file.*
 
       If the client is implementing a "trash" system, the client SHOULD use the `PATCH /files/{id}`
-      endpoint and update the file state to `deleted` to signify that the file is pending permanent
-      deletion instead of invoking this endpoint.
+      route and update the file state to `deleted` to signify that the file is pending permanent
+      deletion instead of invoking this route.
     responses:
       '200':
         $ref: '../responses.yml#/empty-success'

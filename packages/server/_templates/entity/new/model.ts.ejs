@@ -10,9 +10,9 @@ import Joi from 'joi';
 import {model as createModel, Document} from 'mongoose';
 import joigoose from '@/lib/joigoose';
 
-//Typescript interface
-interface typescriptInterface extends Document
-{<% for (const field of fields) { %>
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> interface
+interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
+{<% for (const field of uniqueRequestFields) { %>
   /**
 <%- h.multiline(field.description, 3) %>
    */
@@ -20,22 +20,23 @@ interface typescriptInterface extends Document
 <% } -%>
 }
 
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> document interface
+type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document = Document | I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
+
 //Joi schema
-const joiSchema = Joi.object({
-<% for (const [field, separator] of h.list(fields, ',')) { -%>
+const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = Joi.object({
+<% for (const [field, separator] of h.list(uniqueRequestFields, ',')) { -%>
   <%- field.name %>: <%- field.joiType %><%- separator %>
 <% } -%>
 });
 
-//Mongoose schema
-const mongooseSchema = joigoose.convert(joiSchema);
-
 //Mongoose model
-const model = createModel<typescriptInterface>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', mongooseSchema);
+const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema));
 
 //Export
 export {
-  typescriptInterface as I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>,
-  joiSchema as <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema,
-  model as <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
+  I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>,
+  I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document,
+  <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema,
+  <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
 };

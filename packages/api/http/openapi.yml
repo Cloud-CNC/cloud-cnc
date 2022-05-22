@@ -15,31 +15,42 @@ info:
 
     ## Glossary
     * ACL: Access Control List
+    * RBAC: Role-Based Access Control
     * MFA: Multi-Factor Authentication
     * TOTP: Time-based One Time Password ([RFC 6238](https://tools.ietf.org/html/rfc6238))
-    * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule compatible jobs on (eg: working-area dimensions)
-    * Affinities: labels from a machine/relay that a given job would prefer to be scheduled on (eg: GCODE support)
-    * Taints: similar to labels; unfavorable properties about a machine/relay that the job-scheduling algorithm uses to avoid scheduling incompatible jobs (eg: low filament)
-    * Tolerations: similar to affinities; taints from a machine/relay that a given job can tolerate (eg: unheated bed)
+    * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule
+    compatible jobs on (eg: working-area dimensions)
+    * Affinities: labels from a machine/relay that a given job would prefer to be scheduled on (eg:
+    GCODE support)
+    * Taints: similar to labels; unfavorable properties about a machine/relay that the job-
+    scheduling
+    algorithm uses to avoid scheduling incompatible jobs (eg: low filament)
+    * Tolerations: similar to affinities; taints from a machine/relay that a given job can tolerate
+    (eg: unheated bed)
 
-    ## Permissions
-    * RBAC is used for route-level permissions while ACLs are used for individual ownable resources
-    (eg: files). For convenience, ACLs accept the same roles that the RBAC uses (In addition to regular
-    accounts).
-    * Both the RBAC and ACLs are add-only (Permissions can only be added); by default, users have
-    no permissions.
-    * ACL permission **key** format: `[entity type]:[entity ID]` (eg: `account:6109ba1dc24de13eb8fa0c94`
-    or `role:6109ba287a72978d7d621f97`)
-    * RBAC permission format: `[operationId]<:[variant]>` (eg: `getAllMachines`, `getFile:own`)
+    ## Access control
+    
+    ### API routes
+    Access to API routes are controlled by RBAC. Each route has a permission name; permission names
+    can be added to a role to grant that role access to that route; any user whose a member of that
+    role inherits all of that role's permissions.
+
+    RBAC permission names are the same as the operation ID.
+
+    ### Ownable entities
+    Access to individual ownable entities (eg: files) are controlled by ACLs. Each ownable entity
+    has a hash map, where the keys are identify the accessor and the values represent the accessor's
+    permissions.
+
+    The format of ACL accessors is `[entity name]:[entity ID]` (eg:
+    `account:6109ba1dc24de13eb8fa0c94` or `role:6109ba287a72978d7d621f97`). Refer to entity-specific
+    documentation for which accessor entities are supported and the accessor permissions themselves.
 
     ## Custom route attributes
-    * `x-operation-type` (enum): common operation types (used for code autogeneration). Valid values
-    are: `all` (Get all entity instances), `create` (Create an entity instance), `get` (Get an entity
-    instance by ID), `update` (Update an entity instance by ID), and `delete` (Delete an entity
-    instance by ID).
-    * `x-bifurcate-permissions`: whether the route permissions MUST be bifurcated into an `own`
-    variant (For operating upon one's own resources) and an `other` variant (For operating upon
-    other's resources) or left as a single permission.
+
+    * `x-operation-type` (enum): common operation types. Valid values are: `all` (Get all entity
+    instances), `create` (Create an entity instance), `get` (Get an entity instance by ID), `update`
+    (Update an entity instance by ID), and `delete` (Delete an entity instance by ID).
   version: 2.0.0
   license:
     name: MIT
@@ -53,10 +64,10 @@ tags:
     description: User accounts
 
   - name: roles
-    description: Account roles
+    description: RBAC roles
 
   - name: files
-    description: Model & machine files
+    description: CAD, 2D/3D model, and/or machine-code files
 
   - name: jobs
     description: Machine jobs
@@ -97,6 +108,8 @@ paths:
     $ref: './routes/files.yml#/all'
   /files/create:
     $ref: './routes/files.yml#/create'
+  /files/{id}/raw:
+    $ref: './routes/files.yml#/raw'
   /files/{id}:
     $ref: './routes/files.yml#/id'
 
@@ -129,4 +142,4 @@ components:
       name: session
 
 security:
-  - jwt: []
+  - cookie: []

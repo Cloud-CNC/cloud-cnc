@@ -6,94 +6,118 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
  */
 
 //Imports
-import {ParameterizedContext} from 'koa';
-<% if (entity.operations.find(operation => ['get', 'update', 'delete'].includes(operation.type))) { -%>
-import validate from '@/middleware/validate';
-<% } -%>
-import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema, <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-
-//Controller context
-export interface <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context extends ParameterizedContext
-{
-  state: {<% for (const parameter of parameters) { %>
-    /**
-<%- h.multiline(entity.description, 5) %>
-    */
-    <%- h.changeCase.camel(h.inflection.singularize(name)) %>: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
-<% } -%>
-  };
-}
+import log from '@/lib/log';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 
 <% for (const operation of entity.operations) { -%>
 /**
 <%- h.multiline(operation.description, 1) %>
  */
-const <%- operation.name %> = <% if (['all', 'create', 'update', 'delete'].includes(operation.type)) { %>async <% } %>(ctx: <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Context) =>
+<% switch (operation.type) { case 'all': -%>
+const <%- operation.name %> = async (<% if (operation.ownable) { %>owner: string<% } %>) =>
 {
-<% if (['all', 'create', 'update', 'delete'].includes(operation.type)) { -%>
-  //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> is valid
-  if (ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
-  {
-    //Log
-    ctx.log.error(ctx, 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!');
-
-    //Reject
-    ctx.throw({
-      error: {
-        name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
-        description: 'The supplied <%- h.changeCase.no(h.inflection.singularize(name)) %> was invalid.'
-      }
-    }, 400);
-  }
-
-<% } if (['get', 'update', 'delete'].includes(operation.type)) { -%>
-  //Validate the body
-  validate(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema, ctx);
-
-<% } if (operation.type == 'all') { -%>
-  //Find and return all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
-  ctx.response.body = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.find();
+  //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
+  const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.find({<% if (operation.ownable) { %>owner<% } %>}, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: 1<%- separator %>
+<% } -%>
+  });
 
   //Log
-  ctx.log.info('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
-<% } else if (operation.type == 'create') { -%>
-  //Instantiate the model
-  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.create(ctx.request.body);
+  log.info('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
 
-  //Save the model
+  return <%- h.changeCase.camel(h.inflection.pluralize(name)) %>;
+};
+<% break; case 'create': -%>
+const <%- operation.name %> = async (create: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>) =>
+{
+  //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.create(create);
+
+  //Save the <%- h.changeCase.no(h.inflection.singularize(name)) %>
   await <%- h.changeCase.camel(h.inflection.singularize(name)) %>.save();
 
-  //Return the model
-  ctx.response.body = {
-    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>.id
-  };
-
   //Log
-  ctx.log.info(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% } else if (operation.type == 'get') { -%>
-  //Return the model
-  ctx.response.body = ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+  log.info(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 
-  //Log
-  ctx.log.info(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% } else if (operation.type == 'update') { -%>
-  //Update the model
-  await ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.update(ctx.request.body as object);
-
-  //Log
-  ctx.log.info(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% } else if (operation.type == 'delete') { -%>
-  //Delete the model
-  await ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.delete();
-
-  //Log
-  ctx.log.info(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${ctx.state.<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% } else { -%>
-  //TODO: implement business logic
+  return {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>.<%- field.name %><%- separator %>
 <% } -%>
+  };
 };
+<% break; case 'get': -%>
+const <%- operation.name %> = async (id: string) =>
+{
+  //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findById(id, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: 1<%- separator %>
+<% } -%>
+  });
 
-<% } %>
+  //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> exists
+  if (<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
+  {
+    throw new Error(`Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> with ID ${id}!`);
+  }
+
+  //Log
+  log.info(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+
+  return <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+};
+<% break; case 'update': -%>
+const <%- operation.name %> = async (id: string, update: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>) =>
+{
+  //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findById(id, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: 1<%- separator %>
+<% } -%>
+  });
+
+  //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> exists
+  if (<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
+  {
+    throw new Error(`Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> with ID ${id}!`);
+  }
+
+  //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  await <%- h.changeCase.camel(h.inflection.singularize(name)) %>.update(update);
+
+  //Log
+  log.info(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+
+  return <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+};
+<% break; case 'delete': -%>
+const <%- operation.name %> = async (id: string) =>
+{
+  //Delete the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndDelete(id);
+
+  //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> exists
+  if (<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
+  {
+    throw new Error(`Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> with ID ${id}!`);
+  }
+
+  //Log
+  log.info(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+
+  return <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+};
+<% break; default: -%>
+const <%- operation.name %> = () =>
+{
+  //TODO: implement business logic
+
+  //TODO: log
+};
+<% break; } -%>
+
+<% } -%>
 //Export
 export {
 <% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>

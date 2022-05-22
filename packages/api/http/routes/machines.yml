@@ -36,7 +36,6 @@ taints:
 all:
   get:
     operationId: getAllMachines
-    x-bifurcate-permissions: false
     x-operation-type: all
     tags:
       - machines
@@ -79,7 +78,6 @@ all:
 create:
   post:
     operationId: createMachine
-    x-bifurcate-permissions: false
     x-operation-type: create
     tags:
       - machines
@@ -135,7 +133,6 @@ id:
         type: string
   get:
     operationId: getMachine
-    x-bifurcate-permissions: false
     x-operation-type: get
     tags:
       - machines
@@ -172,7 +169,6 @@ id:
 
   patch:
     operationId: updateMachine
-    x-bifurcate-permissions: false
     x-operation-type: update
     tags:
       - machines
@@ -206,7 +202,6 @@ id:
 
   delete:
     operationId: deleteMachine
-    x-bifurcate-permissions: false
     x-operation-type: delete
     tags:
       - machines

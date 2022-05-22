@@ -27,24 +27,17 @@ module.exports = {
       throw new Error(`Failed to find entity with name ${name}!`);
     }
 
-    //Get unique fields
-    const fields = uniqWith(entity.operations.flatMap(operation => operation.fields), (a, b) =>
+    //Get unique request fields
+    const uniqueRequestFields = uniqWith(entity.operations.flatMap(operation => operation.requestFields), (a, b) =>
       a.name == b.name &&
       a.description == b.description &&
       a.joiType == b.joiType &&
       a.typescriptType == b.typescriptType
     );
 
-    //Get unique parameters
-    const parameters = uniqWith(entity.operations.flatMap(operation => operation.parameters), (a, b) =>
-      a.name == b.name &&
-      a.description == b.description
-    );
-
     return {
       entity,
-      fields,
-      parameters
+      uniqueRequestFields
     };
   }
 };

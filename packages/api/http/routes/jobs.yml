@@ -56,7 +56,6 @@ state:
 all:
   get:
     operationId: getAllJobs
-    x-bifurcate-permissions: true
     x-operation-type: all
     tags:
       - jobs
@@ -105,7 +104,6 @@ all:
 create:
   post:
     operationId: createJob
-    x-bifurcate-permissions: true
     x-operation-type: create
     tags:
       - jobs
@@ -164,7 +162,6 @@ id:
         type: string
   get:
     operationId: getJob
-    x-bifurcate-permissions: true
     x-operation-type: get
     tags:
       - jobs
@@ -207,7 +204,6 @@ id:
 
   patch:
     operationId: updateJob
-    x-bifurcate-permissions: true
     x-operation-type: update
     tags:
       - jobs
@@ -243,7 +239,6 @@ id:
 
   delete:
     operationId: deleteJob
-    x-bifurcate-permissions: true
     x-operation-type: delete
     tags:
       - jobs

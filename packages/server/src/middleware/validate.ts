@@ -3,14 +3,14 @@
  */
 
 //Imports
-import {ParameterizedContext} from 'koa';
+import {Next, ParameterizedContext} from 'koa';
 import {Schema} from 'joi';
 
 //Middleware
-const validate = (schema: Schema, ctx: ParameterizedContext) =>
+const validate = (schema: Schema) => (ctx: ParameterizedContext, next: Next) =>
 {
   //Validate the body
-  const res = schema.validate(ctx.body);
+  const res = schema.validate(ctx.request.body);
 
   //Invalid requests
   if (res.error != null)
@@ -33,6 +33,8 @@ const validate = (schema: Schema, ctx: ParameterizedContext) =>
     //Log
     ctx.log.warn({ctx, res}, 'Suspect request!');
   }
+
+  return next();
 };
 
 //Export
