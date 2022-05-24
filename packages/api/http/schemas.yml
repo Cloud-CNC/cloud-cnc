@@ -23,7 +23,7 @@ error:
 pluginData:
   description: |
     Arbitrary plugin data
-    * Keys: plugin identifier (Plugins SHOULD use an RFC 3986 URN)
+    * Keys: plugin identifier (Plugins SHOULD use an RFC 3986 URI)
     * Values: arbitrary, plugin-specific data (Plugins SHOULD only modify their respective data)
   type: object
   additionalProperties: true

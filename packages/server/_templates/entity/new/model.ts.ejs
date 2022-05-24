@@ -12,7 +12,7 @@ import joigoose from '@/lib/joigoose';
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> interface
 interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
-{<% for (const field of uniqueRequestFields) { %>
+{<% for (const field of uniqueFields) { %>
   /**
 <%- h.multiline(field.description, 3) %>
    */
@@ -25,7 +25,7 @@ type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document 
 
 //Joi schema
 const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = Joi.object({
-<% for (const [field, separator] of h.list(uniqueRequestFields, ',')) { -%>
+<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
   <%- field.name %>: <%- field.joiType %><%- separator %>
 <% } -%>
 });

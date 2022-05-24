@@ -14,8 +14,79 @@ file:
   type: string
 
 filter:
-  description: Label/taint filter written in the Cloud CNC filter Domain-Specific Language (DSL)
-  type: string
+  description: Label/taint filter
+  type: object
+  properties:
+    operator:
+      description: |
+        Filter operator
+
+        # `and`
+        * Summary: performs a logical AND (`&&`) on all arguments
+        * Arguments: `boolean` (2 or more)
+        * Returns: `boolean`
+
+        # `or`
+        * Summary: performs a logical OR (`||`) on all arguments
+        * Arguments: `boolean` (2 or more)
+        * Returns: `boolean`
+
+        # `not`
+        * Summary: performs a logical NOT (`!`) on the argument
+        * Arguments: `boolean`
+        * Returns: `boolean`
+
+        # `equal`
+        * Summary: performs a logical comparison (`==`) on all arguments
+        * Arguments: `[any type]` (2 or more; all arguments must have the same type)
+        * Returns: `boolean`
+
+        # `includes`
+        * Summary: checks if the first argument is included in the second argument
+        * Arguments: `[any type]`, `array` (Items must have the same type as the first argument)
+        * Returns: `boolean`
+
+        # `greaterThan`
+        * Summary: performs a numerical greater than comparison (`>`) on the arguments
+        * Arguments: `number` (2)
+        * Returns `boolean`
+
+        # `greaterThanOrEqual`
+        * Summary: performs a numerical greater than or equal to comparison (`>=`) on the arguments
+        * Arguments: `number` (2)
+        * Returns `boolean`
+
+        # `lessThan`
+        * Summary: performs a numerical less than comparison (`<`) on the arguments
+        * Arguments: `number` (2)
+        * Returns `boolean`
+
+        # `lessThanOrEqual`
+        * Summary: performs a numerical less than or equal to comparison (`<=`) on the arguments
+        * Arguments: `number` (2)
+        * Returns `boolean`
+      type: string
+      enum:
+        - and
+        - or
+        - not
+        - equal
+        - includes
+        - greaterThan
+        - greaterThanOrEqual
+        - lessThan
+        - lessThanOrEqual
+    arguments:
+      description: Operator arguments (Refer to individual operators for more information)
+      type: array
+      items:
+        oneOf:
+          - type:
+            $ref: '#/filter'
+          - type: array
+          - type: boolean
+          - type: number
+          - type: string
 
 priority:
   description: Job priority (Lower indicates a higher priority)

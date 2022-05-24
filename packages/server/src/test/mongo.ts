@@ -1,36 +1,60 @@
 /**
- * @fileoverview In-memory MongoDB testing utility
+ * @fileoverview Ephemeral MongoDB utility
  */
 
 //Imports
-import {ExecutionContext} from 'ava';
 import {MongoMemoryServer} from 'mongodb-memory-server';
-import {connect, disconnect} from 'mongoose';
+import {
+  connect as connectMongoose,
+  connection,
+  disconnect as disconnectMongoose
+} from 'mongoose';
+
+//MongoDB server used for all tests
+const server = new MongoMemoryServer();
 
 /**
- * Setup an in-memory MongoDB instance and connect Mongoose to it
+ * Connect to the database
  */
-const setupMongo = async (ctx: ExecutionContext) =>
+const connect = async () =>
 {
-  //Launch an in-memory server
-  const server = await MongoMemoryServer.create();
+  //Start the server
+  await server.start();
 
   //Get the Mongo URI
   const uri = server.getUri();
 
   //Connect Mongoose
-  await connect(uri);
-
-  //Register the teardown hook
-  ctx.teardown(async () =>
-  {
-    //Disconnect Mongoose
-    await disconnect();
-
-    //Stop the in-memory server
-    await server.stop();
-  });
+  await connectMongoose(uri);
 };
 
+/**
+ * Disconnect from the database
+ */
+const disconnect = async () =>
+{
+  //Disconnect Mongoose
+  await disconnectMongoose();
+
+  //Stop the server
+  await server.stop();
+}
+
+/**
+ * Reset the database
+ */
+const reset = async () =>
+{
+  //Drop all collections
+  for (const collection of Object.values(connection.collections))
+  {
+    await collection.drop();
+  }
+}
+
 //Export
-export default setupMongo;
+export {
+  connect,
+  disconnect,
+  reset
+};

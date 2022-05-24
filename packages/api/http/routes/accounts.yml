@@ -13,7 +13,7 @@ password:
   type: string
   description: Account password
 
-requestMfa:
+mfaRequested:
   type: boolean
   description: Whether or not to request MFA (Note that the client MUST invoke `/accounts/verify-mfa` before MFA is enabled)
 
@@ -88,15 +88,15 @@ create:
             required:
               - username
               - password
-              - requestMfa
+              - mfaRequested
               - roles
             properties:
               username:
                 $ref: '#/username'
               password:
                 $ref: '#/password'
-              requestMfa:
-                $ref: '#/requestMfa'
+              mfaRequested:
+                $ref: '#/mfaRequested'
               roles:
                 $ref: '#/roles'
               pluginData:
@@ -218,8 +218,8 @@ id:
                 $ref: '#/username'
               password:
                 $ref: '#/password'
-              requestMfa:
-                $ref: '#/requestMfa'
+              mfaRequested:
+                $ref: '#/mfaRequested'
               roles:
                 $ref: '#/roles'
               pluginData:

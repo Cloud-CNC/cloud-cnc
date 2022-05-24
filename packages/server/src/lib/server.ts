@@ -11,8 +11,12 @@ import {http} from './config';
 //Generic HTTP server listener
 type Listener = (req: IncomingMessage | Http2ServerRequest, res: ServerResponse | Http2ServerResponse) => void;
 
-//Export
-export default (listener: Listener) =>
+/**
+ * Create an HTTP server
+ * @param listener App listener
+ * @returns HTTP/HTTPS/HTTP2 server
+ */
+const createServer = (listener: Listener) =>
 {
   //Plain HTTP server
   if (!http.tls)
@@ -39,3 +43,6 @@ export default (listener: Listener) =>
     }, listener);
   }
 };
+
+//Export
+export default createServer

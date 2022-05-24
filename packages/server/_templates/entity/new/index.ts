@@ -6,7 +6,7 @@
 
 //Imports
 import {getEntities} from '../../../../api/lib/openapi/index';
-import {uniqWith} from 'lodash';
+import {sortBy, uniqWith} from 'lodash';
 
 //Export
 module.exports = {
@@ -27,8 +27,12 @@ module.exports = {
       throw new Error(`Failed to find entity with name ${name}!`);
     }
 
-    //Get unique request fields
-    const uniqueRequestFields = uniqWith(entity.operations.flatMap(operation => operation.requestFields), (a, b) =>
+    //Get all fields
+    let fields = entity.operations.flatMap(operation => [...operation.requestFields, ...operation.responseFields]);
+    fields = sortBy(fields, field => field.name);
+
+    //Get unique fields
+    const uniqueFields = uniqWith(fields, (a, b) =>
       a.name == b.name &&
       a.description == b.description &&
       a.joiType == b.joiType &&
@@ -37,7 +41,7 @@ module.exports = {
 
     return {
       entity,
-      uniqueRequestFields
+      uniqueFields
     };
   }
 };

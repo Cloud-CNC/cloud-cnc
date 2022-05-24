@@ -1,0 +1,271 @@
+---
+to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.spec.ts
+---
+/**
+ * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> model unit tests
+ */
+
+//Imports
+import test from 'ava';
+import {createSandbox} from 'sinon';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {
+<% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
+  <%- operation.name %><%- separator %>
+<% } -%>
+} from './<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+
+//Fixtures
+//TODO: add realistic data
+const <%- h.changeCase.camel(h.inflection.singularize(name)) %>A = {
+<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
+  <%- field.name %>: null<%- separator %>
+<% } -%>
+} as I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
+
+const <%- h.changeCase.camel(h.inflection.singularize(name)) %>B = {
+<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
+  <%- field.name %>: null<%- separator %>
+<% } -%>
+} as I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
+
+//Sinon sandbox
+const sandbox = createSandbox();
+test.afterEach('Restore sandbox', () =>
+{
+  sandbox.restore();
+});
+
+//Tests
+<% for (const [operation, separator] of h.list(entity.operations, '\n\n')) { -%>
+test.serial('<%- operation.description %>', async ctx =>
+{
+<% switch (operation.type) { case 'all': -%>
+<% if (operation.responseFields.length > 0) { -%>
+  //Test data
+  const output = [
+    {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% } -%>
+    },
+    {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- field.name %><%- separator %>
+<% } -%>
+    }
+  ];
+
+  //Stub the toObject method
+  const toObject = sandbox.stub()
+    .withArgs()
+    .onCall(0)
+    .returns(output[0])
+    .onCall(1)
+    .returns(output[1]);
+
+<% } -%>
+  //Stub the find method
+  const find = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'find')
+    .withArgs({}<% if (operation.responseFields.length > 0) { %>, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: 1<%- separator %>
+<% } -%>
+    }<% } %>)
+    .resolves(<% if (operation.responseFields.length > 0) { %>Array(2).fill({
+      toObject
+    })<% } %>);
+
+  //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
+  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = <% } %>await <%- operation.name %>();
+
+  //Ensure the result is expected
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.deepEqual(<%- h.changeCase.camel(h.inflection.pluralize(name)) %>, output);
+<% } -%>
+  ctx.assert(find.calledOnce);
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.calledTwice);
+<% } -%>
+<% break; case 'create': -%>
+  //Test data
+  const input = {
+<% for (const [field, separator] of h.list(operation.requestFields, ',')) { -%>
+    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% } -%>
+  };
+
+<% if (operation.responseFields.length > 0) { -%>
+  const output = {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% } -%>
+  };
+
+<% } -%>
+  //Stub the save method
+  const save = sandbox.stub()
+    .withArgs()
+    .resolves();
+
+  //Stub the create method
+  const create = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'create')
+    //@ts-ignore Sinon types are outdated
+    .withArgs(input)
+    .resolves({
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id,
+      save
+    });
+
+  //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(input);
+
+  //Ensure the result is expected
+  ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %><% if (operation.responseFields.length > 0) { %>, output<% } %>);
+  ctx.assert(create.calledOnce);
+  ctx.assert(save.calledOnce);
+<% break; case 'get': -%>
+<% if (operation.responseFields.length > 0) { -%>
+  //Test data
+  const output = {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% } -%>
+  };
+
+  //Stub the toObject method
+  const toObject = sandbox.stub()
+    .withArgs()
+    .returns(output);
+
+<% } -%>
+  //Stub the findById method
+  const findById = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findById')
+    .withArgs(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: 1<%- separator %>
+<% } -%>
+    }<% } %>)
+    .resolves({
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+      toObject
+<% } -%>
+    });
+
+  //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id);
+
+  //Ensure the result is expected
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
+<% } -%>
+  ctx.assert(findById.calledOnce);
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.calledOnce);
+<% } -%>
+<% break; case 'update': -%>
+  //Test data
+  const input = {
+<% for (const [field, separator] of h.list(operation.requestFields, ',')) { -%>
+    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- field.name %><%- separator %>
+<% } -%>
+  };
+
+<% if (operation.responseFields.length > 0) { -%>
+  const output = {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% } -%>
+  };
+
+<% } -%>
+  //Stub the update method
+  const update = sandbox.stub()
+    .withArgs(input)
+    .resolves();
+
+<% if (operation.responseFields.length > 0) { -%>
+  //Stub the toObject method
+  const toObject = sandbox.stub()
+    .withArgs()
+    .returns(output);
+
+<% } -%>
+  //Stub the findById method
+  const findById = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findById')
+    .withArgs(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: 1<%- separator %>
+<% } -%>
+    }<% } %>)
+    .resolves({
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+      toObject<% } %>,
+      update
+    });
+
+  //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id, input);
+
+  //Ensure the result is expected
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
+<% } -%>
+  ctx.assert(findById.calledOnce);
+  ctx.assert(update.calledOnce);
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.calledOnce);
+<% } -%>
+<% break; case 'delete': -%>
+<% if (operation.responseFields.length > 0) { -%>
+  //Test data
+  const output = {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% } -%>
+  };
+
+<% } -%>
+  //Stub the delete method
+  const _delete = sandbox.stub()
+    .withArgs()
+    .resolves();
+
+<% if (operation.responseFields.length > 0) { -%>
+  //Stub the toObject method
+  const toObject = sandbox.stub()
+    .withArgs()
+    .returns(output);
+
+<% } -%>
+  //Stub the findById method
+  const findById = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findById')
+    .withArgs(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: 1<%- separator %>
+<% } -%>
+    }<% } %>)
+    .resolves({
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id,
+      delete: _delete<% if (operation.responseFields.length > 0) { %>,
+      toObject<% } %>
+    });
+  
+  //Delete the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id);
+
+  //Ensure the result is expected
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
+<% } -%>
+  ctx.assert(findById.calledOnce);
+  ctx.assert(_delete.calledOnce);
+<% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.calledOnce);
+<% } -%>
+<% break; default: -%>
+  //TODO: implement text
+  <%- operation.name %>();
+<% break; } -%>
+});<%- separator -%>
+<% } %>

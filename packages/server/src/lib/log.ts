@@ -9,12 +9,29 @@
 import 'dotenv/config';
 import pino from 'pino';
 
+//Get the level
+let level: string;
+switch (process.env.NODE_ENV)
+{
+  case 'development':
+    level = 'debug';
+    break;
+
+  case 'test':
+    level = 'warn';
+    break;
+
+  default:
+    level = 'info';
+    break;
+}
+
 //Setup the log
 const log = pino({
   formatters: {
     level: label => ({level: label})
   },
-  level: process.env.NODE_ENV == 'development' ? 'debug' : 'info',
+  level,
   prettyPrint: !!process.env.PRETTY
 });
 
