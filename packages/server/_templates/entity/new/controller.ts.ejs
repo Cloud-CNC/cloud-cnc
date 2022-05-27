@@ -2,19 +2,20 @@
 to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 ---
 /**
- * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> model
+ * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> controller
  */
 
 //Imports
 import log from '@/lib/log';
 import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {WithID} from '@/lib/types';
 
 <% for (const operation of entity.operations) { -%>
 /**
 <%- h.multiline(operation.description, 1) %>
  */
 <% switch (operation.type) { case 'all': -%>
-const <%- operation.name %> = async (<% if (operation.ownable) { %>owner: string<% } %>)<% if (operation.responseFields.length > 0) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>[]><% } %> =>
+const <%- operation.name %> = async (<% if (operation.ownable) { %>owner: string<% } %>)<% if (operation.responseFields.length > 0) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>[]><% } %> =>
 {
   //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
   const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.find({<% if (operation.ownable) { %>owner<% } %>}<% if (operation.responseFields.length > 0) { %>, {
@@ -25,12 +26,12 @@ const <%- operation.name %> = async (<% if (operation.ownable) { %>owner: string
 
   //Log
   log.info('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
-<%_ if (operation.responseFields.length > 0) { %>
+<% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.pluralize(name)) %>.map(<%- h.changeCase.camel(h.inflection.singularize(name)) %> => <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject());
 <% } -%>
 };
 <% break; case 'create': -%>
-const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>)<% if (operation.responseFields.length > 0) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>><% } %> =>
+const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>)<% if (operation.responseFields.length > 0) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>><% } %> =>
 {
   //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
   const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.create(create);
@@ -40,7 +41,7 @@ const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inf
 
   //Log
   log.info(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<%_ if (operation.responseFields.length > 0) { %>
+<% if (operation.responseFields.length > 0) { %>
   return {
 <% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
     <%- field.name %>: <% if (field.name == 'id') { %><%- h.changeCase.camel(h.inflection.singularize(name)) %>.<%- field.name %><% } else { %>null //TODO: add data<% } %><%- separator %>
@@ -66,7 +67,7 @@ const <%- operation.name %> = async (id: string)<% if (operation.responseFields.
 
   //Log
   log.info(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<%_ if (operation.responseFields.length > 0) { %>
+<% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
 };
@@ -87,11 +88,11 @@ const <%- operation.name %> = async (id: string, update: Pick<I<%- h.changeCase.
   }
 
   //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  await <%- h.changeCase.camel(h.inflection.singularize(name)) %>.update(update);
+  await <%- h.changeCase.camel(h.inflection.singularize(name)) %>.updateOne(update);
 
   //Log
   log.info(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<%_ if (operation.responseFields.length > 0) { %>
+<% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
 };
@@ -116,7 +117,7 @@ const <%- operation.name %> = async (id: string)<% if (operation.responseFields.
 
   //Log
   log.info(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<%_ if (operation.responseFields.length > 0) { %>
+<% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
 };

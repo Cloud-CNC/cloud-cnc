@@ -2,32 +2,19 @@
 to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.spec.ts
 ---
 /**
- * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> model unit tests
+ * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> controller unit tests
  */
 
 //Imports
 import test from 'ava';
+import {<%- h.changeCase.camel(h.inflection.singularize(name)) %>A, <%- h.changeCase.camel(h.inflection.singularize(name)) %>B} from '!/fixtures/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 import {createSandbox} from 'sinon';
-import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 import {
 <% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
   <%- operation.name %><%- separator %>
 <% } -%>
 } from './<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-
-//Fixtures
-//TODO: add realistic data
-const <%- h.changeCase.camel(h.inflection.singularize(name)) %>A = {
-<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
-  <%- field.name %>: null<%- separator %>
-<% } -%>
-} as I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
-
-const <%- h.changeCase.camel(h.inflection.singularize(name)) %>B = {
-<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
-  <%- field.name %>: null<%- separator %>
-<% } -%>
-} as I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
 
 //Sinon sandbox
 const sandbox = createSandbox();
@@ -89,13 +76,14 @@ test.serial('<%- operation.description %>', async ctx =>
 <% } -%>
 <% break; case 'create': -%>
   //Test data
+<% if (operation.requestFields.length > 0) { -%>
   const input = {
 <% for (const [field, separator] of h.list(operation.requestFields, ',')) { -%>
     <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
 <% } -%>
   };
 
-<% if (operation.responseFields.length > 0) { -%>
+<% } if (operation.responseFields.length > 0) { -%>
   const output = {
 <% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
     <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
@@ -110,18 +98,24 @@ test.serial('<%- operation.description %>', async ctx =>
 
   //Stub the create method
   const create = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'create')
+<% if (operation.requestFields.length > 0) { -%>
     //@ts-ignore Sinon types are outdated
     .withArgs(input)
+<% } else { -%>
+    .withArgs()
+<% } -%>
     .resolves({
       id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id,
       save
     });
 
   //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(input);
+  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% if (operation.requestFields.length > 0) { %>input<% } %>);
 
   //Ensure the result is expected
+<% if (operation.responseFields.length > 0) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %><% if (operation.responseFields.length > 0) { %>, output<% } %>);
+<% } -%>
   ctx.assert(create.calledOnce);
   ctx.assert(save.calledOnce);
 <% break; case 'get': -%>
@@ -148,8 +142,7 @@ test.serial('<%- operation.description %>', async ctx =>
     }<% } %>)
     .resolves({
       id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
-      toObject
-<% } -%>
+      toObject<% } %>
     });
 
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
@@ -165,13 +158,14 @@ test.serial('<%- operation.description %>', async ctx =>
 <% } -%>
 <% break; case 'update': -%>
   //Test data
+<% if (operation.requestFields.length > 0) { -%>
   const input = {
 <% for (const [field, separator] of h.list(operation.requestFields, ',')) { -%>
     <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- field.name %><%- separator %>
 <% } -%>
   };
 
-<% if (operation.responseFields.length > 0) { -%>
+<% } if (operation.responseFields.length > 0) { -%>
   const output = {
 <% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
     <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
@@ -179,9 +173,13 @@ test.serial('<%- operation.description %>', async ctx =>
   };
 
 <% } -%>
-  //Stub the update method
-  const update = sandbox.stub()
+  //Stub the updateOne method
+  const updateOne = sandbox.stub()
+<% if (operation.requestFields.length > 0) { -%>
     .withArgs(input)
+<% } else { -%>
+    .withArgs()
+<% } -%>
     .resolves();
 
 <% if (operation.responseFields.length > 0) { -%>
@@ -201,18 +199,18 @@ test.serial('<%- operation.description %>', async ctx =>
     .resolves({
       id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
       toObject<% } %>,
-      update
+      updateOne
     });
 
   //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id, input);
+  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.requestFields.length > 0) { %>, input<% } %>);
 
   //Ensure the result is expected
 <% if (operation.responseFields.length > 0) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
 <% } -%>
   ctx.assert(findById.calledOnce);
-  ctx.assert(update.calledOnce);
+  ctx.assert(updateOne.calledOnce);
 <% if (operation.responseFields.length > 0) { -%>
   ctx.assert(toObject.calledOnce);
 <% } -%>
@@ -264,7 +262,7 @@ test.serial('<%- operation.description %>', async ctx =>
   ctx.assert(toObject.calledOnce);
 <% } -%>
 <% break; default: -%>
-  //TODO: implement text
+  //TODO: implement test
   <%- operation.name %>();
 <% break; } -%>
 });<%- separator -%>

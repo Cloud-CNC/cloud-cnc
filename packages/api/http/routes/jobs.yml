@@ -299,7 +299,7 @@ id:
               pluginData:
                 $ref: '../schemas.yml#/pluginData'
     responses:
-      '200':
+      '204':
         $ref: '../responses.yml#/empty-success'
       '400':
         $ref: '../responses.yml#/bad-request'
@@ -315,7 +315,7 @@ id:
       - jobs
     summary: Delete a job
     responses:
-      '200':
+      '204':
         $ref: '../responses.yml#/empty-success'
       '400':
         $ref: '../responses.yml#/bad-request'

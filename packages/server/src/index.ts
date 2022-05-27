@@ -5,7 +5,7 @@
 //Imports
 // import plugin from '@/lib/plugin';
 // import socket from '@/socket';
-import app from '@/routes';
+import app from '@/routes/index';
 import generateServer from '@/lib/server';
 import log from '@/lib/log';
 import {connect} from 'mongoose';

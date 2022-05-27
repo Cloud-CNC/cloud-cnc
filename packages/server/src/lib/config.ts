@@ -23,7 +23,7 @@ const panic = (message: string) =>
 };
 
 //Read environment variables
-const debug = process.env.NODE_ENV == 'development';
+const debug = ['development', 'test'].includes(process.env.NODE_ENV || '');
 const http = {
   port: parseInt(process.env.PORT || '', 10) || 80,
   http2: !!process.env.HTTP2,
@@ -37,44 +37,47 @@ const mongoUrl = process.env.MONGO_URL;
 const redisUrl = process.env.REDIS_URL;
 
 //Validate the config
-if (http.http2 && !http.tls)
+if (!debug)
 {
-  //Panic with message
-  panic('Cannot enable HTTP2 without TLS!');
-}
+  if (http.http2 && !http.tls)
+  {
+    //Panic with message
+    panic('Cannot enable HTTP2 without TLS!');
+  }
 
-if (http.tls && (http.certificate == null || !existsSync(http.certificate)))
-{
-  //Panic with message
-  panic(`Invalid TLS certificate ${http.certificate}!`);
-}
-else if (http.tls)
-{
-  //Read certificate
-  http.certificate = readFileSync(http.certificate!, 'utf-8');
-}
+  if (http.tls && (http.certificate == null || !existsSync(http.certificate)))
+  {
+    //Panic with message
+    panic(`Invalid TLS certificate ${http.certificate}!`);
+  }
+  else if (http.tls)
+  {
+    //Read certificate
+    http.certificate = readFileSync(http.certificate!, 'utf-8');
+  }
 
-if (http.tls && (http.key == null || !existsSync(http.key)))
-{
-  //Panic with message
-  panic(`Invalid TLS key ${http.key}!`);
-}
-else if (http.tls)
-{
-  //Read key
-  http.key = readFileSync(http.key!, 'utf-8');
-}
+  if (http.tls && (http.key == null || !existsSync(http.key)))
+  {
+    //Panic with message
+    panic(`Invalid TLS key ${http.key}!`);
+  }
+  else if (http.tls)
+  {
+    //Read key
+    http.key = readFileSync(http.key!, 'utf-8');
+  }
 
-if (mongoUrl == null)
-{
-  //Panic with message
-  panic('Missing Mongo URL!');
-}
+  if (mongoUrl == null)
+  {
+    //Panic with message
+    panic('Missing Mongo URL!');
+  }
 
-if (redisUrl == null)
-{
-  //Log
-  log.warn('Redis URL wasn\'t provided, running in single instance mode!');
+  if (redisUrl == null)
+  {
+    //Log
+    log.warn('Redis URL wasn\'t provided, running in single instance mode!');
+  }
 }
 
 //Export

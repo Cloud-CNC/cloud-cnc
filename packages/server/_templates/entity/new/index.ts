@@ -32,12 +32,15 @@ module.exports = {
     fields = sortBy(fields, field => field.name);
 
     //Get unique fields
-    const uniqueFields = uniqWith(fields, (a, b) =>
+    let uniqueFields = uniqWith(fields, (a, b) =>
       a.name == b.name &&
       a.description == b.description &&
       a.joiType == b.joiType &&
       a.typescriptType == b.typescriptType
     );
+
+    //Strip the id field
+    uniqueFields = uniqueFields.filter(field => field.name != 'id');
 
     return {
       entity,

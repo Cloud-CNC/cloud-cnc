@@ -32,6 +32,14 @@ const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = 
 
 //Mongoose model
 const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema));
+<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.schema.set('toObject', {
+  virtuals: true,
+  versionKey: false,
+  transform: (_, ret) =>
+  {
+    delete ret._id;
+  }
+});
 
 //Export
 export {

@@ -12,7 +12,7 @@ import checkPermission from '@/middleware/permission';
 import validate from '@/middleware/validate';
 <% } -%>
 import {
-<%_ for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
+<% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
   <%- operation.name %><%- separator %>
 <% } -%>
 } from '@/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
@@ -31,79 +31,105 @@ router
   {
 <% switch (operation.type) { case 'all': -%>
     //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
-    const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = await <%- operation.name %>();
+    <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = <% } %>await <%- operation.name %>();
 
+<% if (operation.responseFields.length > 0) { -%>
     //Return the <%- h.changeCase.no(h.inflection.pluralize(name)) %>
     ctx.response.body = <%- h.changeCase.camel(h.inflection.pluralize(name)) %>;
-<% break; case 'create': -%>
+<% } else { -%>
+    //Return nothing
+    ctx.response.body = null;
+<% } break; case 'create': -%>
     //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- operation.name %>(ctx.request.body);
+    <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(ctx.request.body);
 
+<% if (operation.responseFields.length > 0) { -%>
     //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
     ctx.response.body = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
-<% break; case 'get': -%>
-    //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.parameters, ',')) { %>ctx.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>);
+<% } else { -%>
+    //Return nothing
+    ctx.response.body = null;
+<% } break; case 'get': -%>
+    try
+    {
+      //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+      <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.parameters, ',')) { %>ctx.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>);
 
-    //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> is valid
-    if (<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
+<% if (operation.responseFields.length > 0) { -%>
+      //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+      ctx.response.body = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+<% } else { -%>
+      //Return nothing
+      ctx.response.body = null;
+<% } -%>
+    }
+    catch (error)
     {
       //Log
-      ctx.log.error(ctx, 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> <% for (const [parameter, parameterSeparator] of h.list(operation.parameters, '/')) { %><%- parameter.name %><%- parameterSeparator %><% } %>!');
+      ctx.log.error(error);
 
       //Reject
       ctx.throw({
         error: {
           name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
-          description: 'The supplied <%- h.changeCase.no(h.inflection.singularize(name)) %> <% for (const [parameter, parameterSeparator] of h.list(operation.parameters, '/')) { %><%- parameter.name %><%- parameterSeparator %><% } %> is invalid.'
+          description: error
         }
       }, 400);
     }
-
-    //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    ctx.response.body = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
 <% break; case 'update': -%>
-    //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.parameters, ',')) { %>ctx.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>, ctx.request.body);
+    try
+    {
+      //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+      <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.parameters, ',')) { %>ctx.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>, ctx.request.body);
 
-    //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> is valid
-    if (<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
+<% if (operation.responseFields.length > 0) { -%>
+      //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+      ctx.response.body = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+<% } else { -%>
+      //Return nothing
+      ctx.response.body = null;
+<% } -%>
+    }
+    catch (error)
     {
       //Log
-      ctx.log.error(ctx, 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> <% for (const [parameter, parameterSeparator] of h.list(operation.parameters, '/')) { %><%- parameter.name %><%- parameterSeparator %><% } %>!');
+      ctx.log.error(error);
 
       //Reject
       ctx.throw({
         error: {
           name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
-          description: 'The supplied <%- h.changeCase.no(h.inflection.singularize(name)) %> <% for (const [parameter, parameterSeparator] of h.list(operation.parameters, '/')) { %><%- parameter.name %><%- parameterSeparator %><% } %> is invalid.'
+          description: error
         }
       }, 400);
     }
-
-    //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    ctx.response.body = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
 <% break; case 'delete': -%>
-    //Delete the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.parameters, ',')) { %>ctx.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>);
+    try
+    {
+      //Delete the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+      <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.parameters, ',')) { %>ctx.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>);
 
-    //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> is valid
-    if (<%- h.changeCase.camel(h.inflection.singularize(name)) %> == null)
+<% if (operation.responseFields.length > 0) { -%>
+      //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+      ctx.response.body = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
+<% } else { -%>
+      //Return nothing
+      ctx.response.body = null;
+<% } -%>
+    }
+    catch (error)
     {
       //Log
-      ctx.log.error(ctx, 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %> <% for (const [parameter, parameterSeparator] of h.list(operation.parameters, '/')) { %><%- parameter.name %><%- parameterSeparator %><% } %>!');
+      ctx.log.error(error);
 
       //Reject
       ctx.throw({
         error: {
           name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
-          description: 'The supplied <%- h.changeCase.no(h.inflection.singularize(name)) %> <% for (const [parameter, parameterSeparator] of h.list(operation.parameters, '/')) { %><%- parameter.name %><%- parameterSeparator %><% } %> is invalid.'
+          description: error
         }
       }, 400);
     }
-
-    //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    ctx.response.body = <%- h.changeCase.camel(h.inflection.singularize(name)) %>;
 <% break; default: -%>
     //TODO: fully invoke controller
     await <%- operation.name %>();

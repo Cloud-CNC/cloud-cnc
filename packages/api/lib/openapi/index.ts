@@ -93,15 +93,16 @@ export const getEntities = async () =>
             throw new Error('Operation ID and summary must be provided!');
           }
 
-          //Aggregate operation fields
+          //Aggregate operation fields and MIME types
           const requestFields: Field[] = [];
+          let requestMime: string | undefined;
 
           if (requestBody != null && requestBody.content != null)
           {
-            for (const content of Object.values(requestBody.content))
+            for (const [contentKey, contentValue] of Object.entries(requestBody.content))
             {
               //Cast
-              let schema = content.schema as OpenAPIV3.SchemaObject;
+              let schema = contentValue.schema as OpenAPIV3.SchemaObject;
 
               //Skip empty schemas
               if (schema == null)
@@ -121,27 +122,38 @@ export const getEntities = async () =>
                 continue;
               }
 
-              //Convert properties
-              const properties = Object.entries(schema.properties).map(([propertyKey, propertyValue]) =>
+              //Convert fields
+              for (const [propertyKey, propertyValue] of Object.entries(schema.properties))
               {
                 //Cast
                 const property = propertyValue as OpenAPIV3.SchemaObject;
 
-                return {
+                //Skip id fields
+                if (propertyKey == 'id')
+                {
+                  continue;
+                }
+
+                //Add
+                requestFields.push({
                   name: propertyKey,
                   description: property.description,
                   joiType: joiType(property),
                   typescriptType: typescriptType(property),
                   required: schema.required?.includes(propertyKey) || false
-                } as Field;
-              });
+                } as Field);
+              };
 
-              //Add
-              requestFields.push(...properties);
+              //Set the MIME type
+              requestMime = contentKey;
+
+              break;
             }
           }
 
           const responseFields: Field[] = [];
+          let responseMime: string | undefined;
+          let responseStatus: number | undefined;
 
           for (const [responseKey, responseValue] of Object.entries(operation.responses))
           {
@@ -151,53 +163,64 @@ export const getEntities = async () =>
             //Parse the status code
             const statusCode = parseInt(responseKey);
 
-            //Skip non-200 or content-less responses
-            if ((statusCode < 200 || 300 <= statusCode) || response.content == null)
+            //Skip non-200 responses
+            if ((statusCode < 200 || 300 <= statusCode))
             {
               continue;
             }
 
-            for (const [contentKey, contentValue] of Object.entries(response.content))
+            //Update the response status
+            responseStatus = statusCode;
+
+            if (response.content != null)
             {
-              //Cast
-              let schema = contentValue.schema as OpenAPIV3.SchemaObject;
-
-              //Skip empty schemas
-              if (schema == null)
-              {
-                continue;
-              }
-
-              //Resolve arrays
-              if (schema.type == 'array')
-              {
-                schema = schema.items as OpenAPIV3.SchemaObject;
-              }
-
-              //Skip non-JSON, non-object-schema, or property-less contents
-              if (contentKey != 'application/json' || schema.type != 'object' || schema.properties == null)
-              {
-                continue;
-              }
-
-              //Convert properties
-              const properties = Object.entries(schema.properties).map(([propertyKey, propertyValue]) =>
+              for (const [contentKey, contentValue] of Object.entries(response.content))
               {
                 //Cast
-                const property = propertyValue as OpenAPIV3.SchemaObject;
+                let schema = contentValue.schema as OpenAPIV3.SchemaObject;
 
-                return {
-                  name: propertyKey,
-                  description: property.description,
-                  joiType: joiType(property),
-                  typescriptType: typescriptType(property),
-                  required: schema.required?.includes(propertyKey) || false
-                } as Field;
-              });
+                //Skip empty schemas
+                if (schema == null)
+                {
+                  continue;
+                }
 
-              //Add
-              responseFields.push(...properties);
+                //Resolve arrays
+                if (schema.type == 'array')
+                {
+                  schema = schema.items as OpenAPIV3.SchemaObject;
+                }
+
+                //Skip non-JSON, non-object-schema, or property-less contents
+                if (contentKey != 'application/json' || schema.type != 'object' || schema.properties == null)
+                {
+                  continue;
+                }
+
+                //Convert fields
+                for (const [propertyKey, propertyValue] of Object.entries(schema.properties))
+                {
+                  //Cast
+                  const property = propertyValue as OpenAPIV3.SchemaObject;
+
+                  //Add
+                  responseFields.push({
+                    name: propertyKey,
+                    description: property.description,
+                    joiType: joiType(property),
+                    typescriptType: typescriptType(property),
+                    required: schema.required?.includes(propertyKey) || false
+                  } as Field);
+                };
+
+                //Set the MIME type
+                responseMime = contentKey;
+
+                break;
+              }
             }
+
+            break;
           }
 
           //Convert path parameter format
@@ -213,7 +236,10 @@ export const getEntities = async () =>
             path,
             parameters,
             requestFields,
-            responseFields
+            requestMime,
+            responseFields,
+            responseMime,
+            responseStatus
           });
           break;
         }

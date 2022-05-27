@@ -1,0 +1,32 @@
+---
+to: test/fixtures/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
+---
+/**
+ * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> fixtures
+ */
+
+//Imports
+import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {WithID} from '@/lib/types';
+
+//Fixtures
+//TODO: add realistic data
+const <%- h.changeCase.camel(h.inflection.singularize(name)) %>A = {
+  id: '',
+<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
+  <%- field.name %>: null<%- separator %>
+<% } -%>
+} as WithID<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
+
+const <%- h.changeCase.camel(h.inflection.singularize(name)) %>B = {
+  id: '',
+<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
+  <%- field.name %>: null<%- separator %>
+<% } -%>
+} as WithID<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
+
+//Export
+export {
+  <%- h.changeCase.camel(h.inflection.singularize(name)) %>A,
+  <%- h.changeCase.camel(h.inflection.singularize(name)) %>B
+};

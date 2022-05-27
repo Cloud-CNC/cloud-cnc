@@ -14,9 +14,9 @@ import {
 const server = new MongoMemoryServer();
 
 /**
- * Connect to the database
+ * Start the database
  */
-const connect = async () =>
+const start = async () =>
 {
   //Start the server
   await server.start();
@@ -29,9 +29,9 @@ const connect = async () =>
 };
 
 /**
- * Disconnect from the database
+ * Stop the database
  */
-const disconnect = async () =>
+const stop = async () =>
 {
   //Disconnect Mongoose
   await disconnectMongoose();
@@ -54,7 +54,7 @@ const reset = async () =>
 
 //Export
 export {
-  connect,
-  disconnect,
+  start,
+  stop,
   reset
 };

@@ -110,9 +110,24 @@ export interface Operation
   requestFields: Field[];
 
   /**
+   * Operation request MIME type
+   */
+  requestMime?: string;
+
+  /**
    * Operation response fields
    */
   responseFields: Field[];
+
+  /**
+   * Operation response MIME type
+   */
+  responseMime?: string;
+
+  /**
+   * Operation response status code
+   */
+  responseStatus?: number;
 }
 
 /**
