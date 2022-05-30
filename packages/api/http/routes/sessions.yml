@@ -3,11 +3,11 @@
 # Routes
 userpass:
   post:
-    operationId: loginUserPass
+    operationId: loginUserpass
     tags:
       - sessions
     summary: Log in to an account with a username and password
-    description: The client MUST invoke `/login/mfa` if MFA is enabled.
+    description: The client MUST invoke `/login/totp` if TOTP is enabled.
     security: []
     requestBody:
       required: true
@@ -40,14 +40,14 @@ userpass:
               type: object
               required:
                 - valid
-                - mfa
+                - totp
               properties:
                 valid:
                   type: boolean
                   description: Whether or not the username and password were valid
-                mfa:
+                totp:
                   type: boolean
-                  description: Whether or not the account has MFA enabled (And therefore whether or not the client needs to make a request to `/sessions/mfa`)
+                  description: Whether or not the account has TOTP enabled (And therefore whether or not the client needs to make a request to `/sessions/totp`)
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -55,12 +55,12 @@ userpass:
       '500':
         $ref: '../responses.yml#/internal-error'
 
-mfa:
+totp:
   post:
-    operationId: loginMFA
+    operationId: loginTotp
     tags:
       - sessions
-    summary: Log in to an account with MFA
+    summary: Log in to an account with TOTP
     description: The client MUST invoke `/login/userpass` prior to invoking this route.
     requestBody:
       required: true

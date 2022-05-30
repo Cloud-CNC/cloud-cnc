@@ -16,7 +16,6 @@ info:
     ## Glossary
     * ACL: Access Control List
     * RBAC: Role-Based Access Control
-    * MFA: Multi-Factor Authentication
     * TOTP: Time-based One Time Password ([RFC 6238](https://tools.ietf.org/html/rfc6238))
     * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule
     compatible jobs on (eg: working-area dimensions)
@@ -35,7 +34,9 @@ info:
     can be added to a role to grant that role access to that route; any user whose a member of that
     role inherits all of that role's permissions.
 
-    RBAC permission names are the same as the operation ID.
+    The format of RBAC permissions is `[operation ID]` (eg: `getAllMachines`) for variant-less
+    operations and `[operation ID]:[operation variant]` (eg: `getAccount:own`) for variant-full
+    operations.
 
     ### Ownable entities
     Access to individual ownable entities (eg: files) are controlled by ACLs. Each ownable entity
@@ -48,9 +49,12 @@ info:
 
     ## Custom route attributes
 
-    * `x-operation-type` (enum): common operation types. Valid values are: `all` (Get all entity
-    instances), `create` (Create an entity instance), `get` (Get an entity instance by ID), `update`
-    (Update an entity instance by ID), and `delete` (Delete an entity instance by ID).
+    * `x-operation-type` (enum): common operation types. Valid values are:
+      * `all`: get all entity instances
+      * `create`: create an entity instance
+      * `get`: get an entity instance by ID
+      * `update`: update an entity instance by ID
+      * `delete`: delete an entity instance by ID
   version: 2.0.0
   license:
     name: MIT
@@ -81,8 +85,8 @@ tags:
 paths:
   /sessions/login/userpass:
     $ref: './routes/sessions.yml#/userpass'
-  /sessions/login/mfa:
-    $ref: './routes/sessions.yml#/mfa'
+  /sessions/login/totp:
+    $ref: './routes/sessions.yml#/totp'
   /sessions/revoke:
     $ref: './routes/sessions.yml#/revoke'
   /sessions/logout:

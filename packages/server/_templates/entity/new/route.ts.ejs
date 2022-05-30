@@ -27,7 +27,7 @@ router
   /**
 <%- h.multiline(operation.description, 3) %>
    */
-  .<%- operation.method %>('<%- operation.path %>', checkPermission('<%- operation.permission %>'), <% if (['create', 'update'].includes(operation.type)) { %>validate(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema), <% } %>async ctx =>
+  .<%- operation.method %>('<%- operation.path %>', checkPermission('<%- operation.permission %>'), <% if (['create', 'update'].includes(operation.type)) { %>validate(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema, [<% for (const [field, fieldSeparator] of h.list(operation.requestFields, ', ')) { %>'<%- field.name %>'<%- fieldSeparator %><% } %>]), <% } %>async ctx =>
   {
 <% switch (operation.type) { case 'all': -%>
     //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>

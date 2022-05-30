@@ -4,13 +4,22 @@
 
 //Imports
 import {Next, ParameterizedContext} from 'koa';
-import {Schema} from 'joi';
+import {ObjectSchema, object} from 'joi';
+import {pick} from 'lodash';
 
-//Middleware
-const validate = (schema: Schema) => (ctx: ParameterizedContext, next: Next) =>
+/**
+ * Body validation middleware factory
+ * @param entitySchema Joi entity schema
+ * @param keys Keys from the entity schema used to generate the operation-specific sub-schema
+ * @returns Middleware
+ */
+const validate = (entitySchema: ObjectSchema, keys: string[]) => (ctx: ParameterizedContext, next: Next) =>
 {
+  //Generate the sub-schema
+  const subSchema = object(pick(entitySchema, keys));
+
   //Validate the body
-  const res = schema.validate(ctx.request.body);
+  const res = subSchema.validate(ctx.request.body);
 
   //Invalid requests
   if (res.error != null)

@@ -26,7 +26,7 @@ type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document 
 //Joi schema
 const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = Joi.object({
 <% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
-  <%- field.name %>: <%- field.joiType %><%- separator %>
+  <%- field.name %>: <%- field.joiType %><%- field.required ? '.required()' : '.optional()' %><%- separator %>
 <% } -%>
 });
 

@@ -153,7 +153,7 @@ export const getEntities = async () =>
 
           const responseFields: Field[] = [];
           let responseMime: string | undefined;
-          let responseStatus: number | undefined;
+          let responseStatus: number;
 
           for (const [responseKey, responseValue] of Object.entries(operation.responses))
           {
@@ -239,7 +239,7 @@ export const getEntities = async () =>
             requestMime,
             responseFields,
             responseMime,
-            responseStatus
+            responseStatus: responseStatus!
           });
           break;
         }

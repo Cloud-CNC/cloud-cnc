@@ -15,7 +15,7 @@ import {WithID} from '@/lib/types';
 <%- h.multiline(operation.description, 1) %>
  */
 <% switch (operation.type) { case 'all': -%>
-const <%- operation.name %> = async (<% if (operation.ownable) { %>owner: string<% } %>)<% if (operation.responseFields.length > 0) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>[]><% } %> =>
+const <%- operation.name %> = async ()<% if (operation.responseFields.length > 0) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>[]><% } %> =>
 {
   //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
   const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.find({<% if (operation.ownable) { %>owner<% } %>}<% if (operation.responseFields.length > 0) { %>, {
@@ -72,7 +72,7 @@ const <%- operation.name %> = async (id: string)<% if (operation.responseFields.
 <% } -%>
 };
 <% break; case 'update': -%>
-const <%- operation.name %> = async (id: string, update: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>)<% if (operation.responseFields.length > 0) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>><% } %> =>
+const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>)<% if (operation.responseFields.length > 0) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>><% } %> =>
 {
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
   const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findById(id<% if (operation.responseFields.length > 0) { %>, {

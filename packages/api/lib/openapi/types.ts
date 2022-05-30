@@ -87,7 +87,7 @@ export interface Operation
   /**
    * Operation type (If applicable)
    */
-  type: OperationType;
+  type?: OperationType;
 
   /**
    * HTTP method
@@ -127,16 +127,7 @@ export interface Operation
   /**
    * Operation response status code
    */
-  responseStatus?: number;
-}
-
-/**
- * Operation variant
- */
-export enum OperationVariant
-{
-  OWN = 'own',
-  OTHER = 'other'
+  responseStatus: number;
 }
 
 /**

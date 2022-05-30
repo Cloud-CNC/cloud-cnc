@@ -6,22 +6,21 @@
     
     /* Modules */
     "paths": {
-      "api/*": [
+      "#api/*": [
         "../api/*"
       ],
-      "relay/*": [
+      "#relay/*": [
         "../relay/*"
       ],
-      "server/*": [
+      "#server/*": [
         "../server/*"
       ],
-      "ui/*": [
+      "#ui/*": [
         "../ui/*"
-      ]
+      ],
     },
 
     /* Emit */
-    "sourceMap": true,
     "newLine": "crlf",
 
     /* Interop Constraints */
@@ -46,9 +45,5 @@
 
     /* Completeness */
     "skipLibCheck": true
-  },
-  "include": [
-    "./**/*.ts",
-    "./**/*.d.ts"
-  ]
+  }
 }

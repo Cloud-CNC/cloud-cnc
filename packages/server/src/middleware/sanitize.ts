@@ -6,7 +6,11 @@
 import {Context, Next} from 'koa';
 import {sanitize} from 'mongodb-sanitize';
 
-//Middleware
+/**
+ * Database sanitization middleware
+ * @param ctx Koa context
+ * @param next Next middleware
+ */
 const middleware = async (ctx: Context, next: Next) =>
 {
   //Sanitize the body

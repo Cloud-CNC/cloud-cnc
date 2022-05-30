@@ -7,7 +7,11 @@
 // import {Role} from '@/models/role';
 import {Context, Next} from 'koa';
 
-//Middleware
+/**
+ * Permission check middleware factory
+ * @param name Permission name
+ * @returns Middleware
+ */
 const checkPermission = (_: string) => async (_: Context, next: Next) =>
 {
   return next();

@@ -81,8 +81,7 @@ filter:
       type: array
       items:
         oneOf:
-          - type:
-            $ref: '#/filter'
+          - $ref: '#/filter'
           - type: array
           - type: boolean
           - type: number
@@ -179,6 +178,8 @@ create:
     tags:
       - jobs
     summary: Create a job
+    description: |
+      The client MUST have at least `read` ACL permissions on the file to schedule a job for it
     requestBody:
       required: true
       content:
@@ -234,7 +235,6 @@ id:
   get:
     operationId: getJob
     x-operation-type: get
-    tags:
       - jobs
     summary: Get a job
     responses:
@@ -279,6 +279,8 @@ id:
     tags:
       - jobs
     summary: Update a job
+    description: |
+      The client MUST have at least `read` ACL permissions on the file to schedule a job for it
     requestBody:
       required: true
       content:
