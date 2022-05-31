@@ -32,7 +32,9 @@ const log = pino({
     level: label => ({level: label})
   },
   level,
-  prettyPrint: !!process.env.PRETTY
+  transport: process.env.PRETTY == 'true' ? {
+    target: 'pino-pretty'
+  } : undefined
 });
 
 //Export

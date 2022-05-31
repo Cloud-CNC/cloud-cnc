@@ -1,27 +1,14 @@
 {
   "compilerOptions": {
+    /* Projects */
+    "incremental": true,
+
     /* JavaScript Support */
     "allowJs": true,
     "checkJs": true,
-    
-    /* Modules */
-    "paths": {
-      "#api/*": [
-        "../api/*"
-      ],
-      "#relay/*": [
-        "../relay/*"
-      ],
-      "#server/*": [
-        "../server/*"
-      ],
-      "#ui/*": [
-        "../ui/*"
-      ],
-    },
 
     /* Emit */
-    "newLine": "crlf",
+    "newLine": "lf",
 
     /* Interop Constraints */
     "allowSyntheticDefaultImports": true,

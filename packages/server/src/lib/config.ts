@@ -9,8 +9,8 @@
 
 //Imports
 import 'dotenv/config';
-import {existsSync, readFileSync} from 'fs';
 import log from './log';
+import {existsSync, readFileSync} from 'fs';
 
 //Fatally log and crash
 const panic = (message: string) =>
@@ -22,26 +22,50 @@ const panic = (message: string) =>
   process.exit(1);
 };
 
+//App modes
+export enum Mode
+{
+  DEVELOPMENT = 'development',
+  TESTING = 'testing',
+  PRODUCTION = 'production'
+}
+
 //Read environment variables
-const debug = ['development', 'test'].includes(process.env.NODE_ENV || '');
+let mode: Mode;
+switch (process.env.NODE_ENV)
+{
+  case 'development':
+    mode = Mode.DEVELOPMENT;
+    break;
+
+  case 'test':
+    mode = Mode.TESTING;
+    break;
+
+  default:
+    mode = Mode.PRODUCTION;
+    break;
+}
+
 const hash = {
   iterations: parseInt(process.env.HASH_ITERATIONS || '', 10) || 8,
-  memory: parseInt(process.env.HASH_MEMORY || '', 10) || (1024 * 128), //128 MiB,
+  memory: parseInt(process.env.HASH_MEMORY || '', 10) || (1024 * 128), //128 MiB
 };
+
 const http = {
   port: parseInt(process.env.PORT || '', 10) || 80,
-  http2: !!process.env.HTTP2,
+  http2: process.env.HTTP2 == 'true',
 
-  tls: !!process.env.TLS_ENABLED,
-  certificate: process.env.TLS_CERTIFICATE,
-  key: process.env.TLS_KEY
+  tls: process.env.TLS_ENABLED == 'true',
+  certificate: undefined as Buffer | undefined,
+  key: undefined as Buffer | undefined
 };
-const pretty = !!process.env.PRETTY;
+
 const mongoUrl = process.env.MONGO_URL;
 const redisUrl = process.env.REDIS_URL;
 
 //Validate the config
-if (!debug)
+if (mode == Mode.TESTING)
 {
   if (hash.iterations < 1)
   {
@@ -67,26 +91,41 @@ if (!debug)
     panic('Cannot enable HTTP2 without TLS!');
   }
 
-  if (http.tls && (http.certificate == null || !existsSync(http.certificate)))
+  if (http.tls && process.env.TLS_CERTIFICATE == null || process.env.TLS_KEY == null)
   {
-    //Panic with message
-    panic(`Invalid TLS certificate ${http.certificate}!`);
-  }
-  else if (http.tls)
-  {
-    //Read certificate
-    http.certificate = readFileSync(http.certificate!, 'utf-8');
+    //Override TLS
+    http.tls = false;
+
+    //Log
+    log.warn('The TLS certificate and/or key weren\'t provided, disabling TLS!');
   }
 
-  if (http.tls && (http.key == null || !existsSync(http.key)))
+  if (http.tls && process.env.TLS_CERTIFICATE != null)
   {
-    //Panic with message
-    panic(`Invalid TLS key ${http.key}!`);
+    if (!existsSync(process.env.TLS_CERTIFICATE))
+    {
+      //Panic with message
+      panic(`Invalid TLS certificate ${process.env.TLS_CERTIFICATE}!`);
+    }
+    else
+    {
+      //Read certificate
+      http.certificate = readFileSync(process.env.TLS_CERTIFICATE);
+    }
   }
-  else if (http.tls)
+
+  if (http.tls && process.env.TLS_KEY != null)
   {
-    //Read key
-    http.key = readFileSync(http.key!, 'utf-8');
+    if (!existsSync(process.env.TLS_KEY))
+    {
+      //Panic with message
+      panic(`Invalid TLS key ${process.env.TLS_KEY}!`);
+    }
+    else
+    {
+      //Read key
+      http.key = readFileSync(process.env.TLS_KEY);
+    }
   }
 
   if (mongoUrl == null)
@@ -105,10 +144,9 @@ if (!debug)
 //Export
 export
 {
-  debug,
+  mode,
   hash,
   http,
-  pretty,
   mongoUrl,
   redisUrl
 };

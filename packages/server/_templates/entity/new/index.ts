@@ -6,7 +6,7 @@
 
 //Imports
 import {getEntities} from '../../../../api/lib/openapi/index';
-import {sortBy, uniqWith} from 'lodash';
+import {orderBy, uniqWith} from 'lodash';
 
 //Export
 module.exports = {
@@ -28,19 +28,18 @@ module.exports = {
     }
 
     //Get all fields
-    let fields = entity.operations.flatMap(operation => [...operation.requestFields, ...operation.responseFields]);
-    fields = sortBy(fields, field => field.name);
+    const rawFields = entity.operations.flatMap(operation => [...operation.requestFields, ...operation.responseFields]);
+
+    //Sort fields
+    const sortedFields = orderBy(rawFields, ['name', 'required'], ['asc', 'desc']);
 
     //Get unique fields
-    let uniqueFields = uniqWith(fields, (a, b) =>
+    const uniqueFields = uniqWith(sortedFields, (a, b) =>
       a.name == b.name &&
       a.description == b.description &&
       a.joiType == b.joiType &&
       a.typescriptType == b.typescriptType
-    );
-
-    //Strip the id field
-    uniqueFields = uniqueFields.filter(field => field.name != 'id');
+    ).filter(field => field.name != 'id');
 
     return {
       entity,

@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    /* Modules */
+    "rootDir": "src",
+
+    /* Emit */
+    "outDir": "dist"
+  },
+  "exclude": [
+    "**/*.spec.ts",
+    ".hygen.js",
+    "_templates/*",
+    "ava.config.mjs",
+    "test/*"
+  ]
+}

@@ -5,6 +5,26 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Start (Debug)",
+      "presentation": {
+        "group": "Server",
+        "order": 2
+      },
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "start:debug"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "outputCapture": "std",
+      "preLaunchTask": "npm: build - packages/server"
+    },
+    {
       "name": "Run Tests",
       "presentation": {
         "group": "Server",

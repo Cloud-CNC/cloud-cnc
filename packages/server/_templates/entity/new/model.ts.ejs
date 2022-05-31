@@ -7,7 +7,7 @@ to: src/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 
 //Imports
 import Joi from 'joi';
-import {model as createModel, Document} from 'mongoose';
+import {Document, model as createModel} from 'mongoose';
 import joigoose from '@/lib/joigoose';
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> interface
@@ -16,12 +16,9 @@ interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
   /**
 <%- h.multiline(field.description, 3) %>
    */
-  <%- field.name %>: <%- field.typescriptType %>;
+  <%- field.name %><%- !field.required ? '?' : '' %>: <%- field.typescriptType %>;
 <% } -%>
 }
-
-//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> document interface
-type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document = Document | I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>;
 
 //Joi schema
 const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = Joi.object({
@@ -31,20 +28,26 @@ const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = 
 });
 
 //Mongoose model
-const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema));
+const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema));
 <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.schema.set('toObject', {
   virtuals: true,
   versionKey: false,
-  transform: (_, ret) =>
+  transform: (document: Document<any, any, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>, value: any) =>
   {
-    delete ret._id;
+    //Delete the Object ID
+    delete value._id;
+
+    //Delete the stringified ID if not specifically selected for
+    if (!document.isSelected('id'))
+    {
+      delete value.id;
+    }
   }
 });
 
 //Export
 export {
   I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>,
-  I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document,
   <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema,
   <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
 };

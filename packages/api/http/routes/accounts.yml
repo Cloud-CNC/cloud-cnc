@@ -83,12 +83,15 @@ create:
             required:
               - username
               - password
+              - totpEnabled
               - roles
             properties:
               username:
                 $ref: '#/username'
               password:
                 $ref: '#/password'
+              totpEnabled:
+                $ref: '#/totpEnabled'
               roles:
                 $ref: '#/roles'
               pluginData:
@@ -209,6 +212,8 @@ id:
                 $ref: '#/username'
               password:
                 $ref: '#/password'
+              totpEnabled:
+                $ref: '#/totpEnabled'
               roles:
                 $ref: '#/roles'
               pluginData:

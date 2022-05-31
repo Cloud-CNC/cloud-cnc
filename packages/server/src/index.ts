@@ -9,7 +9,7 @@ import app from '@/routes/index';
 import generateServer from '@/lib/server';
 import log from '@/lib/log';
 import {connect} from 'mongoose';
-import {debug, http, mongoUrl} from '@/lib/config';
+import {mode, http, mongoUrl} from '@/lib/config';
 
 const main = async () =>
 {
@@ -32,7 +32,7 @@ const main = async () =>
   server.listen(http.port);
 
   //Log
-  log.info(`Started Cloud CNC core on port ${http.port}. Running in ${debug ? 'debug' : 'production'} mode.`);
+  log.info(`Started Cloud CNC core on port ${http.port}. Running in ${mode} mode.`);
 };
 
 main();

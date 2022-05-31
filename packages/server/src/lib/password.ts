@@ -13,7 +13,7 @@ const argonOptions = {
   hashLength: 64,
   saltLength: 32,
   memoryCost: hashConfig.memory,
-  timeCost: hashConfig.memory,
+  timeCost: hashConfig.iterations,
   parallelism: cpus().length,
   raw: false
 } as Options & {raw: false};

@@ -14,9 +14,9 @@ const middleware = session({
     sameSite: 'strict'
   },
   key: 'session',
-  store: redisStore({
+  store: redisUrl != null ? redisStore({
     url: redisUrl
-  })
+  }) : undefined
 });
 
 //Export

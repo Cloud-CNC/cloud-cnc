@@ -146,7 +146,7 @@ test.serial('<%- operation.description %>', async ctx =>
   //Ensure the <%- h.changeCase.no(h.inflection.singularize(name)) %> was deleted correctly
   ctx.assert(await <%- h.changeCase.pascal(h.inflection.singularize(name)) %>.findById(<%- h.changeCase.camel(h.inflection.singularize(name)) %>Document.id, {}) == null);
 <% break; default: -%>
-  //TODO; ensure the database was updated correctly
+  //TODO: ensure the database was updated correctly
 <% break; } -%>
 });<%- separator -%>
 <% } %>

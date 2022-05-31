@@ -1,1 +1,2 @@
-check update operations return expected data
+hook system
+root account creation/bootstrapping
