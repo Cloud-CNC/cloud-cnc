@@ -25,7 +25,7 @@ const <%- operation.name %> = async ()<% if (operation.responseFields.length > 0
   }<% } %>);
 
   //Log
-  log.info('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
+  log.debug('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
 <% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.pluralize(name)) %>.map(<%- h.changeCase.camel(h.inflection.singularize(name)) %> => <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject());
 <% } -%>
@@ -40,7 +40,7 @@ const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inf
   await <%- h.changeCase.camel(h.inflection.singularize(name)) %>.save();
 
   //Log
-  log.info(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+  log.debug(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 <% if (operation.responseFields.length > 0) { %>
   return {
 <% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
@@ -66,7 +66,7 @@ const <%- operation.name %> = async (id: string)<% if (operation.responseFields.
   }
 
   //Log
-  log.info(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+  log.debug(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 <% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
@@ -93,7 +93,7 @@ const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%- h.cha
   }
 
   //Log
-  log.info(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+  log.debug(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 <% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
@@ -117,7 +117,7 @@ const <%- operation.name %> = async (id: string)<% if (operation.responseFields.
   }
 
   //Log
-  log.info(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
+  log.debug(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
 <% if (operation.responseFields.length > 0) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>

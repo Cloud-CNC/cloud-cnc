@@ -12,6 +12,7 @@ username:
 password:
   type: string
   description: Account password
+  minLength: 12
 
 totpEnabled:
   type: boolean

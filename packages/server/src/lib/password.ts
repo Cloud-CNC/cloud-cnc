@@ -5,7 +5,8 @@
 //Imports
 import {hash as hashConfig} from '@/lib/config';
 import {cpus} from 'os';
-import {argon2id, hash as argonHash, verify as argonVerify, Options} from 'argon2';
+import {Options as ArgonOptions, argon2id, hash as argonHash, verify as argonVerify} from 'argon2';
+import {GenerateOptions as GeneratePasswordOptions, generate as generatePassword} from 'generate-password';
 
 //Argon2ID options (See https://github.com/ranisalt/node-argon2/wiki/Options)
 const argonOptions = {
@@ -16,7 +17,24 @@ const argonOptions = {
   timeCost: hashConfig.iterations,
   parallelism: cpus().length,
   raw: false
-} as Options & {raw: false};
+} as ArgonOptions & {raw: false};
+
+//Password generation options
+const passwordOptions = {
+  excludeSimilarCharacters: true,
+  length: 24,
+  lowercase: true,
+  numbers: true,
+  strict: true,
+  symbols: false,
+  uppercase: true
+} as GeneratePasswordOptions;
+
+/**
+ * Generate a password
+ * @returns Password
+ */
+const generate = () => generatePassword(passwordOptions);
 
 /**
  * Hash the input
@@ -36,6 +54,7 @@ const verify = async (hashed: string, plain: string) => await argonVerify(hashed
 //Export
 export
 {
+  generate,
   hash,
   verify
 };

@@ -1,41 +1,28 @@
 /**
  * @fileoverview App log
- * 
- * This file cannot use the config (due to a dependency loop) but should still
- * follow it's principles
  */
 
 //Imports
-import 'dotenv/config';
-import pino from 'pino';
+import pino, {DestinationStream} from 'pino';
+import pretty from 'pino-pretty';
+import {log} from '@/lib/config';
 
-//Get the level
-let level: string;
-switch (process.env.NODE_ENV)
+//Generate the stream
+let stream: DestinationStream;
+if (log.pretty)
 {
-  case 'development':
-    level = 'debug';
-    break;
-
-  case 'test':
-    level = 'warn';
-    break;
-
-  default:
-    level = 'info';
-    break;
+  stream = pretty({
+    sync: true
+  });
 }
 
-//Setup the log
-const log = pino({
+//Setup the logger
+const logger = pino({
   formatters: {
     level: label => ({level: label})
   },
-  level,
-  transport: process.env.PRETTY == 'true' ? {
-    target: 'pino-pretty'
-  } : undefined
-});
+  level: log.level
+}, stream!);
 
 //Export
-export default log;
+export default logger;

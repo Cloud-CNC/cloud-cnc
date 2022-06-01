@@ -8,7 +8,8 @@ import log from '@/lib/log';
 
 //Middleware
 const middleware = pino({
-  logger: log
+  logger: log,
+  useLevel: 'trace'
 });
 
 //Export

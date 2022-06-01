@@ -1,0 +1,28 @@
+---
+to: src/commands/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
+---
+/**
+ * @fileoverview <%- h.changeCase.sentence(h.inflection.singularize(name)) %> command
+ */
+
+//Imports
+import {Command} from 'commander';
+
+//Register the command
+const register = (program: Command) =>
+{
+  //Register the command
+  program
+    .command('<%- h.changeCase.param(h.inflection.singularize(name)) %>')
+    .description('command description')
+    .argument('<required>', 'argument description')
+    .argument('[optional]', 'argument description')
+    .option('-f, --flag <value>', 'description')
+    .action(async (args) =>
+    {
+
+    });
+};
+
+//Export
+export default register;

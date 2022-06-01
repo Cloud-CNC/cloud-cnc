@@ -38,7 +38,7 @@ router
    */
   .post('/accounts/create', checkPermission('createAccount'), validate(Joi.object({
     username: Joi.string().required(),
-    password: Joi.string().required(),
+    password: Joi.string().min(12).required(),
     totpEnabled: Joi.boolean().required(),
     roles: Joi.array().items(Joi.string()).required(),
     pluginData: Joi.object().optional()
@@ -93,7 +93,7 @@ router
    */
   .patch('/accounts/:id', checkPermission('updateAccount'), validate(Joi.object({
     username: Joi.string().optional(),
-    password: Joi.string().optional(),
+    password: Joi.string().min(12).optional(),
     totpEnabled: Joi.boolean().optional(),
     roles: Joi.array().items(Joi.string()).optional(),
     pluginData: Joi.object().optional()

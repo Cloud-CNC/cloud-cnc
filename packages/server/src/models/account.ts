@@ -51,12 +51,16 @@ interface IAccount
 //Joi schema
 const AccountSchema = Joi.object({
   enabled: Joi.boolean().required(),
-  password: Joi.string().required(),
+  password: Joi.string().min(12).required(),
   pluginData: Joi.object().optional(),
   roles: Joi.array().items(Joi.string()).required(),
   totpEnabled: Joi.boolean().required(),
   totpSecret: Joi.string().optional(),
-  username: Joi.string().required()
+  username: Joi.string().required().meta({
+    _mongoose: {
+      unique: true
+    }
+  })
 });
 
 //Mongoose model

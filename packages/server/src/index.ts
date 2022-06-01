@@ -1,38 +1,32 @@
 /**
- * @fileoverview Server entrypoint
+ * App entrypoint
  */
 
 //Imports
-// import plugin from '@/lib/plugin';
-// import socket from '@/socket';
-import app from '@/routes/index';
-import generateServer from '@/lib/server';
-import log from '@/lib/log';
-import {connect} from 'mongoose';
-import {mode, http, mongoUrl} from '@/lib/config';
+import {Project} from '@lerna/project';
+import {program} from 'commander';
+import {resolve} from 'path';
 
-const main = async () =>
+//Commands
+import '@/commands/bootstrap';
+import '@/commands/run';
+
+/**
+ * Get the project version
+ */
+export const getVersion = () =>
 {
-  //Get the app HTTP handler
-  const handler = app.callback();
+  //Resolve the project
+  const project = new Project(resolve(__dirname, '..', '..'));
 
-  //Generate the server
-  const server = generateServer(handler);
-
-  //SocketIO setup
-  // const io = socket(server);
-
-  //Apply plugins
-  // await plugin(app, io);
-
-  //Connect to Mongo
-  await connect(mongoUrl!);
-
-  //Start the server
-  server.listen(http.port);
-
-  //Log
-  log.info(`Started Cloud CNC core on port ${http.port}. Running in ${mode} mode.`);
+  return project.version;
 };
 
-main();
+//Create the root command
+const command = program
+  .name('server')
+  .description('Cloud CNC API server')
+  .version(getVersion());
+
+//Process arguments and options
+command.parse(process.argv);

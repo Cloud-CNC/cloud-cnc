@@ -8,3 +8,4 @@ Core monorepo
 
 ## Auxillary Packages
 * [API specifications](packages/api)
+* [Project info utility](packages/info)

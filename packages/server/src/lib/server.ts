@@ -7,6 +7,7 @@ import {createSecureServer as createHttp2Server, Http2ServerRequest, Http2Server
 import {createServer as createHttpServer, IncomingMessage, ServerResponse} from 'http';
 import {createServer as createHttpsServer} from 'https';
 import {http} from './config';
+import {readFile} from 'fs/promises';
 
 //Generic HTTP server listener
 type Listener = (req: IncomingMessage | Http2ServerRequest, res: ServerResponse | Http2ServerResponse) => void;
@@ -16,33 +17,40 @@ type Listener = (req: IncomingMessage | Http2ServerRequest, res: ServerResponse 
  * @param listener App listener
  * @returns HTTP/HTTPS/HTTP2 server
  */
-const createServer = (listener: Listener) =>
+const createServer = async (listener: Listener) =>
 {
   //Plain HTTP server
   if (!http.tls)
   {
     return createHttpServer(listener);
   }
-  //HTTPS server
-  else if (!http.http2)
-  {
-    return createHttpsServer({
-      cert: http.certificate,
-      key: http.key,
-      minVersion: 'TLSv1.2'
-    }, listener);
-  }
-  //HTTP2 server
   else
   {
-    return createHttp2Server({
-      allowHTTP1: true,
-      cert: http.certificate,
-      key: http.key,
-      minVersion: 'TLSv1.2'
-    }, listener);
+    //Read certificate and key
+    const certificate = await readFile(http.certificate!);
+    const key = await readFile(http.key!);
+
+    //HTTPS server
+    if (!http.http2)
+    {
+      return createHttpsServer({
+        cert: certificate,
+        key: key,
+        minVersion: 'TLSv1.2'
+      }, listener);
+    }
+    //HTTP2 server
+    else
+    {
+      return createHttp2Server({
+        allowHTTP1: true,
+        cert: certificate,
+        key: key,
+        minVersion: 'TLSv1.2'
+      }, listener);
+    }
   }
 };
 
 //Export
-export default createServer
+export default createServer;

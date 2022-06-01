@@ -24,7 +24,7 @@ const getAllAccounts = async (): Promise<WithID<Pick<IAccount, 'username' | 'tot
   });
 
   //Log
-  log.info('Got all accounts.');
+  log.debug('Got all accounts.');
 
   return accounts.map(account => account.toObject());
 };
@@ -56,7 +56,7 @@ const createAccount = async (create: Pick<IAccount, 'username' | 'password' | 't
   await account.save();
 
   //Log
-  log.info(`Created account ${account.id}.`);
+  log.debug(`Created account ${account.id}.`);
 
   return {
     id: account.id,
@@ -94,7 +94,7 @@ const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totp
   }
 
   //Log
-  log.info(`Got account ${account.id}.`);
+  log.debug(`Got account ${account.id}.`);
 
   return account.toObject();
 };
@@ -139,7 +139,7 @@ const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'usernam
   }
 
   //Log
-  log.info(`Updated account ${account.id}.`);
+  log.debug(`Updated account ${account.id}.`);
 
   return account.toObject();
 };
@@ -159,7 +159,7 @@ const deleteAccount = async (id: string) =>
   }
 
   //Log
-  log.info(`Deleted account ${account.id}.`);
+  log.debug(`Deleted account ${account.id}.`);
 };
 
 //Export

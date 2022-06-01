@@ -9,14 +9,14 @@
 
 //Imports
 import 'dotenv/config';
-import log from './log';
-import {existsSync, readFileSync} from 'fs';
+import {existsSync} from 'fs';
+import {LevelWithSilent, levels} from 'pino';
 
 //Fatally log and crash
 const panic = (message: string) =>
 {
   //Log
-  log.fatal(message);
+  console.error(message);
 
   //Crash
   process.exit(1);
@@ -47,6 +47,29 @@ switch (process.env.NODE_ENV)
     break;
 }
 
+const log = {
+  pretty: process.env.PRETTY == 'true',
+  level: process.env.LOG_LEVEL as LevelWithSilent | undefined
+};
+
+if (log.level == null)
+{
+  switch (mode)
+  {
+    case Mode.DEVELOPMENT:
+      log.level = 'debug';
+      break;
+
+    case Mode.PRODUCTION:
+      log.level = 'info';
+      break;
+
+    case Mode.TESTING:
+      log.level = 'warn';
+      break;
+  }
+}
+
 const hash = {
   iterations: parseInt(process.env.HASH_ITERATIONS || '', 10) || 8,
   memory: parseInt(process.env.HASH_MEMORY || '', 10) || (1024 * 128), //128 MiB
@@ -57,16 +80,22 @@ const http = {
   http2: process.env.HTTP2 == 'true',
 
   tls: process.env.TLS_ENABLED == 'true',
-  certificate: undefined as Buffer | undefined,
-  key: undefined as Buffer | undefined
+  certificate: process.env.TLS_CERTIFICATE,
+  key: process.env.TLS_KEY
 };
 
 const mongoUrl = process.env.MONGO_URL;
 const redisUrl = process.env.REDIS_URL;
 
 //Validate the config
-if (mode == Mode.TESTING)
+if (mode != Mode.TESTING)
 {
+  if (!Object.keys(levels.values).includes(log.level))
+  {
+    //Panic with message
+    panic(`Log level ${log.level} is invalid! (Must be one of ${Object.keys(levels.values).join(', ')})`);
+  }
+
   if (hash.iterations < 1)
   {
     //Panic with message
@@ -91,40 +120,27 @@ if (mode == Mode.TESTING)
     panic('Cannot enable HTTP2 without TLS!');
   }
 
-  if (http.tls && process.env.TLS_CERTIFICATE == null || process.env.TLS_KEY == null)
+  if (http.tls && (http.certificate == null || http.key == null))
   {
-    //Override TLS
-    http.tls = false;
-
-    //Log
-    log.warn('The TLS certificate and/or key weren\'t provided, disabling TLS!');
+    //Panic with message
+    panic('The TLS certificate and/or key weren\'t provided, disabling TLS!');
   }
 
-  if (http.tls && process.env.TLS_CERTIFICATE != null)
+  if (http.tls && http.certificate != null)
   {
-    if (!existsSync(process.env.TLS_CERTIFICATE))
+    if (!existsSync(http.certificate))
     {
       //Panic with message
-      panic(`Invalid TLS certificate ${process.env.TLS_CERTIFICATE}!`);
-    }
-    else
-    {
-      //Read certificate
-      http.certificate = readFileSync(process.env.TLS_CERTIFICATE);
+      panic(`Invalid TLS certificate ${http.certificate}!`);
     }
   }
 
-  if (http.tls && process.env.TLS_KEY != null)
+  if (http.tls && http.key != null)
   {
-    if (!existsSync(process.env.TLS_KEY))
+    if (!existsSync(http.key))
     {
       //Panic with message
-      panic(`Invalid TLS key ${process.env.TLS_KEY}!`);
-    }
-    else
-    {
-      //Read key
-      http.key = readFileSync(process.env.TLS_KEY);
+      panic(`Invalid TLS key ${http.key}!`);
     }
   }
 
@@ -137,7 +153,7 @@ if (mode == Mode.TESTING)
   if (redisUrl == null)
   {
     //Log
-    log.warn('Redis URL wasn\'t provided, running in single instance mode!');
+    console.warn('Redis URL wasn\'t provided, running in single instance mode!');
   }
 }
 
@@ -145,6 +161,7 @@ if (mode == Mode.TESTING)
 export
 {
   mode,
+  log,
   hash,
   http,
   mongoUrl,

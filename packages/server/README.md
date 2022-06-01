@@ -11,6 +11,7 @@
 ### Post Code Generation Tasks
 * Complete any remaining TODO items (Search for `TODO:`)
 * Account entity
+  * Make username unique
   * Bifurcate the `getAccount`, `updateAccount`, and `deleteAccount` operations and their
     corresponding routes into an `own` and an `other variant`
   * Restrict access to only a user's own account for all `own` operation variants

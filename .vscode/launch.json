@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Start (Debug)",
+      "name": "Bootstrap the server",
       "presentation": {
         "group": "Server",
         "order": 2
@@ -16,7 +16,9 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run-script",
-        "start:debug"
+        "start:debug",
+        "--",
+        "bootstrap"
       ],
       "skipFiles": [
         "<node_internals>/**"
@@ -25,7 +27,29 @@
       "preLaunchTask": "npm: build - packages/server"
     },
     {
-      "name": "Run Tests",
+      "name": "Run the server",
+      "presentation": {
+        "group": "Server",
+        "order": 2
+      },
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "start:debug",
+        "--",
+        "run"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "outputCapture": "std",
+      "preLaunchTask": "npm: build - packages/server"
+    },
+    {
+      "name": "Run server tests",
       "presentation": {
         "group": "Server",
         "order": 2
