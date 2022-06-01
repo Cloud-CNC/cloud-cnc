@@ -20,19 +20,22 @@ interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
 <% } -%>
 }
 
-//Joi schema
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> document
+type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document = Document<unknown, any, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
+
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> schema
 const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = Joi.object({
 <% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
   <%- field.name %>: <%- field.joiType %><%- field.required ? '.required()' : '.optional()' %><%- separator %>
 <% } -%>
 });
 
-//Mongoose model
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> model
 const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema));
 <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.schema.set('toObject', {
   virtuals: true,
   versionKey: false,
-  transform: (document: Document<any, any, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>, value: any) =>
+  transform: (document: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document, value: any) =>
   {
     //Delete the Object ID
     delete value._id;
@@ -48,6 +51,7 @@ const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = create
 //Export
 export {
   I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>,
+  I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document,
   <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema,
   <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
 };

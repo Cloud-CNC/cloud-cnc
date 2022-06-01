@@ -1,0 +1,27 @@
+---
+to: src/lib/hooks.ts
+inject: true
+after: interface Hooks\s+\{
+prepend: true
+---
+  //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> entity
+<% for (const operation of entity.operations) { -%>
+<% switch (operation.type) { case 'all': -%>
+  '<%- operation.name %>:pre': () => void | Promise<void>;
+  '<%- operation.name %>:post': (<%- h.changeCase.camel(h.inflection.pluralize(name)) %>: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document[]) => void | Promise<void>;
+<% break; case 'create': -%>
+  '<%- operation.name %>:pre': (create: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>) => void | Promise<void>;
+  '<%- operation.name %>:post': (<%- h.changeCase.camel(h.inflection.singularize(name)) %>: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document) => void | Promise<void>;
+<% break; case 'get': -%>
+  '<%- operation.name %>:pre': (id: string) => void | Promise<void>;
+  '<%- operation.name %>:post': (<%- h.changeCase.camel(h.inflection.singularize(name)) %>: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document) => void | Promise<void>;
+<% break; case 'update': -%>
+  '<%- operation.name %>:pre': (update: Partial<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>) => void | Promise<void>;
+  '<%- operation.name %>:post': (<%- h.changeCase.camel(h.inflection.singularize(name)) %>: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document) => void | Promise<void>;
+<% break; case 'delete': -%>
+  '<%- operation.name %>:pre': (id: string) => void | Promise<void>;
+  '<%- operation.name %>:post': (<%- h.changeCase.camel(h.inflection.singularize(name)) %>: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document) => void | Promise<void>;
+<% break; default: -%>
+  '<%- operation.name %>:pre': () => void | Promise<void>;
+  '<%- operation.name %>:post': () => void | Promise<void>;
+<% break; }} -%>

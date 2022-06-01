@@ -28,7 +28,9 @@ module.exports = {
     }
 
     //Get all fields
-    const rawFields = entity.operations.flatMap(operation => [...operation.requestFields, ...operation.responseFields]);
+    const rawFields = entity.operations
+      .filter(field => field.type != null)
+      .flatMap(operation => [...operation.requestFields, ...operation.responseFields]);
 
     //Sort fields
     const sortedFields = orderBy(rawFields, ['name', 'required'], ['asc', 'desc']);

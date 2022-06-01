@@ -54,11 +54,11 @@ router
   /**
    * Start/stop impersonating an account
    */
-  // .post('/accounts/:id/impersonate', checkPermission('impersonateAccount'), async ctx =>
-  // {
-  //   //TODO: fully invoke controller
-  //   await impersonateAccount();
-  // })
+  /*.post('/accounts/:id/impersonate', checkPermission('impersonateAccount'), async ctx =>
+  {
+    //TODO: fully invoke controller
+    await impersonateAccount();
+  })*/
 
   /**
    * Get an account

@@ -15,7 +15,7 @@ import {start, stop, reset} from '!/lib/mongo';
 
 //Ephemeral MongoDB
 test.before('Start MongoDB', start);
-test.afterEach('Reset MongoDB', reset);
+test.afterEach.always('Reset MongoDB', reset);
 test.after('Stop MongoDB', stop);
 
 //Tests
@@ -92,14 +92,12 @@ test.serial('<%- operation.description %>', async ctx =>
   ctx.is(res.body.<%- field.name %>, <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %>);
 <% } break; case 'get': case 'delete': -%>
   ctx.deepEqual(res.body, {
-    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>Document.id,
 <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ',')) { -%>
     <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
 <% } -%>
   });
 <% break; case 'update': -%>
   ctx.deepEqual(res.body, {
-    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>Document.id,
 <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ',')) { -%>
     <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- field.name %><%- separator %>
 <% } -%>
@@ -118,7 +116,7 @@ test.serial('<%- operation.description %>', async ctx =>
 <% for (const [field, separator] of h.list(uniqueFields.filter(field => field.name != 'id'), ',')) { -%>
     <%- field.name %>: 1<%- separator %>
 <% } -%>
-  })  as Record<string, any>;
+  }) as Record<string, any>;
 
   //Ensure the document exists
   ctx.assert(<%- h.changeCase.camel(h.inflection.singularize(name)) %>Document != null);
@@ -129,7 +127,7 @@ test.serial('<%- operation.description %>', async ctx =>
 <% } break; case 'update': -%>
 
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  const updated<%- h.changeCase.pascal(h.inflection.singularize(name)) %>Document = await <%- h.changeCase.pascal(h.inflection.singularize(name)) %>.findById(res.body.id, {
+  const updated<%- h.changeCase.pascal(h.inflection.singularize(name)) %>Document = await <%- h.changeCase.pascal(h.inflection.singularize(name)) %>.findById(<%- h.changeCase.camel(h.inflection.singularize(name)) %>Document.id, {
 <% for (const [field, separator] of h.list(uniqueFields.filter(field => field.name != 'id'), ',')) { -%>
     <%- field.name %>: 1<%- separator %>
 <% } -%>

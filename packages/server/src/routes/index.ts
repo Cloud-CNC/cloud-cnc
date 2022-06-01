@@ -19,7 +19,7 @@ app
 
   //Account routes
   .use(account.routes())
-  .use(account.allowedMethods);
+  .use(account.allowedMethods());
 
 //Export
 export default app;

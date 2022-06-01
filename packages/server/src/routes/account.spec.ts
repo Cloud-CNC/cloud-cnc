@@ -12,7 +12,7 @@ import {start, stop, reset} from '!/lib/mongo';
 
 //Ephemeral MongoDB
 test.before('Start MongoDB', start);
-test.afterEach('Reset MongoDB', reset);
+test.afterEach.always('Reset MongoDB', reset);
 test.after('Stop MongoDB', stop);
 
 //Tests
@@ -73,20 +73,18 @@ test.serial('Create an account', async ctx =>
 
   //Get the account
   const accountDocument = await Account.findById(res.body.id, {
-    enabled: 1,
     password: 1,
     pluginData: 1,
     roles: 1,
     totpEnabled: 1,
     totpSecret: 1,
     username: 1
-  })  as Record<string, any>;
+  }) as Record<string, any>;
 
   //Ensure the document exists
   ctx.assert(accountDocument != null);
 
   //Ensure the account was created correctly
-  ctx.deepEqual(accountDocument.enabled, accountA.enabled);
   ctx.deepEqual(accountDocument.password, accountA.password);
   ctx.deepEqual(accountDocument.pluginData, accountA.pluginData);
   ctx.deepEqual(accountDocument.roles, accountA.roles);
@@ -95,7 +93,7 @@ test.serial('Create an account', async ctx =>
   ctx.deepEqual(accountDocument.username, accountA.username);
 });
 
-test.serial('Start/stop impersonating an account', async ctx =>
+/*test.serial('Start/stop impersonating an account', async ctx =>
 {
   //TODO: setup the database
 
@@ -111,7 +109,7 @@ test.serial('Start/stop impersonating an account', async ctx =>
   //Ensure the response is expected
   ctx.is(res.status, 204);
   //TODO: ensure the database was updated correctly
-});
+});*/
 
 test.serial('Get an account', async ctx =>
 {
@@ -128,7 +126,6 @@ test.serial('Get an account', async ctx =>
   //Ensure the response is expected
   ctx.assert(res.headers['content-type'].includes('application/json'));
   ctx.deepEqual(res.body, {
-    id: accountDocument.id,
     username: accountA.username,
     totpEnabled: accountA.totpEnabled,
     roles: accountA.roles,
@@ -160,14 +157,12 @@ test.serial('Update an account', async ctx =>
   //Ensure the response is expected
   ctx.assert(res.headers['content-type'].includes('application/json'));
   ctx.deepEqual(res.body, {
-    id: accountDocument.id,
     totpSecret: accountB.totpSecret
   });
   ctx.is(res.status, 200);
 
   //Get the account
-  const updatedAccountDocument = await Account.findById(res.body.id, {
-    enabled: 1,
+  const updatedAccountDocument = await Account.findById(accountDocument.id, {
     password: 1,
     pluginData: 1,
     roles: 1,
@@ -180,7 +175,6 @@ test.serial('Update an account', async ctx =>
   ctx.assert(updatedAccountDocument != null);
 
   //Ensure the account was created correctly
-  ctx.deepEqual(updatedAccountDocument.enabled, accountB.enabled);
   ctx.deepEqual(updatedAccountDocument.password, accountB.password);
   ctx.deepEqual(updatedAccountDocument.pluginData, accountB.pluginData);
   ctx.deepEqual(updatedAccountDocument.roles, accountB.roles);

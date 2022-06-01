@@ -1,0 +1,7 @@
+---
+to: src/index.ts
+inject: true
+after: //Commands
+prepend: true
+---
+import '@/commands/<%- h.changeCase.param(h.inflection.singularize(name)) %>';

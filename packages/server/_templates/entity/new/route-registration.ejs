@@ -1,0 +1,9 @@
+---
+to: src/routes/index.ts
+inject: true
+after: .\use\(middleware\)\n
+prepend: true
+---
+  //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> routes
+  .use(<%- h.changeCase.camel(h.inflection.singularize(name), false) %>.routes())
+  .use(<%- h.changeCase.camel(h.inflection.singularize(name), false) %>.allowedMethods())

@@ -3,22 +3,23 @@
  */
 
 //Imports
-import test from 'ava';
 import {accountA, accountB} from '!/fixtures/account';
-import {Account} from '@/models/account';
+import {Account, IAccount} from '@/models/account';
 import {createSandbox} from 'sinon';
 import {
   getAllAccounts,
   createAccount,
-  impersonateAccount,
+  // impersonateAccount,
   getAccount,
   updateAccount,
   deleteAccount
 } from './account';
+import hooks from '@/lib/hooks';
+import test from 'ava';
 
 //Sinon sandbox
 const sandbox = createSandbox();
-test.afterEach('Restore sandbox', () =>
+test.afterEach.always('Restore sandbox', () =>
 {
   sandbox.restore();
 });
@@ -44,9 +45,11 @@ test.serial('Get all accounts', async ctx =>
     }
   ];
 
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
+
   //Stub the toObject method
   const toObject = sandbox.stub()
-    .withArgs()
     .onCall(0)
     .returns(output[0])
     .onCall(1)
@@ -54,13 +57,6 @@ test.serial('Get all accounts', async ctx =>
 
   //Stub the find method
   const find = sandbox.stub(Account, 'find')
-    .withArgs({}, {
-      id: 1,
-      username: 1,
-      totpEnabled: 1,
-      roles: 1,
-      pluginData: 1
-    })
     .resolves(Array(2).fill({
       toObject
     }));
@@ -70,8 +66,20 @@ test.serial('Get all accounts', async ctx =>
 
   //Ensure the result is expected
   ctx.deepEqual(accounts, output);
-  ctx.assert(find.calledOnce);
+  ctx.assert(find.calledOnceWithExactly({}, {
+    id: 1,
+    username: 1,
+    totpEnabled: 1,
+    roles: 1,
+    pluginData: 1
+  }));
+  ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledTwice);
+  ctx.assert(callHook.getCall(0).calledWithExactly('getAllAccounts:pre'));
+  ctx.assert(callHook.getCall(1).calledWithExactly('getAllAccounts:post', Array(2).fill({
+    toObject
+  })));
+  ctx.assert(callHook.calledTwice);
 });
 
 test.serial('Create an account', async ctx =>
@@ -90,15 +98,14 @@ test.serial('Create an account', async ctx =>
     totpSecret: accountA.totpSecret
   };
 
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
+
   //Stub the save method
-  const save = sandbox.stub()
-    .withArgs()
-    .resolves();
+  const save = sandbox.stub().resolves();
 
   //Stub the create method
   const create = sandbox.stub(Account, 'create')
-    //@ts-ignore Sinon types are outdated
-    .withArgs(input)
     .resolves({
       id: accountA.id,
       save
@@ -109,15 +116,28 @@ test.serial('Create an account', async ctx =>
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
-  ctx.assert(create.calledOnce);
-  ctx.assert(save.calledOnce);
+  //@ts-ignore Sinon types are outdated
+  ctx.assert(create.calledOnceWithExactly({
+    ...input,
+    totpSecret: 'dummy-totp-secret'
+  } as IAccount));
+  ctx.assert(save.calledOnceWithExactly());
+  ctx.assert(callHook.getCall(0).calledWithExactly('createAccount:pre', {
+    ...input,
+    totpSecret: 'dummy-totp-secret'
+  } as IAccount));
+  ctx.assert(callHook.getCall(1).calledWithExactly('createAccount:post', {
+    id: accountA.id,
+    save
+  } as any));
+  ctx.assert(callHook.calledTwice);
 });
 
-test.serial('Start/stop impersonating an account', async ctx =>
+/*test.serial('Start/stop impersonating an account', async ctx =>
 {
   //TODO: implement test
   impersonateAccount();
-});
+});*/
 
 test.serial('Get an account', async ctx =>
 {
@@ -128,20 +148,15 @@ test.serial('Get an account', async ctx =>
     roles: accountA.roles,
     pluginData: accountA.pluginData
   };
+  
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
   //Stub the toObject method
-  const toObject = sandbox.stub()
-    .withArgs()
-    .returns(output);
+  const toObject = sandbox.stub().returns(output);
 
   //Stub the findById method
   const findById = sandbox.stub(Account, 'findById')
-    .withArgs(accountA.id, {
-      username: 1,
-      totpEnabled: 1,
-      roles: 1,
-      pluginData: 1
-    })
     .resolves({
       id: accountA.id,
       toObject
@@ -152,8 +167,20 @@ test.serial('Get an account', async ctx =>
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
-  ctx.assert(findById.calledOnce);
+  ctx.assert(findById.calledOnceWithExactly(accountA.id, {
+    username: 1,
+    totpEnabled: 1,
+    roles: 1,
+    pluginData: 1
+  }));
+  ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
+  ctx.assert(callHook.getCall(0).calledWithExactly('getAccount:pre', accountA.id));
+  ctx.assert(callHook.getCall(1).calledWithExactly('getAccount:post', {
+    id: accountA.id,
+    toObject
+  } as any));
+  ctx.assert(callHook.calledTwice);
 });
 
 test.serial('Update an account', async ctx =>
@@ -171,25 +198,17 @@ test.serial('Update an account', async ctx =>
     totpSecret: accountA.totpSecret
   };
 
-  //Stub the updateOne method
-  const updateOne = sandbox.stub()
-    .withArgs(input)
-    .resolves();
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
   //Stub the toObject method
-  const toObject = sandbox.stub()
-    .withArgs()
-    .returns(output);
+  const toObject = sandbox.stub().returns(output);
 
-  //Stub the findById method
-  const findById = sandbox.stub(Account, 'findById')
-    .withArgs(accountA.id, {
-      totpSecret: 1
-    })
+  //Stub the findByIdAndUpdate method
+  const findByIdAndUpdate = sandbox.stub(Account, 'findByIdAndUpdate')
     .resolves({
       id: accountA.id,
-      toObject,
-      updateOne
+      toObject
     });
 
   //Update the account
@@ -197,30 +216,49 @@ test.serial('Update an account', async ctx =>
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
-  ctx.assert(findById.calledOnce);
-  ctx.assert(updateOne.calledOnce);
+  ctx.assert(findByIdAndUpdate.calledOnceWithExactly(accountA.id, {
+    $set: {
+      ...input,
+      totpSecret: undefined
+    } as IAccount
+  }, {
+    new: true,
+    projection: {
+      totpSecret: 1
+    }
+  }));
+  ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
+  ctx.assert(callHook.getCall(0).calledWithExactly('updateAccount:pre', {
+    ...input,
+    totpSecret: undefined
+  } as IAccount));
+  ctx.assert(callHook.getCall(1).calledWithExactly('updateAccount:post', {
+    id: accountA.id,
+    toObject
+  } as any));
+  ctx.assert(callHook.calledTwice);
 });
 
 test.serial('Delete an account', async ctx =>
 {
-  //Stub the delete method
-  const _delete = sandbox.stub()
-    .withArgs()
-    .resolves();
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
-  //Stub the findById method
-  const findById = sandbox.stub(Account, 'findById')
-    .withArgs(accountA.id)
+  //Stub the findByIdAndDelete method
+  const findByIdAndDelete = sandbox.stub(Account, 'findByIdAndDelete')
     .resolves({
-      id: accountA.id,
-      delete: _delete
+      id: accountA.id
     });
   
   //Delete the account
   await deleteAccount(accountA.id);
 
   //Ensure the result is expected
-  ctx.assert(findById.calledOnce);
-  ctx.assert(_delete.calledOnce);
+  ctx.assert(findByIdAndDelete.calledOnceWithExactly(accountA.id));
+  ctx.assert(callHook.getCall(0).calledWithExactly('deleteAccount:pre', accountA.id));
+  ctx.assert(callHook.getCall(1).calledWithExactly('deleteAccount:post', {
+    id: accountA.id
+  } as any));
+  ctx.assert(callHook.calledTwice);
 });

@@ -9,25 +9,31 @@ import {WithID} from '@/lib/types';
 //Fixtures
 //TODO: add realistic data
 const accountA = {
-  id: '',
-  enabled: null,
-  password: null,
-  pluginData: null,
-  roles: null,
-  totpEnabled: null,
-  totpSecret: null,
-  username: null
+  id: '62971075fb647cd2b8fc6ab0',
+  password: 'a bad password',
+  pluginData: {
+    a: 'b'
+  },
+  roles: [
+    'admin'
+  ],
+  totpEnabled: true,
+  totpSecret: 'dummy-totp-secret',
+  username: 'janedoe'
 } as WithID<IAccount>;
 
 const accountB = {
-  id: '',
-  enabled: null,
-  password: null,
-  pluginData: null,
-  roles: null,
-  totpEnabled: null,
-  totpSecret: null,
-  username: null
+  id: '6297107b04ee177988f9bc46',
+  password: 'another bad password',
+  pluginData: {
+    c: 'd'
+  },
+  roles: [
+    'users'
+  ],
+  totpEnabled: false,
+  totpSecret: 'dummy-totp-secret',
+  username: 'johndoe'
 } as WithID<IAccount>;
 
 //Export

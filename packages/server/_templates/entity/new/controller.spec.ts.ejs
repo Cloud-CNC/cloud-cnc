@@ -6,7 +6,6 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.sp
  */
 
 //Imports
-import test from 'ava';
 import {<%- h.changeCase.camel(h.inflection.singularize(name)) %>A, <%- h.changeCase.camel(h.inflection.singularize(name)) %>B} from '!/fixtures/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 import {createSandbox} from 'sinon';
@@ -15,10 +14,12 @@ import {
   <%- operation.name %><%- separator %>
 <% } -%>
 } from './<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import hooks from '@/lib/hooks';
+import test from 'ava';
 
 //Sinon sandbox
 const sandbox = createSandbox();
-test.afterEach('Restore sandbox', () =>
+test.afterEach.always('Restore sandbox', () =>
 {
   sandbox.restore();
 });
@@ -43,9 +44,11 @@ test.serial('<%- operation.description %>', async ctx =>
     }
   ];
 
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
+
   //Stub the toObject method
   const toObject = sandbox.stub()
-    .withArgs()
     .onCall(0)
     .returns(output[0])
     .onCall(1)
@@ -54,11 +57,6 @@ test.serial('<%- operation.description %>', async ctx =>
 <% } -%>
   //Stub the find method
   const find = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'find')
-    .withArgs({}<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
-<% } -%>
-    }<% } %>)
     .resolves(<% if (operation.responseFields.length > 0) { %>Array(2).fill({
       toObject
     })<% } %>);
@@ -70,10 +68,20 @@ test.serial('<%- operation.description %>', async ctx =>
 <% if (operation.responseFields.length > 0) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.pluralize(name)) %>, output);
 <% } -%>
-  ctx.assert(find.calledOnce);
+  ctx.assert(find.calledOnceWithExactly({}<% if (operation.responseFields.length > 0) { %>, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: 1<%- separator %>
+<% } -%>
+  }<% } %>));
 <% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledTwice);
 <% } -%>
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre'));
+  ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', Array(2).fill({
+    toObject
+  })));
+  ctx.assert(callHook.calledTwice);
 <% break; case 'create': -%>
   //Test data
 <% if (operation.requestFields.length > 0) { -%>
@@ -91,19 +99,14 @@ test.serial('<%- operation.description %>', async ctx =>
   };
 
 <% } -%>
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
+
   //Stub the save method
-  const save = sandbox.stub()
-    .withArgs()
-    .resolves();
+  const save = sandbox.stub().resolves();
 
   //Stub the create method
   const create = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'create')
-<% if (operation.requestFields.length > 0) { -%>
-    //@ts-ignore Sinon types are outdated
-    .withArgs(input)
-<% } else { -%>
-    .withArgs()
-<% } -%>
     .resolves({
       id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id,
       save
@@ -116,8 +119,15 @@ test.serial('<%- operation.description %>', async ctx =>
 <% if (operation.responseFields.length > 0) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %><% if (operation.responseFields.length > 0) { %>, output<% } %>);
 <% } -%>
-  ctx.assert(create.calledOnce);
-  ctx.assert(save.calledOnce);
+  //@ts-ignore Sinon types are outdated
+  ctx.assert(create.calledOnceWithExactly(<% if (operation.requestFields.length > 0) { %>input<% } %>));
+  ctx.assert(save.calledOnceWithExactly());
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre'<% if (operation.requestFields.length > 0) { %>, input<% } %>));
+  ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id,
+    save
+  } as any));
+  ctx.assert(callHook.calledTwice);
 <% break; case 'get': -%>
 <% if (operation.responseFields.length > 0) { -%>
   //Test data
@@ -126,20 +136,18 @@ test.serial('<%- operation.description %>', async ctx =>
     <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
 <% } -%>
   };
+  
+<% } -%>
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
+<% if (operation.responseFields.length > 0) { -%>
   //Stub the toObject method
-  const toObject = sandbox.stub()
-    .withArgs()
-    .returns(output);
+  const toObject = sandbox.stub().returns(output);
 
 <% } -%>
   //Stub the findById method
   const findById = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findById')
-    .withArgs(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
-<% } -%>
-    }<% } %>)
     .resolves({
       id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
       toObject<% } %>
@@ -152,10 +160,21 @@ test.serial('<%- operation.description %>', async ctx =>
 <% if (operation.responseFields.length > 0) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
 <% } -%>
-  ctx.assert(findById.calledOnce);
+  ctx.assert(findById.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+    <%- field.name %>: 1<%- separator %>
+<% } -%>
+  }<% } %>));
 <% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
 <% } -%>
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre', <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id));
+  ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+    toObject<% } %>
+  } as any));
+  ctx.assert(callHook.calledTwice);
 <% break; case 'update': -%>
   //Test data
 <% if (operation.requestFields.length > 0) { -%>
@@ -173,33 +192,19 @@ test.serial('<%- operation.description %>', async ctx =>
   };
 
 <% } -%>
-  //Stub the updateOne method
-  const updateOne = sandbox.stub()
-<% if (operation.requestFields.length > 0) { -%>
-    .withArgs(input)
-<% } else { -%>
-    .withArgs()
-<% } -%>
-    .resolves();
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
 <% if (operation.responseFields.length > 0) { -%>
   //Stub the toObject method
-  const toObject = sandbox.stub()
-    .withArgs()
-    .returns(output);
+  const toObject = sandbox.stub().returns(output);
 
 <% } -%>
-  //Stub the findById method
-  const findById = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findById')
-    .withArgs(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
-<% } -%>
-    }<% } %>)
+  //Stub the findByIdAndUpdate method
+  const findByIdAndUpdate = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findByIdAndUpdate')
     .resolves({
       id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
-      toObject<% } %>,
-      updateOne
+      toObject<% } %>
     });
 
   //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
@@ -209,11 +214,26 @@ test.serial('<%- operation.description %>', async ctx =>
 <% if (operation.responseFields.length > 0) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
 <% } -%>
-  ctx.assert(findById.calledOnce);
-  ctx.assert(updateOne.calledOnce);
+  ctx.assert(findByIdAndUpdate.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id, {
+    $set: input
+  }<% if (operation.responseFields.length > 0) { %>, {
+    new: true,
+    projection: {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: 1<%- separator %>
+<% } -%>
+    }
+  }<% } %>));
 <% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
 <% } -%>
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre'<% if (operation.requestFields.length > 0) { %>, input<% } %>));
+  ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+    toObject<% } %>
+  } as any));
+  ctx.assert(callHook.calledTwice);
 <% break; case 'delete': -%>
 <% if (operation.responseFields.length > 0) { -%>
   //Test data
@@ -224,28 +244,18 @@ test.serial('<%- operation.description %>', async ctx =>
   };
 
 <% } -%>
-  //Stub the delete method
-  const _delete = sandbox.stub()
-    .withArgs()
-    .resolves();
+  //Stub the callHook method
+  const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
 <% if (operation.responseFields.length > 0) { -%>
   //Stub the toObject method
-  const toObject = sandbox.stub()
-    .withArgs()
-    .returns(output);
+  const toObject = sandbox.stub().returns(output);
 
 <% } -%>
-  //Stub the findById method
-  const findById = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findById')
-    .withArgs(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
-<% } -%>
-    }<% } %>)
+  //Stub the findByIdAndDelete method
+  const findByIdAndDelete = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findByIdAndDelete')
     .resolves({
-      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id,
-      delete: _delete<% if (operation.responseFields.length > 0) { %>,
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
       toObject<% } %>
     });
   
@@ -256,11 +266,23 @@ test.serial('<%- operation.description %>', async ctx =>
 <% if (operation.responseFields.length > 0) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
 <% } -%>
-  ctx.assert(findById.calledOnce);
-  ctx.assert(_delete.calledOnce);
+  ctx.assert(findByIdAndDelete.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
+    projection: {
+<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
+      <%- field.name %>: 1<%- separator %>
+<% } -%>
+    }
+  }<% } %>));
 <% if (operation.responseFields.length > 0) { -%>
+  ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
 <% } -%>
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre', <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id));
+  ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+    toObject<% } %>
+  } as any));
+  ctx.assert(callHook.calledTwice);
 <% break; default: -%>
   //TODO: implement test
   <%- operation.name %>();

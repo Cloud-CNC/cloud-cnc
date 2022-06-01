@@ -3,17 +3,19 @@
  */
 
 //Imports
+import hooks from '@/lib/hooks';
 import log from '@/lib/log';
 import {Account, IAccount} from '@/models/account';
 import {WithID} from '@/lib/types';
-import {hash} from '@/lib/password';
-import {generate} from '@/lib/totp';
 
 /**
  * Get all accounts
  */
 const getAllAccounts = async (): Promise<WithID<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>>[]> =>
 {
+  //Invoke hook
+  await hooks.callHook('getAllAccounts:pre');
+
   //Get all accounts
   const accounts = await Account.find({}, {
     id: 1,
@@ -22,6 +24,9 @@ const getAllAccounts = async (): Promise<WithID<Pick<IAccount, 'username' | 'tot
     roles: 1,
     pluginData: 1
   });
+
+  //Invoke hook
+  await hooks.callHook('getAllAccounts:post', accounts);
 
   //Log
   log.debug('Got all accounts.');
@@ -34,51 +39,58 @@ const getAllAccounts = async (): Promise<WithID<Pick<IAccount, 'username' | 'tot
  */
 const createAccount = async (create: Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>): Promise<WithID<Pick<IAccount, 'totpSecret'>>> =>
 {
-  //Hash the password
-  const password = await hash(create.password);
+  const data = {
+    ...create,
+    totpSecret: create.totpEnabled ? 'dummy-totp-secret' : undefined
+  } as IAccount;
 
-  //Generate the TOTP secret
-  let totpSecret: string | undefined;
-  if (create.totpEnabled)
-  {
-    totpSecret = generate();
-  }
+  //Invoke hook
+  await hooks.callHook('createAccount:pre', data);
 
   //Create the account
-  const account = await Account.create({
-    ...create,
-    enabled: true,
-    password,
-    totpSecret
-  });
+  const account = await Account.create(data);
 
   //Save the account
   await account.save();
+
+  //Invoke hook
+  await hooks.callHook('createAccount:post', account);
 
   //Log
   log.debug(`Created account ${account.id}.`);
 
   return {
     id: account.id,
-    totpSecret
+    totpSecret: 'dummy-totp-secret' //TODO: add data
   };
 };
 
 /**
  * Start/stop impersonating an account
  */
-const impersonateAccount = () =>
+/*const impersonateAccount = async () =>
 {
+  //Invoke hook
+  //TODO: add hook arguments
+  await hooks.callHook('impersonateAccount:pre');
+
   //TODO: implement business logic
 
+  //Invoke hook
+  //TODO: add hook arguments
+  await hooks.callHook('impersonateAccount:post');
+
   //TODO: log
-};
+};*/
 
 /**
  * Get an account
  */
 const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>> =>
 {
+  //Invoke hook
+  await hooks.callHook('getAccount:pre', id);
+
   //Get the account
   const account = await Account.findById(id, {
     username: 1,
@@ -93,6 +105,9 @@ const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totp
     throw new Error(`Invalid account with ID ${id}!`);
   }
 
+  //Invoke hook
+  await hooks.callHook('getAccount:post', account);
+
   //Log
   log.debug(`Got account ${account.id}.`);
 
@@ -104,27 +119,17 @@ const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totp
  */
 const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>>): Promise<Pick<IAccount, 'totpSecret'>> =>
 {
-  //Hash the password
-  let password: string | undefined;
-  if (update.password != null)
-  {
-    password = await hash(update.password);
-  }
+  const data = {
+    ...update,
+    totpSecret: update.totpEnabled ? 'dummy-totp-secret' : undefined
+  } as IAccount;
 
-  //Generate the TOTP secret
-  let totpSecret: string | undefined;
-  if (update.totpEnabled)
-  {
-    totpSecret = generate();
-  }
+  //Invoke hook
+  await hooks.callHook('updateAccount:pre', data);
 
   //Get the account
   const account = await Account.findByIdAndUpdate(id, {
-    $set: {
-      ...update,
-      password,
-      totpSecret
-    }
+    $set: data
   }, {
     new: true,
     projection: {
@@ -138,6 +143,9 @@ const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'usernam
     throw new Error(`Invalid account with ID ${id}!`);
   }
 
+  //Invoke hook
+  await hooks.callHook('updateAccount:post', account);
+
   //Log
   log.debug(`Updated account ${account.id}.`);
 
@@ -149,6 +157,9 @@ const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'usernam
  */
 const deleteAccount = async (id: string) =>
 {
+  //Invoke hook
+  await hooks.callHook('deleteAccount:pre', id);
+
   //Get the account
   const account = await Account.findByIdAndDelete(id);
 
@@ -158,16 +169,18 @@ const deleteAccount = async (id: string) =>
     throw new Error(`Invalid account with ID ${id}!`);
   }
 
+  //Invoke hook
+  await hooks.callHook('deleteAccount:post', account);
+
   //Log
   log.debug(`Deleted account ${account.id}.`);
 };
 
 //Export
-export
-{
+export {
   getAllAccounts,
   createAccount,
-  impersonateAccount,
+  // impersonateAccount,
   getAccount,
   updateAccount,
   deleteAccount

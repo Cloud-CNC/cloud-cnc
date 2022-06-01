@@ -11,11 +11,6 @@ import joigoose from '@/lib/joigoose';
 interface IAccount
 {
   /**
-   * Whether to start impersonating or stop impersonating
-   */
-  enabled: boolean;
-
-  /**
    * Account password
    */
   password: string;
@@ -48,27 +43,25 @@ interface IAccount
   username: string;
 }
 
-//Joi schema
+//Account document
+type IAccountDocument = Document<unknown, any, IAccount>;
+
+//Account schema
 const AccountSchema = Joi.object({
-  enabled: Joi.boolean().required(),
   password: Joi.string().min(12).required(),
   pluginData: Joi.object().optional(),
   roles: Joi.array().items(Joi.string()).required(),
   totpEnabled: Joi.boolean().required(),
   totpSecret: Joi.string().optional(),
-  username: Joi.string().required().meta({
-    _mongoose: {
-      unique: true
-    }
-  })
+  username: Joi.string().required()
 });
 
-//Mongoose model
+//Account model
 const Account = createModel<IAccount>('accounts', joigoose.convert(AccountSchema));
 Account.schema.set('toObject', {
   virtuals: true,
   versionKey: false,
-  transform: (document: Document<any, any, IAccount>, value: any) =>
+  transform: (document: IAccountDocument, value: any) =>
   {
     //Delete the Object ID
     delete value._id;
@@ -84,6 +77,7 @@ Account.schema.set('toObject', {
 //Export
 export {
   IAccount,
+  IAccountDocument,
   AccountSchema,
   Account
 };
