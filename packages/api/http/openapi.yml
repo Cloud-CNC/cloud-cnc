@@ -4,14 +4,13 @@ info:
   title: Cloud CNC HTTP API
   description: |
     ## Preface
-    This specification is the canonical source for the Cloud CNC HTTP API. The
-    HTTP API is used between the client and API server(s) for administrative
-    tasks (eg: creating a file, deleting a machine). Some of the concepts in
-    Cloud CNC are based on [Kubernetes](https://kubernetes.io) (Specifically
-    affinities, labels, taints, and tolerations). The key words "MUST",
-    "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
-    "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted
-    as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+    This specification is the canonical source for the Cloud CNC HTTP API. The HTTP API is used
+    between the client and API server(s) for administrative tasks (eg: creating a file, deleting a
+    machine). Some of the concepts in Cloud CNC are based on [Kubernetes](https://kubernetes.io)
+    (Specifically affinities, labels, taints, and tolerations). The key words "MUST", "MUST NOT",
+    "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"
+    in this document are to be interpreted as described in
+    [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
     ## Glossary
     * ACL: Access Control List
@@ -38,14 +37,14 @@ info:
     operations and `[operation ID]:[operation variant]` (eg: `getAccount:own`) for variant-full
     operations.
 
-    ### Ownable entities
-    Access to individual ownable entities (eg: files) are controlled by ACLs. Each ownable entity
-    has a hash map, where the keys are identify the accessor and the values represent the accessor's
+    ### Individual entities
+    Access to individual entities (eg: files or machines) are controlled by ACLs. Each entity has a
+    hash map, where the keys are identify the accessor and the values represent the accessor's
     permissions.
 
     The format of ACL accessors is `[entity name]:[entity ID]` (eg:
-    `account:6109ba1dc24de13eb8fa0c94` or `role:6109ba287a72978d7d621f97`). Refer to entity-specific
-    documentation for which accessor entities are supported and the accessor permissions themselves.
+    `account:6109ba1dc24de13eb8fa0c94` or `role:6109ba287a72978d7d621f97`). The entity name is one
+    of `account` for account entities or `role` for role entities.
 
     ## Custom route attributes
 
@@ -63,22 +62,16 @@ info:
 tags:
   - name: sessions
     description: User sessions
-
   - name: accounts
     description: User accounts
-
   - name: roles
     description: RBAC roles
-
   - name: files
     description: CAD, 2D/3D model, and/or machine-code files
-
   - name: jobs
     description: Machine jobs
-
   - name: relays
     description: Command relays
-
   - name: machines
     description: CNC machines
 
@@ -140,10 +133,13 @@ paths:
 
 components:
   securitySchemes:
-    cookie:
-      type: apiKey
+    session:
+      description: |
+        The security scheme used by established user clients. Note: this is the same session scheme
+        used by the Websocket API.
       in: cookie
       name: session
+      type: apiKey
 
 security:
-  - cookie: []
+  - session: []

@@ -4,14 +4,13 @@ info:
   title: Cloud CNC Websocket API
   description: |
     ## Preface
-    This specification is the canonical source for the Cloud CNC Websocket API.
-    The Websocket API is used between the client, API server(s), and command
-    relays for direct machine/relay communication. Some of the concepts in
-    Cloud CNC are based on [Kubernetes](https://kubernetes.io) (Specifically
-    affinities, labels, taints, and tolerations). The key words "MUST",
-    "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
-    "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted
-    as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+    This specification is the canonical source for the Cloud CNC Websocket API. The Websocket API is
+    used between the user client, API server(s), and command relays for direct machine/relay
+    communication. Some of the concepts in Cloud CNC are based on
+    [Kubernetes](https://kubernetes.io) (Specifically affinities, labels, taints, and tolerations).
+    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+    "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in
+    [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
     ## Glossary
     * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule compatible jobs on (eg: working-area dimensions)
@@ -24,36 +23,34 @@ info:
     url: https://github.com/cloud-cnc/cloud-cnc/blob/main/LICENSE
 
 tags:
-  - name: client
-    description: Client-only channels
-
-  - name: relay
-    description: Relay-only channels
+  - name: relays
+    description: Command relays
+  - name: machines
+    description: CNC machines
 
 channels:
-  client/io:
-    $ref: './channels/client.yml#/io'
-  relay/{id}/io:
-    $ref: './channels/relay.yml#/io'
-  relay/{id}/metadata:
-    $ref: './channels/relay.yml#/metadata'
-  relay/{id}/status:
-    $ref: './channels/relay.yml#/status'
+  relays/authentication:
+    $ref: './channels/relays.yml#/authentication'
+  relays/{id}/status:
+    $ref: './channels/relays.yml#/status'
+  machines/{id}/io:
+    $ref: './channels/machines.yml#/io'
+  machines/{id}/status:
+    $ref: './channels/machines.yml#/status'
 
 servers:
   server:
-    url: 'https://your-cloud-cnc-instance.local'
+    description: The URL is the same one you use to access the Cloud CNC user interface
     protocol: socketio
     protocolVersion: '4.5.0'
-    description: The URL is the same one you use to access the Cloud CNC user interface
+    url: 'https://your-cloud-cnc-instance.local'
 
 components:
   securitySchemes:
-    client:
-      type: httpApiKey
+    session:
+      description: |
+        The security scheme used by established user and relay clients. Note: this is the same
+        session scheme used by the HTTP API.
       in: cookie
-      name: jwt
-      description: The security scheme used by end clients to connect to the SocketIO rooms
-    relay:
-      type: X509
-      description: The security scheme used by command relays to connect to the SocketIO rooms
+      name: session
+      type: httpApiKey

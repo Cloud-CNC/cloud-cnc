@@ -19,7 +19,7 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
   //Prevent infinite recursion
   if (depth > MAX_DEPTH)
   {
-    return '//TODO: add recursive reference';
+    return '/*TODO: add recursive reference*/';
   }
 
   let type: string;
@@ -64,6 +64,11 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           type = `Joi.array().items(${itemType})`;
 
           //Add limits
+          if (schema.minItems != null && schema.maxItems != null && schema.minItems == schema.maxItems)
+          {
+            type += `.length(${schema.minItems})`;
+          }
+
           if (schema.minItems != null)
           {
             type += `.min(${schema.minItems})`;
@@ -146,6 +151,11 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
         }
 
         //Add limits
+        if (schema.minProperties != null && schema.maxProperties != null && schema.minProperties == schema.maxProperties)
+        {
+          type += `.length(${schema.minProperties})`;
+        }
+
         if (schema.minProperties != null)
         {
           type += `.min(${schema.minProperties})`;
@@ -177,6 +187,17 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           //Update the type
           type = 'Joi.binary()';
         }
+        //Object ID
+        else if (schema.format == 'object-id')
+        {
+          //Update the type
+          type = `Joi.string().meta({
+  _mongoose: {
+    type: \'ObjectId\',
+    ref: null /*TODO: add collection name*/
+  }
+})`;
+        }
         //Regular strings
         else
         {
@@ -190,6 +211,11 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           }
 
           //Add limits
+          if (schema.minLength != null && schema.maxLength != null && schema.minLength == schema.maxLength)
+          {
+            type += `.length(${schema.minLength})`;
+          }
+          
           if (schema.minLength != null)
           {
             type += `.min(${schema.minLength})`;
@@ -223,7 +249,7 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
   //Prevent infinite recursion
   if (depth > MAX_DEPTH)
   {
-    return '//TODO: add recursive reference';
+    return '/*TODO: add recursive reference*/';
   }
 
   let type: string;
@@ -247,7 +273,7 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
   else if (schema.not != null)
   {
     //Update the type
-    type = 'never //TODO: add limits';
+    type = 'never /*TODO: add restrictions*/';
   }
   //Regular types
   else
@@ -341,6 +367,12 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
         {
           //Update the type
           type = 'Buffer';
+        }
+        //Object ID
+        else if (schema.format == 'object-id')
+        {
+          //Update the type
+          type = 'ObjectId /*TODO: import Mongoose */';
         }
         //Regular strings
         else

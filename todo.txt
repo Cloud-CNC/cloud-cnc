@@ -1,1 +1,0 @@
-switch from mTLS to shared secret

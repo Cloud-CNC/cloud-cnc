@@ -1,0 +1,143 @@
+# Relay channels
+
+# Types
+id:
+  description: Relay ID
+  type: string
+  format: object-id
+
+relayStatusRequest:
+  description: Relay status request
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      $ref: '#/id'
+    pluginData:
+      $ref: '../schemas.yml#/pluginData'
+
+relayStatusResponse:
+  description: Relay status response
+  type: object
+  required:
+    - id
+    - machines
+    - labels
+    - taints
+  properties:
+    id:
+      $ref: '#/id'
+    machines:
+      description: IDs of the machines the relay is responsible for
+      type: array
+      items:
+        type: string
+        format: object-id
+    labels:
+      description: Relay labels (Not to be confused with machine labels)
+      type: array
+      items:
+        type: string
+        pattern: ^[ -~]+$
+        minLength: 3
+        maxLength: 256
+    taints:
+      description: |
+        Relay taints (Not to be confused with machine taints). Well known ones are:
+        * `relay.cloud-cnc/incompatible-version`: the API server and relay versions are incompatible with each other<sup>1</sup>
+        * `relay.cloud-cnc/offline`: the relay is offline<sup>1</sup>
+
+        <sup>1</sup> automatically added and removed
+      type: array
+      items:
+        type: string
+        pattern: ^[ -~]+$
+        minLength: 3
+        maxLength: 256        
+    pluginData:
+      $ref: '../schemas.yml#/pluginData'
+
+# Channels
+authentication:
+  description: |
+    Relay authentication. *Note: this is a psuedo-channel and actual communication is done via
+    [Socket.IO's auth system](https://socket.io/docs/v4/middlewares/#sending-credentials).*
+
+  publish:
+    operationId: onRelayLoginRequest
+    tags:
+      - name: relay
+    summary: Login requests sent from the relay to the API server
+    message:
+      messageId: relayLoginRequest
+      description: Relay login request
+      payload:
+        type: object
+        required:
+          - id
+          - key
+        properties:
+          id:
+            $ref: '#/id'
+          key:
+            description: Relay key
+            type: string
+            pattern: ^[A-Za-z0-9-_]+$
+            format: password
+            minLength: 64
+            maxLength: 64
+          pluginData:
+            $ref: '../schemas.yml#/pluginData'
+
+status:
+  description: |
+    Relay status. When a relay starts, it MAY send the `relayStatusBackwardRequest` message.
+    The API server MUST respond by sending the `relayStatusBackwardResponse` with the last known
+    status. Whenever a relay has a status update, or if the API server sends a
+    `relayStatusForwardRequest` message, the relay MUST send a `relayStatusForwardResponse` message
+    to update the API server.
+  parameters:
+    id:
+      description: Relay ID
+      location: $message.payload#/target
+      schema:
+        $ref: '#/id'
+
+  publish:
+    operationId: onRelayStatusBackwardRequestOrForwardResponse
+    tags:
+      - name: relay
+    summary: Status update
+    security:
+      - session: []
+    message:
+      oneOf:
+        - messageId: relayStatusBackwardRequest
+          description: Status update request sent from the relay to the API server
+          payload:
+            $ref: '#/relayStatusRequest'
+
+        - messageId: relayStatusForwardResponse
+          description: Status update response sent from the relay to the API server
+          payload:
+            $ref: '#/relayStatusResponse'
+
+  subscribe:
+    operationId: onRelayStatusBackwardResponseOrForwardRequest
+    tags:
+      - name: relay
+    summary: Status update
+    security:
+      - session: []
+    message:
+      oneOf:
+        - messageId: relayStatusBackwardResponse
+          description: Status update response sent from the API server to the relay
+          payload:
+            $ref: '#/relayStatusResponse'
+
+        - messageId: relayStatusForwardRequest
+          description: Status update request sent from the API server to the relay
+          payload:
+            $ref: '#/relayStatusRequest'

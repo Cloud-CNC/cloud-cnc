@@ -20,12 +20,18 @@ userpass:
               - password
             properties:
               username:
+                description: Account username
                 type: string
-                description: The account's username
+                pattern: ^[A-Za-z0-9-_]+$
+                minLength: 3
+                maxLength: 256
               password:
-                description: The account's password
+                description: Account password
                 type: string
                 format: password
+                pattern: ^[ -~]+$
+                minLength: 12
+                maxLength: 256
     responses:
       '200':
         description: OK
@@ -72,8 +78,11 @@ totp:
               - totp
             properties:
               totp:
-                type: string
                 description: The TOTP
+                type: string
+                pattern: /^[0-9]+$/
+                minLength: 6
+                maxLength: 6
     responses:
       '200':
         description: OK

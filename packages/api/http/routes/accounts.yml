@@ -3,30 +3,38 @@
 # Types
 _id:
   description: Account ID
-  type: string
+  format: object-id
 
 username:
   description: Account username
   type: string
+  pattern: ^[A-Za-z0-9-_]+$
+  minLength: 3
+  maxLength: 256
 
 password:
-  type: string
   description: Account password
+  type: string
+  format: password
+  pattern: ^[ -~]+$
   minLength: 12
+  maxLength: 256
 
 totpEnabled:
-  type: boolean
   description: Whether or not TOTP is enabled
+  type: boolean
 
 totpSecret:
-  type: string
   description: TOTP secret (Only present if TOTP is enabled)
+  type: string
+  pattern: ^[A-Z2-7]{52}$
 
 roles:
-  description: Account roles
+  description: Account role IDs
   type: array
   items:
     type: string
+    format: object-id
 
 # Routes
 all:
@@ -125,7 +133,7 @@ impersonate:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   post:
     operationId: impersonateAccount
     tags:
@@ -141,8 +149,8 @@ impersonate:
               - enabled
             properties:
               enabled:
-                type: boolean
                 description: Whether to start impersonating or stop impersonating
+                type: boolean
     responses:
       '204':
         $ref: '../responses.yml#/empty-success'
@@ -162,7 +170,7 @@ id:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   get:
     operationId: getAccount
     x-operation-type: get

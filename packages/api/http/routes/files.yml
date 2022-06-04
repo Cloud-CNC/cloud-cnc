@@ -2,16 +2,22 @@
 
 # Types
 _id:
-  type: string
   description: File ID
+  type: string
+  format: object-id
 
 name:
-  type: string
   description: File name
+  type: string
+  pattern: ^[ -~]+$
+  minLength: 3
+  maxLength: 256
 
 description:
-  type: string
   description: File description
+  type: string
+  pattern: ^[ -~]+$
+  maxLength: 1024
 
 state:
   description: |
@@ -26,19 +32,22 @@ state:
 permission:
   description: |
     File subject permission
-    * `owner`: the subject can read from, write to, delete the file and update the file's ACL
-    * `write`: the subject can only read from and write to the file
-    * `read`: the subject can only read from the file
+    * `admin`: the subject can read and write the file's name, description, state, content,
+      estimate, and plugin data as well as delete the file and update the file's ACL
+    * `write`: the subject can only read and write the file's name, description, state, content,
+      estimate, and plugin data
+    * `read`: the subject can only read the file's name, description, state, content, estimate,
+      and plugin data
   type: string
   enum:
-    - owner
+    - admin
     - write
     - read
 
 acl:
   description: |
     File access control list
-    * Keys: ACL permission keys (Valid for `account` and `role` entity types only)
+    * Keys: ACL permission keys
     * Values: ACL permission values
 
     *Note: if sending over `multipart/form-data`, this field MUST be a JSON-encoded string.*
@@ -159,7 +168,7 @@ raw:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   get:
     operationId: getRawFile
     x-operation-type: get
@@ -187,7 +196,7 @@ id:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   get:
     operationId: getFile
     x-operation-type: get

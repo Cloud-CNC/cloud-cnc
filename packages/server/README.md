@@ -27,8 +27,7 @@
   * Restrict access to only jobs a user has access to the job's corresponding file
 * Relay entity
   * Create and sign a TLS keypair for the the `createRelay` operation
-  * Terminate the relay connection and the TLS keypair to the Certificate Revocation List for the
-    `deleteRelay` operation
+  * Terminate the relay connection for the `deleteRelay` operation
 * Session entity
   * Hash the password and update the session for the `loginUserpass` operation
   * Verify the TOTP and update the session for the `loginTotp` operation

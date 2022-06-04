@@ -1,21 +1,9 @@
 # Schemas
 
-error:
-  description: Generic error schema
+pluginData:
+  description: |
+    Arbitrary plugin data
+    * Keys: plugin identifier (Plugins SHOULD use an RFC 3986 URI)
+    * Values: arbitrary, plugin-specific data (Plugins SHOULD only modify their respective data)
   type: object
-  required:
-    - error
-  properties:
-    error:
-      description: Error information
-      type: object
-      required:
-        - name
-        - description
-      properties:
-        name:
-          type: string
-          description: Short yet descriptive message
-        description:
-          type: string
-          description: Longer message, detailing how to avoid/fix the underlying cause for the error
+  additionalProperties: true

@@ -2,22 +2,53 @@
 
 # Types
 _id:
-  type: string
   description: Machine ID
+  type: string
+  format: object-id
 
 name:
-  type: string
   description: Machine name
+  type: string
+  pattern: ^[ -~]+$
+  minLength: 3
+  maxLength: 256
 
 relay:
-  type: string
   description: Relay ID
+  type: string
+  format: object-id
+
+permission:
+  description: |
+    Machine subject permission
+    * `admin`: the subject can read and write the machine's name, relay, labels, taints, and plugin
+      data as well as delete the machine and update the machine's ACL
+    * `write`: the subject can only read and write the machine's name, relay, labels, taints, and
+      plugin data
+    * `read`: the subject can only read the machine's name, relay, labels, taints, and plugin data
+  type: string
+  enum:
+    - admin
+    - write
+    - read
+
+acl:
+  description: |
+    Machine access control list
+    * Keys: ACL permission keys
+    * Values: ACL permission values
+  type: object
+  additionalProperties:
+    $ref: '#/permission'
 
 labels:
   description: Machine labels (Not to be confused with relay labels)
   type: array
   items:
     type: string
+    pattern: ^[ -~]+$
+    minLength: 3
+    maxLength: 256
 
 taints:
   description: |
@@ -31,6 +62,9 @@ taints:
   type: array
   items:
     type: string
+    pattern: ^[ -~]+$
+    minLength: 3
+    maxLength: 256
 
 # Routes
 all:
@@ -130,7 +164,7 @@ id:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   get:
     operationId: getMachine
     x-operation-type: get

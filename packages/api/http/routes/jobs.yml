@@ -4,14 +4,19 @@
 _id:
   description: Job ID
   type: string
+  format: object-id
 
 name:
   description: Job name
   type: string
+  pattern: ^[ -~]+$
+  minLength: 3
+  maxLength: 256
 
 file:
   description: Job file ID
   type: string
+  format: object-id
 
 filter:
   description: Label/taint filter
@@ -86,6 +91,7 @@ filter:
           - type: boolean
           - type: number
           - type: string
+            pattern: ^[ -~]+$
 
 priority:
   description: Job priority (Lower indicates a higher priority)
@@ -113,6 +119,7 @@ state:
     machine:
       description: Assigned machine ID (During the `waiting` stage, this is an estimate)
       type: string
+      format: object-id
     start:
       description: Start time (During the `waiting` stage, this is an estimate)
       type: string
@@ -231,10 +238,12 @@ id:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   get:
     operationId: getJob
     x-operation-type: get
+      - jobs
+    tags:
       - jobs
     summary: Get a job
     responses:

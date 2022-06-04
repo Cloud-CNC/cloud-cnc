@@ -14,11 +14,16 @@ error:
         - description
       properties:
         name:
-          type: string
           description: Short yet descriptive message
-        description:
           type: string
+          pattern: ^[ -~]+$
+          minLength: 3
+          maxLength: 256
+        description:
           description: Longer message, detailing how to avoid/fix the underlying cause for the error
+          type: string
+          pattern: ^[ -~]+$
+          maxLength: 1024
 
 pluginData:
   description: |

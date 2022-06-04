@@ -1,0 +1,165 @@
+# Machine channels
+
+# Types
+id:
+  description: Machine ID
+  type: string
+  format: object-id
+
+raw:
+  description: Raw data
+  type: string
+  format: binary
+
+machineIO:
+  description: User input/machine output
+  type: object
+  required:
+    - id
+    - raw
+  properties:
+    id:
+      $ref: '#/id'
+    raw:
+      $ref: '#/raw'
+    pluginData:
+      $ref: '../schemas.yml#/pluginData'
+
+machineStatusRequest:
+  description: Machine status request
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      $ref: '#/id'
+    pluginData:
+      $ref: '../schemas.yml#/pluginData'
+
+machineStatusResponse:
+  description: Machine status response
+  type: object
+  required:
+    - id
+    - labels
+    - taints
+  properties:
+    id:
+      $ref: '#/id'
+    labels:
+      description: Machine labels (Not to be confused with relay labels)
+      type: array
+      items:
+        type: string
+        pattern: ^[ -~]+$
+        minLength: 3
+        maxLength: 256
+    taints:
+      description: |
+        Machine taints (Not to be confused with relay taints). Well known ones are:
+        * `machine.cloud-cnc/emergency-stopped`: the machine is stopped as a result of an
+        emergency-stop signal<sup>1</sup>
+        * `machine.cloud-cnc/busy`: the machine is currently busy<sup>1</sup>
+        * `machine.cloud-cnc/offline`: the machine is offline<sup>1</sup>
+
+        <sup>1</sup> automatically added and removed
+      type: array
+      items:
+        type: string
+        pattern: ^[ -~]+$
+        minLength: 3
+        maxLength: 256
+    pluginData:
+      $ref: '../schemas.yml#/pluginData'
+
+# Channels
+io:
+  description: User input/machine output
+  parameters:
+    id:
+      description: Machine ID
+      location: $message.payload#/id
+      schema:
+        $ref: '#/id'
+
+  publish:
+    operationId: onOutput
+    tags:
+      - name: machine
+    summary: |
+      Output sent from the machine to the user via the relay. *Note: this is a `publish` operation
+      from the relay's perspective but a `subscribe` operation from the user's perspective.*
+    security:
+      - session: []
+    message:
+      messageId: output
+      description: Machine output
+      payload:
+        $ref: '#/machineIO'
+
+  subscribe:
+    operationId: onInput
+    tags:
+      - name: io
+    summary: |
+      Input sent from the user to the machine via the relay. *Note: this is a `subscribe` operation
+      from the relay's perspective but a `publish` operation from the user's perspective.*
+    security:
+      - session: []
+    message:
+      messageId: input
+      description: User input
+      payload:
+        $ref: '#/machineIO'
+
+status:
+  description: |
+    Machine status. When a relay starts, it MAY send the `machineStatusBackwardRequest` message.
+    The API server MUST respond by sending the `machineStatusBackwardResponse` with the last known
+    status. Whenever a machine has a status update, or if the API server sends a
+    `machineStatusForwardRequest` message, the relay MUST send a `machineStatusForwardResponse`
+    message to update the API server.
+  parameters:
+    id:
+      description: Machine ID
+      location: $message.payload#/id
+      schema:
+        $ref: '#/id'
+
+  publish:
+    operationId: onMachineStatusBackwardRequestOrForwardResponse
+    tags:
+      - name: machine
+    summary: Status update
+    security:
+      - session: []
+    message:
+      oneOf:
+        - messageId: machineStatusBackwardRequest
+          description: Status update request sent from the relay to the API server
+          payload:
+            $ref: '#/machineStatusRequest'
+
+        - messageId: machineStatusForwardResponse
+          description: Status update response sent from the relay to the API server
+          payload:
+            $ref: '#/machineStatusResponse'
+
+  subscribe:
+    operationId: onMachineStatusBackwardResponseOrForwardRequest
+    tags:
+      - name: machine
+    summary: Status update
+    security:
+      - session: []
+    message:
+      oneOf:
+        - messageId: machineStatusBackwardResponse
+          description: Status update response sent from the API server to the relay
+          payload:
+            $ref: '#/machineStatusResponse'
+
+        - messageId: machineStatusForwardRequest
+          description: Status update request sent from the API server to the relay
+          payload:
+            $ref: '#/machineStatusRequest'

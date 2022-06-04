@@ -2,40 +2,55 @@
 
 # Types
 _id:
-  type: string
   description: Relay ID
+  type: string
+  format: object-id
 
 name:
-  type: string
   description: Relay name
+  type: string
+  pattern: ^[ -~]+$
+  minLength: 3
+  maxLength: 256
 
-tls:
+key:
+  description: Relay key
+  type: string
+  pattern: ^[A-Za-z0-9-_]+$
+  format: password
+  minLength: 64
+  maxLength: 64
+
+permission:
   description: |
-    mTLS data used for connecting to the API server
+    Relay subject permission
+    * `admin`: the subject can read and write the relay's name, labels, taints, and plugin data as
+      well as delete the relay and update the relay's ACL
+    * `write`: the subject can only read and write the relay's name, labels, taints, and plugin data
+    * `read`: the subject can only read the relay's name, labels, taints, and plugin data
+  type: string
+  enum:
+    - admin
+    - write
+    - read
 
-    *Note: for security purposes, this will not be revealed after creating the relay,
-    even when updating it.*
+acl:
+  description: |
+    Relay access control list
+    * Keys: ACL permission keys
+    * Values: ACL permission values
   type: object
-  required:
-    - certificate
-    - key
-  properties:
-    certificate:
-      description: PEM-encoded mTLS client certificate
-      type: string
-      format: x509-certificate
-    key:
-      description: PEM-encoded mTLS client key
-      type: string
-      format: x509-key
   additionalProperties:
-    type: string
+    $ref: '#/permission'
 
 labels:
   description: Relay labels (Not to be confused with machine labels)
   type: array
   items:
     type: string
+    pattern: ^[ -~]+$
+    minLength: 3
+    maxLength: 256
 
 taints:
   description: |
@@ -47,6 +62,9 @@ taints:
   type: array
   items:
     type: string
+    pattern: ^[ -~]+$
+    minLength: 3
+    maxLength: 256
 
 # Routes
 all:
@@ -115,12 +133,12 @@ create:
               type: object
               required:
                 - id
-                - tls
+                - key
               properties:
                 id:
                   $ref: '#/_id'
-                tls:
-                  $ref: '#/tls'
+                key:
+                  $ref: '#/key'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -135,7 +153,7 @@ id:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   get:
     operationId: getRelay
     x-operation-type: get
@@ -206,10 +224,7 @@ id:
     tags:
       - relays
     summary: Delete a relay
-    description: |
-      *Note: this route will kick the relay if it's currently connected and add the client
-      certificate to an internal Certificate Revocation List (CRL) preventing future connections
-      using the same certificate/key.*
+    description: "*Note: this route will kick the relay if it's currently connected.*"
     responses:
       '204':
         $ref: '../responses.yml#/empty-success'

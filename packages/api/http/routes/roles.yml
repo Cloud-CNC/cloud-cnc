@@ -2,18 +2,23 @@
 
 # Types
 _id:
-  type: string
   description: Role ID
+  type: string
+  format: object-id
 
 name:
-  type: string
   description: Role name
+  type: string
+  pattern: ^[ -~]+$
+  minLength: 3
+  maxLength: 256
 
 permissions:
   description: RBAC role permissions. These permissions will be granted to all role members.
   type: array
   items:
     type: string
+    pattern: ^[ -~]+$
 
 priorityLimits:
   description: |
@@ -125,7 +130,7 @@ id:
       in: path
       required: true
       schema:
-        type: string
+        $ref: '#/_id'
   get:
     operationId: getRole
     x-operation-type: get
