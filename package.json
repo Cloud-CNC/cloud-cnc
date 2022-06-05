@@ -4,10 +4,20 @@
   "author": "Cloud CNC contributors",
   "license": "MIT",
   "scripts": {
+    "test": "lerna run test",
+    "lint": "eslint .",
     "postinstall": "lerna bootstrap"
   },
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.17.0",
+    "eslint-plugin-redos": "^4.4.0",
+    "lerna": "^4.0.0",
+    "ts-node": "^10.8.1",
+    "tsc-alias": "^1.6.8",
+    "tsconfig-paths": "^4.0.0",
+    "typescript": "^4.7.3"
   },
   "homepage": "https://github.com/Cloud-CNC/cloud-cnc#readme",
   "repository": {
@@ -16,5 +26,8 @@
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
+  },
+  "dependencies": {
+    "eslint-plugin-security-node": "^1.1.1"
   }
 }

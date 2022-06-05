@@ -4,21 +4,18 @@
 _id:
   description: Account ID
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 username:
   description: Account username
   type: string
-  pattern: ^[A-Za-z0-9-_]+$
-  minLength: 3
-  maxLength: 256
+  pattern: ^[A-Za-z0-9-_]{3,256}$
 
 password:
   description: Account password
   type: string
   format: password
-  pattern: ^[ -~]+$
-  minLength: 12
-  maxLength: 256
+  pattern: ^[ -~]{12,256}$
 
 totpEnabled:
   description: Whether or not TOTP is enabled
@@ -35,6 +32,7 @@ roles:
   items:
     type: string
     format: object-id
+    pattern: ^[A-Fa-f0-9]{24}$
 
 # Routes
 all:

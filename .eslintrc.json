@@ -1,0 +1,63 @@
+  
+{
+  "env": {
+    "browser": true,
+		"node": true
+	},
+  "extends": [
+    "eslint:recommended",
+		"plugin:@typescript-eslint/strict",
+    "plugin:@typescript-eslint/recommended",
+		"plugin:security-node/recommended"
+  ],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": "latest",
+    "project": [
+			"tsconfig.json",
+			"packages/*/tsconfig.json",
+			"packages/*/tsconfig.*.json"
+		],
+		"sourceType": "module"
+	},
+	"plugins": [
+		"@typescript-eslint",
+		"security-node",
+		"redos"
+	],
+	"rules": {
+		"@typescript-eslint/no-explicit-any": "off",
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"@typescript-eslint/no-unnecessary-condition": "off",
+		"arrow-parens": [
+			"warn",
+			"as-needed"
+		],
+		"brace-style": [
+			"warn",
+			"allman"
+		],
+		"camelcase": [
+			"warn",
+			{
+				"properties": "always"
+			}
+		],
+		"curly": "warn",
+		"no-extra-semi": "error",
+		"no-var": "error",
+		"object-curly-spacing": "warn",
+		"prefer-const": "warn",
+		"redos/no-vulnerable": "error",
+		"semi": "error",
+		"quotes": [
+			"warn",
+			"single"
+		],
+		"quote-props": [
+			"warn",
+			"consistent-as-needed"
+		],
+		"space-in-parens": "warn"
+	}
+}

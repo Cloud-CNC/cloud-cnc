@@ -7,6 +7,7 @@ const MAX_DEPTH = 5;
 
 //Imports
 import {OpenAPIV3} from 'openapi-types';
+import {check as checkRegex} from 'recheck';
 
 /**
  * Translate an OAS3 schema to a Joi type
@@ -14,7 +15,7 @@ import {OpenAPIV3} from 'openapi-types';
  * @param depth Recursion depth
  * @returns Joi type definition
  */
-export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
+export const joiType = async (schema: OpenAPIV3.SchemaObject, depth = 0): Promise<string> =>
 {
   //Prevent infinite recursion
   if (depth > MAX_DEPTH)
@@ -43,7 +44,7 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
   else if (schema.not != null)
   {
     //Update the type
-    type = `Joi.any().not(${joiType(schema.not as OpenAPIV3.SchemaObject, depth + 1)})`;
+    type = `Joi.any().not(${await joiType(schema.not as OpenAPIV3.SchemaObject, depth + 1)})`;
   }
   //Regular types
   else
@@ -57,11 +58,8 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           //Cast items
           const items = schema.items as OpenAPIV3.SchemaObject;
 
-          //Translate the item type
-          const itemType = joiType(items, depth + 1);
-
           //Update the type
-          type = `Joi.array().items(${itemType})`;
+          type = `Joi.array().items(${await joiType(items, depth + 1)})`;
 
           //Add limits
           if (schema.minItems != null && schema.maxItems != null && schema.minItems == schema.maxItems)
@@ -126,7 +124,13 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           const properties = schema.properties as Record<string, OpenAPIV3.SchemaObject>;
 
           //Translate property types
-          const propertyTypes = Object.entries(properties).map(([key, value]) => `${key}: ${joiType(value, depth + 1)}${schema.required?.includes(key) ? '.required()' : '.optional()'}`).join(',\n');
+          const propertyTypes = (
+            await Promise.all(
+              Object
+                .entries(properties)
+                .map(async ([key, value]) => `${key}: ${await joiType(value, depth + 1)}${schema.required?.includes(key) ? '.required()' : '.optional()'}`)
+            )
+          ).join(',\n');
 
           //Update the type
           type = `Joi.object(${propertyTypes})`;
@@ -137,11 +141,8 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           //Cast additional properties
           const additionalProperties = schema.additionalProperties as OpenAPIV3.SchemaObject;
 
-          //Translate additional property type
-          const additionalPropertyType = joiType(additionalProperties, depth + 1);
-
           //Update the type
-          type = `Joi.object().pattern(${additionalPropertyType})`;
+          type = `Joi.object().pattern(${await joiType(additionalProperties, depth + 1)})`;
         }
         //Unknown objects
         else
@@ -193,7 +194,7 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           //Update the type
           type = `Joi.string().meta({
   _mongoose: {
-    type: \'ObjectId\',
+    type: 'ObjectId',
     ref: null /*TODO: add collection name*/
   }
 })`;
@@ -207,6 +208,14 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           //Add pattern
           if (schema.pattern != null)
           {
+            //Ensure the pattern is vulnerable to ReDoS
+            const diagnostics = await checkRegex(schema.pattern, '');
+
+            if (diagnostics.status != 'safe')
+            {
+              throw new Error(`Potentially ReDoS vulnerable pattern "${schema.pattern}"!`);
+            }
+
             type += `.pattern(${schema.pattern})`;
           }
 
@@ -215,7 +224,7 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
           {
             type += `.length(${schema.minLength})`;
           }
-          
+
           if (schema.minLength != null)
           {
             type += `.min(${schema.minLength})`;
@@ -230,7 +239,6 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
         break;
 
       default:
-        console.log(schema);
         throw new Error(`Cannot translate OAS3 type "${schema.type}"!`);
     }
   }
@@ -244,7 +252,7 @@ export const joiType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
  * @param depth Recursion depth
  * @returns TypeScript type literal
  */
-export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): string =>
+export const typescriptType = async (schema: OpenAPIV3.SchemaObject, depth = 0): Promise<string> =>
 {
   //Prevent infinite recursion
   if (depth > MAX_DEPTH)
@@ -287,11 +295,8 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
           //Cast items
           const items = schema.items as OpenAPIV3.SchemaObject;
 
-          //Translate the item type
-          const itemType = typescriptType(items, depth + 1);
-
           //Update the type
-          type = `${itemType}[]`;
+          type = `${await typescriptType(items, depth + 1)}[]`;
         }
         //Unknown arrays
         else
@@ -323,7 +328,13 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
           const properties = schema.properties as Record<string, OpenAPIV3.SchemaObject>;
 
           //Translate property types
-          const propertyTypes = Object.entries(properties).map(([key, value]) => `${key}${!schema.required?.includes(key) ? '?' : ''}: ${typescriptType(value, depth + 1)}`).join(',\n');
+          const propertyTypes = (
+            await Promise.all(
+              Object
+              .entries(properties)
+              .map(async ([key, value]) => `${key}${!schema.required?.includes(key) ? '?' : ''}: ${await typescriptType(value, depth + 1)}`)
+            )
+          ).join(',\n');
 
           //Update the type
           type = `{${propertyTypes}}`;
@@ -334,11 +345,8 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
           //Cast additional properties
           const additionalProperties = schema.additionalProperties as OpenAPIV3.SchemaObject;
 
-          //Translate additional property type
-          const additionalPropertyType = typescriptType(additionalProperties, depth + 1);
-
           //Update the type
-          type = `Record<string, ${additionalPropertyType}>`;
+          type = `Record<string, ${await typescriptType(additionalProperties, depth + 1)}>`;
         }
         //Unknown objects
         else
@@ -368,12 +376,6 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
           //Update the type
           type = 'Buffer';
         }
-        //Object ID
-        else if (schema.format == 'object-id')
-        {
-          //Update the type
-          type = 'ObjectId /*TODO: import Mongoose */';
-        }
         //Regular strings
         else
         {
@@ -384,7 +386,6 @@ export const typescriptType = (schema: OpenAPIV3.SchemaObject, depth = 0): strin
         break;
 
       default:
-        console.log(schema);
         throw new Error(`Cannot translate OAS3 type "${schema.type}"!`);
     }
   }

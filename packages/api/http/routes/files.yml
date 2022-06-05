@@ -5,19 +5,17 @@ _id:
   description: File ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 name:
   description: File name
   type: string
-  pattern: ^[ -~]+$
-  minLength: 3
-  maxLength: 256
+  pattern: ^[ -~]{3,256}$
 
 description:
   description: File description
   type: string
-  pattern: ^[ -~]+$
-  maxLength: 1024
+  pattern: ^[ -~]{0,1024}$
 
 state:
   description: |

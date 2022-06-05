@@ -11,7 +11,7 @@ import {chunk} from 'lodash';
  * @param secret TOTP secret
  * @returns Formatted secret
  */
-const format = (secret: string) => chunk(secret.split(''), 6).map(characters => characters.join('')).join(' ')
+const format = (secret: string) => chunk(secret.split(''), 6).map(characters => characters.join('')).join(' ');
 
 /**
  * Generate a Google Authenticator compatible TOTP secret
@@ -41,4 +41,4 @@ export {
   generate,
   url,
   verify
-}
+};

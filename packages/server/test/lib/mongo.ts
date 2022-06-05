@@ -38,7 +38,7 @@ const stop = async () =>
 
   //Stop the server
   await server.stop();
-}
+};
 
 /**
  * Reset the database
@@ -50,7 +50,7 @@ const reset = async () =>
   {
     await collection.drop();
   }
-}
+};
 
 //Export
 export {

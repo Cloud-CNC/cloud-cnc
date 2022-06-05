@@ -58,7 +58,7 @@ program
     const options = res.value as Options;
 
     //Connect to Mongo
-    await connect(mongoUrl!);
+    await connect(mongoUrl);
 
     //TODO: Create the admin role
 

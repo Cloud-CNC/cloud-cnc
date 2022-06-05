@@ -5,6 +5,7 @@ id:
   description: Machine ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 raw:
   description: Raw data
@@ -51,9 +52,7 @@ machineStatusResponse:
       type: array
       items:
         type: string
-        pattern: ^[ -~]+$
-        minLength: 3
-        maxLength: 256
+        pattern: ^[ -~]{3,256}$
     taints:
       description: |
         Machine taints (Not to be confused with relay taints). Well known ones are:
@@ -66,9 +65,7 @@ machineStatusResponse:
       type: array
       items:
         type: string
-        pattern: ^[ -~]+$
-        minLength: 3
-        maxLength: 256
+        pattern: ^[ -~]{3,256}$
     pluginData:
       $ref: '../schemas.yml#/pluginData'
 

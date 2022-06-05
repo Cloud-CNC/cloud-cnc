@@ -12,8 +12,11 @@ import {Context, Next} from 'koa';
  * @param name Permission name
  * @returns Middleware
  */
-const checkPermission = (_: string) => async (_: Context, next: Next) =>
+const checkPermission = (name: string) => async (_: Context, next: Next) =>
 {
+  //TODO: remove the placeholder and implement this middleware
+  name;
+
   return next();
 };
 

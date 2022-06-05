@@ -5,20 +5,19 @@ _id:
   description: Role ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 name:
   description: Role name
   type: string
-  pattern: ^[ -~]+$
-  minLength: 3
-  maxLength: 256
+  pattern: ^[ -~]{3,256}$
 
 permissions:
   description: RBAC role permissions. These permissions will be granted to all role members.
   type: array
   items:
     type: string
-    pattern: ^[ -~]+$
+    pattern: ^[ -~]{3,256}$
 
 priorityLimits:
   description: |

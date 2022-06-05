@@ -49,7 +49,7 @@ switch (process.env.NODE_ENV)
 
 const log = {
   pretty: process.env.PRETTY == 'true',
-  level: process.env.LOG_LEVEL as LevelWithSilent | undefined
+  level: process.env.LOG_LEVEL as LevelWithSilent
 };
 
 if (log.level == null)
@@ -71,21 +71,21 @@ if (log.level == null)
 }
 
 const hash = {
-  iterations: parseInt(process.env.HASH_ITERATIONS || '', 10) || 8,
-  memory: parseInt(process.env.HASH_MEMORY || '', 10) || (1024 * 128), //128 MiB
+  iterations: parseInt(process.env.HASH_ITERATIONS ?? '', 10) || 8,
+  memory: parseInt(process.env.HASH_MEMORY ?? '', 10) || (1024 * 128), //128 MiB
 };
 
 const http = {
-  port: parseInt(process.env.PORT || '', 10) || 80,
+  port: parseInt(process.env.PORT ?? '', 10) || 80,
   http2: process.env.HTTP2 == 'true',
 
   tls: process.env.TLS_ENABLED == 'true',
-  certificate: process.env.TLS_CERTIFICATE,
-  key: process.env.TLS_KEY
+  certificate: process.env.TLS_CERTIFICATE ?? '',
+  key: process.env.TLS_KEY ?? ''
 };
 
-const mongoUrl = process.env.MONGO_URL;
-const redisUrl = process.env.REDIS_URL;
+const mongoUrl = process.env.MONGO_URL ?? '';
+const redisUrl = process.env.REDIS_URL ?? '';
 
 //Validate the config
 if (mode != Mode.TESTING)
@@ -120,13 +120,13 @@ if (mode != Mode.TESTING)
     panic('Cannot enable HTTP2 without TLS!');
   }
 
-  if (http.tls && (http.certificate == null || http.key == null))
+  if (http.tls && (http.certificate == '' || http.key == ''))
   {
     //Panic with message
     panic('The TLS certificate and/or key weren\'t provided, disabling TLS!');
   }
 
-  if (http.tls && http.certificate != null)
+  if (http.tls && http.certificate != '')
   {
     if (!existsSync(http.certificate))
     {
@@ -135,7 +135,7 @@ if (mode != Mode.TESTING)
     }
   }
 
-  if (http.tls && http.key != null)
+  if (http.tls && http.key != '')
   {
     if (!existsSync(http.key))
     {
@@ -144,13 +144,13 @@ if (mode != Mode.TESTING)
     }
   }
 
-  if (mongoUrl == null)
+  if (mongoUrl == '')
   {
     //Panic with message
     panic('Missing Mongo URL!');
   }
 
-  if (redisUrl == null)
+  if (redisUrl == '')
   {
     //Log
     console.warn('Redis URL wasn\'t provided, running in single instance mode!');

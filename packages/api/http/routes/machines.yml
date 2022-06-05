@@ -5,18 +5,18 @@ _id:
   description: Machine ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 name:
   description: Machine name
   type: string
-  pattern: ^[ -~]+$
-  minLength: 3
-  maxLength: 256
+  pattern: ^[ -~]{3,256}$
 
 relay:
   description: Relay ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 permission:
   description: |
@@ -46,9 +46,7 @@ labels:
   type: array
   items:
     type: string
-    pattern: ^[ -~]+$
-    minLength: 3
-    maxLength: 256
+    pattern: ^[ -~]{3,256}$
 
 taints:
   description: |
@@ -62,9 +60,7 @@ taints:
   type: array
   items:
     type: string
-    pattern: ^[ -~]+$
-    minLength: 3
-    maxLength: 256
+    pattern: ^[ -~]{3,256}$
 
 # Routes
 all:

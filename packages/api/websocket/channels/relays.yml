@@ -5,6 +5,7 @@ id:
   description: Relay ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 relayStatusRequest:
   description: Relay status request
@@ -34,14 +35,13 @@ relayStatusResponse:
       items:
         type: string
         format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
     labels:
       description: Relay labels (Not to be confused with machine labels)
       type: array
       items:
         type: string
-        pattern: ^[ -~]+$
-        minLength: 3
-        maxLength: 256
+        pattern: ^[ -~]{3,256}$
     taints:
       description: |
         Relay taints (Not to be confused with machine taints). Well known ones are:
@@ -52,9 +52,7 @@ relayStatusResponse:
       type: array
       items:
         type: string
-        pattern: ^[ -~]+$
-        minLength: 3
-        maxLength: 256        
+        pattern: ^[ -~]{3,256}$
     pluginData:
       $ref: '../schemas.yml#/pluginData'
 
@@ -83,10 +81,8 @@ authentication:
           key:
             description: Relay key
             type: string
-            pattern: ^[A-Za-z0-9-_]+$
+            pattern: ^[A-Za-z0-9-_]{64}$
             format: password
-            minLength: 64
-            maxLength: 64
           pluginData:
             $ref: '../schemas.yml#/pluginData'
 

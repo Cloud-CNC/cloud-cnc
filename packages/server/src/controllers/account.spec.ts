@@ -116,7 +116,7 @@ test.serial('Create an account', async ctx =>
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
-  //@ts-ignore Sinon types are outdated
+  //@ts-expect-error Sinon types are outdated
   ctx.assert(create.calledOnceWithExactly({
     ...input,
     totpSecret: 'dummy-totp-secret'

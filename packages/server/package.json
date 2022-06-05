@@ -54,11 +54,7 @@
     "hygen": "^6.2.0",
     "mongodb-memory-server": "^8.5.2",
     "sinon": "^14.0.0",
-    "supertest": "^6.2.3",
-    "ts-node": "^10.7.0",
-    "tsc-alias": "^1.6.7",
-    "tsconfig-paths": "^4.0.0",
-    "typescript": "^4.7.2"
+    "supertest": "^6.2.3"
   },
   "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/server",
   "repository": {

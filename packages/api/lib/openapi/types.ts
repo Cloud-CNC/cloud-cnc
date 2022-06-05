@@ -55,7 +55,7 @@ export interface Field
 /**
  * Generic operation types
  */
-enum OperationType
+export enum OperationType
 {
   ALL = 'all',
   CREATE = 'create',

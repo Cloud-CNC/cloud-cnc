@@ -3,11 +3,11 @@
  */
 
 //Imports
-import {OpenAPIV3} from 'openapi-types';
-import {resolve} from 'path';
-import {default as SwaggerParser} from 'swagger-parser';
 import {Entity, Field, Operation, Parameter} from './types';
+import {OpenAPIV3} from 'openapi-types';
+import {default as SwaggerParser} from 'swagger-parser';
 import {joiType, typescriptType} from './utils';
+import {resolve} from 'path';
 
 /**
  * Get entities from the OpenAPI schema
@@ -97,7 +97,7 @@ export const getEntities = async () =>
           const requestFields: Field[] = [];
           let requestMime: string | undefined;
 
-          if (requestBody != null && requestBody.content != null)
+          if (requestBody?.content != null)
           {
             for (const [contentKey, contentValue] of Object.entries(requestBody.content))
             {
@@ -138,11 +138,11 @@ export const getEntities = async () =>
                 requestFields.push({
                   name: propertyKey,
                   description: property.description,
-                  joiType: joiType(property),
-                  typescriptType: typescriptType(property),
-                  required: schema.required?.includes(propertyKey) || false
+                  joiType: await joiType(property),
+                  typescriptType: await typescriptType(property),
+                  required: schema.required?.includes(propertyKey) ?? false
                 } as Field);
-              };
+              }
 
               //Set the MIME type
               requestMime = contentKey;
@@ -153,7 +153,7 @@ export const getEntities = async () =>
 
           const responseFields: Field[] = [];
           let responseMime: string | undefined;
-          let responseStatus: number;
+          let responseStatus = -1;
 
           for (const [responseKey, responseValue] of Object.entries(operation.responses))
           {
@@ -207,11 +207,11 @@ export const getEntities = async () =>
                   responseFields.push({
                     name: propertyKey,
                     description: property.description,
-                    joiType: joiType(property),
-                    typescriptType: typescriptType(property),
-                    required: schema.required?.includes(propertyKey) || false
+                    joiType: await joiType(property),
+                    typescriptType: await typescriptType(property),
+                    required: schema.required?.includes(propertyKey) ?? false
                   } as Field);
-                };
+                }
 
                 //Set the MIME type
                 responseMime = contentKey;
@@ -224,7 +224,7 @@ export const getEntities = async () =>
           }
 
           //Convert path parameter format
-          const path = pathKey.replace(/\{(.+)\}/, ':$1');
+          const path = pathKey.replace(/\{([^{}]+)\}/, ':$1');
 
           //Add the operation
           operations.push({
@@ -239,7 +239,7 @@ export const getEntities = async () =>
             requestMime,
             responseFields,
             responseMime,
-            responseStatus: responseStatus!
+            responseStatus
           });
           break;
         }

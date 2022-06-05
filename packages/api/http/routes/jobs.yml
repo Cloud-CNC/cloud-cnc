@@ -5,18 +5,18 @@ _id:
   description: Job ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 name:
   description: Job name
   type: string
-  pattern: ^[ -~]+$
-  minLength: 3
-  maxLength: 256
+  pattern: ^[ -~]{3,256}$
 
 file:
   description: Job file ID
   type: string
   format: object-id
+  pattern: ^[A-Fa-f0-9]{24}$
 
 filter:
   description: Label/taint filter
@@ -91,7 +91,6 @@ filter:
           - type: boolean
           - type: number
           - type: string
-            pattern: ^[ -~]+$
 
 priority:
   description: Job priority (Lower indicates a higher priority)
@@ -120,6 +119,7 @@ state:
       description: Assigned machine ID (During the `waiting` stage, this is an estimate)
       type: string
       format: object-id
+      pattern: ^[A-Fa-f0-9]{24}$
     start:
       description: Start time (During the `waiting` stage, this is an estimate)
       type: string
