@@ -11,13 +11,13 @@ import {chunk} from 'lodash';
  * @param secret TOTP secret
  * @returns Formatted secret
  */
-const format = (secret: string) => chunk(secret.split(''), 6).map(characters => characters.join('')).join(' ');
+export const format = (secret: string) => chunk(secret.split(''), 6).map(characters => characters.join('')).join(' ');
 
 /**
  * Generate a Google Authenticator compatible TOTP secret
  * @returns TOTP secret
  */
-const generate = () => authenticator.generateSecret(32);
+export const generate = () => authenticator.generateSecret(32);
 
 /**
  * Generate an `otpauth` URL
@@ -25,7 +25,7 @@ const generate = () => authenticator.generateSecret(32);
  * @param secret Account TOTP secret
  * @returns URL
  */
-const url = (username: string, secret: string) => authenticator.keyuri(username, 'Cloud CNC', secret);
+export const url = (username: string, secret: string) => authenticator.keyuri(username, 'Cloud CNC', secret);
 
 /**
  * Verify a Google Authenticate compatible TOTP
@@ -33,12 +33,4 @@ const url = (username: string, secret: string) => authenticator.keyuri(username,
  * @param secret TOTP secret
  * @returns Whether or not the token is valid
  */
-const verify = (token: string, secret: string) => authenticator.check(token, secret);
-
-//Export
-export {
-  format,
-  generate,
-  url,
-  verify
-};
+export const verify = (token: string, secret: string) => authenticator.check(token, secret);

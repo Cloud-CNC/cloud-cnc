@@ -10,12 +10,14 @@
     "lint:websocket": "spectral lint websocket/asyncapi.yml --ruleset=websocket/.spectral.yml --fail-severity=info"
   },
   "dependencies": {
+    "lodash": "^4.17.21",
     "openapi-types": "^11.0.0",
     "recheck": "^4.4.0",
     "swagger-parser": "^10.0.3"
   },
   "devDependencies": {
-    "@stoplight/spectral-cli": "^6.3.0"
+    "@stoplight/spectral-cli": "^6.3.0",
+    "@types/lodash": "^4.14.182"
   },
   "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/relay",
   "repository": {

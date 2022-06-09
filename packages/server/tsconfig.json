@@ -23,5 +23,8 @@
   "include": [
     "**/*.ts",
     "**/*.d.ts"
-  ]
+  ],
+  "ts-node": {
+    "files": true
+  }
 }

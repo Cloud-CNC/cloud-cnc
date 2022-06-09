@@ -11,16 +11,56 @@ error:
       type: object
       required:
         - name
-        - description
       properties:
         name:
           description: Short yet descriptive message
           type: string
-          pattern: ^[ -~]{3,256}$
+          pattern: ^[ -~]{1,256}$
         description:
           description: Longer message, detailing how to avoid/fix the underlying cause for the error
           type: string
-          pattern: ^[ -~]{0,1024}$
+          pattern: ^[ -~]{1,1024}$
+
+allRequest:
+  page:
+    name: page
+    description: |
+      Current page number. If this is equal to `1`, then this is the first page; if this is equal
+      to `pages`, then this is the last page.
+    in: query
+    schema:
+      type: integer
+      minimum: 1
+
+  limit:
+    name: limit
+    description: Maximum items per page (Default is `25`)
+    in: query
+    schema:
+      type: integer
+      minimum: 1
+      maximum: 100
+
+  query:
+    name: query
+    description: Fuzzy-search query
+    in: query
+    schema:
+      type: string
+      pattern: ^[A-Za-z0-9-_]{1,256}$
+
+allResponse:
+  page:
+    description: |
+      Current page number. If this is equal to `1`, then this is the first page; if this is equal
+      to `pages`, then this is the last page.
+    type: integer
+    minimum: 1
+
+  pages:
+    description: Total page count
+    type: integer
+    minimum: 1
 
 pluginData:
   description: |

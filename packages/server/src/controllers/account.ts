@@ -6,46 +6,58 @@
 import hooks from '@/lib/hooks';
 import log from '@/lib/log';
 import {Account, IAccount} from '@/models/account';
-import {WithID} from '@/lib/types';
+import {Filter, WithID, WithPagination} from '@/lib/types';
 
 /**
  * Get all accounts
  */
-const getAllAccounts = async (): Promise<WithID<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>>[]> =>
+export const getAllAccounts = async (filter: Filter): Promise<WithPagination<'accounts', WithID<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>>[]>> =>
 {
   //Invoke hook
-  await hooks.callHook('getAllAccounts:pre');
+  await hooks.callHook('getAllAccounts:pre', filter);
+
+  //Generate the query
+  const query = filter.query != null ? Account.searchQuery(filter.query) : {};
 
   //Get all accounts
-  const accounts = await Account.find({}, {
-    id: 1,
-    username: 1,
-    totpEnabled: 1,
-    roles: 1,
-    pluginData: 1
+  const result = await Account.paginate(query, {
+    page: filter.page ?? 1,
+    projection: {
+      id: 1,
+      username: 1,
+      totpEnabled: 1,
+      roles: 1,
+      pluginData: 1
+    },
+    limit: filter.limit ?? 25
   });
 
   //Invoke hook
-  await hooks.callHook('getAllAccounts:post', accounts);
+  await hooks.callHook('getAllAccounts:post', result);
 
   //Log
   log.debug('Got all accounts.');
 
-  return accounts.map(account => account.toObject());
+  return {
+    accounts: result.docs.map(account => account.toObject()),
+    page: result.page!,
+    pages: result.totalPages
+  };
 };
 
 /**
  * Create an account
  */
-const createAccount = async (create: Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>): Promise<WithID<Pick<IAccount, 'totpSecret'>>> =>
+export const createAccount = async (create: Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>): Promise<WithID<Pick<IAccount, 'totpSecret'>>> =>
 {
-  const data = {
-    ...create,
-    totpSecret: create.totpEnabled ? 'dummy-totp-secret' : undefined
-  } as IAccount;
+  const data = create as IAccount;
+  if (create.totpEnabled)
+  {
+    data.totpSecret = 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR';
+  }
 
   //Invoke hook
-  await hooks.callHook('createAccount:pre', data);
+  await hooks.callHook('createAccount:pre', create);
 
   //Create the account
   const account = await Account.create(data);
@@ -61,14 +73,14 @@ const createAccount = async (create: Pick<IAccount, 'username' | 'password' | 't
 
   return {
     id: account.id,
-    totpSecret: 'dummy-totp-secret' //TODO: add data
+    totpSecret: create.totpEnabled ? 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR' : undefined //TODO: add data
   };
 };
 
 /**
  * Start/stop impersonating an account
  */
-/*const impersonateAccount = async () =>
+/*export const impersonateAccount = async () =>
 {
   //Invoke hook
   //TODO: add hook arguments
@@ -86,7 +98,7 @@ const createAccount = async (create: Pick<IAccount, 'username' | 'password' | 't
 /**
  * Get an account
  */
-const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>> =>
+export const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>> =>
 {
   //Invoke hook
   await hooks.callHook('getAccount:pre', id);
@@ -117,21 +129,21 @@ const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totp
 /**
  * Update an account
  */
-const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>>): Promise<Pick<IAccount, 'totpSecret'>> =>
+export const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>>): Promise<Pick<IAccount, 'totpSecret'>> =>
 {
-  const data = {
-    ...update,
-    totpSecret: update.totpEnabled ? 'dummy-totp-secret' : undefined
-  } as IAccount;
+  const data = update as IAccount;
+  if (update.totpEnabled != null)
+  {
+    data.totpSecret = update.totpEnabled ? 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR' : undefined;
+  }
 
   //Invoke hook
-  await hooks.callHook('updateAccount:pre', data);
+  await hooks.callHook('updateAccount:pre', id, data);
 
   //Get the account
-  const account = await Account.findByIdAndUpdate(id, {
-    $set: data
-  }, {
+  const account = await Account.findByIdAndUpdate(id, data, {
     new: true,
+    overwrite: true,
     projection: {
       totpSecret: 1
     }
@@ -155,7 +167,7 @@ const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'usernam
 /**
  * Delete an account
  */
-const deleteAccount = async (id: string) =>
+export const deleteAccount = async (id: string) =>
 {
   //Invoke hook
   await hooks.callHook('deleteAccount:pre', id);
@@ -174,14 +186,4 @@ const deleteAccount = async (id: string) =>
 
   //Log
   log.debug(`Deleted account ${account.id}.`);
-};
-
-//Export
-export {
-  getAllAccounts,
-  createAccount,
-  // impersonateAccount,
-  getAccount,
-  updateAccount,
-  deleteAccount
 };

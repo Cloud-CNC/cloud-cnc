@@ -46,14 +46,27 @@ info:
     `account:6109ba1dc24de13eb8fa0c94` or `role:6109ba287a72978d7d621f97`). The entity name is one
     of `account` for account entities or `role` for role entities.
 
-    ## Custom route attributes
+    ## Custom attributes
 
+    ### Operation attributes
     * `x-operation-type` (enum): common operation types. Valid values are:
-      * `all`: get all entity instances
-      * `create`: create an entity instance
-      * `get`: get an entity instance by ID
-      * `update`: update an entity instance by ID
-      * `delete`: delete an entity instance by ID
+      * `all`: get all entity instances. The request body MUST equal `schemas.yml#/filter`; the
+        response body MUST include the properties `schemas.yml#/page`, `schemas.yml#/pages`, and the
+        projected (filtered) entity properties properties as `page`, `pages`, and the plural,
+        lowercase name of the entity (respectively) . 
+      * `create`: create an entity instance. The response body must be a body with the projected
+        (filtered) entity properties.
+      * `get`: get an entity instance by ID. The response body must be a body with the projected
+        (filtered) entity properties.
+      * `update`: update an entity instance by ID. The response body must be a body with the
+        projected (filtered) entity properties.
+      * `delete`: delete an entity instance by ID. The response body must be a body with the
+        projected (filtered) entity properties.
+
+    ### Schema attributes
+    * `x-searchable` (boolean): whether or not the field should be included when fuzzy-searching.
+      If not present, the field will be excluded from fuzzy-searching. Only allowed when
+      `x-operation-type` equals `all`.
   version: 2.0.0
   license:
     name: MIT

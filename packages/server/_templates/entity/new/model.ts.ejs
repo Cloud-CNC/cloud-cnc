@@ -7,32 +7,36 @@ to: src/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 
 //Imports
 import Joi from 'joi';
-import {Document, model as createModel} from 'mongoose';
 import joigoose from '@/lib/joigoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
+import mongooseSearch from '@cme-pro/mongoose-search';
+import {Document, PaginateModel, Schema, SearchModel, model as createModel} from 'mongoose';
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> interface
-interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
-{<% for (const field of uniqueFields) { %>
+export interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
+{<% for (const schema of schemas) { %>
   /**
-<%- h.multiline(field.description, 3) %>
+<% if (schema.description != null) { -%>
+<%- h.multiline(schema.description, 3) %>
+<% } -%>
    */
-  <%- field.name %><%- !field.required ? '?' : '' %>: <%- field.typescriptType %>;
+  <%- schema.key != null ? schema.key : '//TODO: add key' %><%- !schema.required ? '?' : '' %>: <%- h.typescriptType(schema) %>;
 <% } -%>
 }
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> document
-type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document = Document<unknown, any, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
+export type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document = Document<unknown, any, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
 
-//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> schema
-const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema = Joi.object({
-<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
-  <%- field.name %>: <%- field.joiType %><%- field.required ? '.required()' : '.optional()' %><%- separator %>
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> Joi schema
+export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>JoiSchema = Joi.object({
+<% for (const [schema, separator] of h.list(schemas, ',')) { -%>
+  <%- schema.key != null ? schema.key : '//TODO: add key' %>: <%- h.joiType(schema, true) %><%- schema.required ? '.required()' : '.optional()' %><%- separator %>
 <% } -%>
 });
 
-//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> model
-const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema));
-<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.schema.set('toObject', {
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> Mongoose schema
+export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema = new Schema(joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>JoiSchema) as any);
+<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema.set('toObject', {
   virtuals: true,
   versionKey: false,
   transform: (document: I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document, value: any) =>
@@ -47,11 +51,8 @@ const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = create
     }
   }
 });
+<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema.plugin(mongoosePaginate);
+<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema.plugin(mongooseSearch);
 
-//Export
-export {
-  I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>,
-  I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document,
-  <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Schema,
-  <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
-};
+//<%- h.changeCase.sentence(h.inflection.singularize(name)) %> model
+export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, PaginateModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>> & SearchModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema);

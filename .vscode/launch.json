@@ -30,7 +30,7 @@
       "name": "Run the server",
       "presentation": {
         "group": "Server",
-        "order": 2
+        "order": 3
       },
       "type": "node",
       "request": "launch",
@@ -52,7 +52,7 @@
       "name": "Run server tests",
       "presentation": {
         "group": "Server",
-        "order": 2
+        "order": 4
       },
       "type": "node",
       "request": "launch",

@@ -11,22 +11,16 @@ import {WithID} from '@/lib/types';
 
 //Fixtures
 //TODO: add realistic data
-const <%- h.changeCase.camel(h.inflection.singularize(name)) %>A = {
+export const <%- h.changeCase.camel(h.inflection.singularize(name)) %>A = {
   id: '',
-<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
-  <%- field.name %>: null<%- separator %>
+<% for (const [schema, separator] of h.list(schemas, ',')) { -%>
+  <%- schema.key %>: null<%- separator %>
 <% } -%>
 } as WithID<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
 
-const <%- h.changeCase.camel(h.inflection.singularize(name)) %>B = {
+export const <%- h.changeCase.camel(h.inflection.singularize(name)) %>B = {
   id: '',
-<% for (const [field, separator] of h.list(uniqueFields, ',')) { -%>
-  <%- field.name %>: null<%- separator %>
+<% for (const [schema, separator] of h.list(schemas, ',')) { -%>
+  <%- schema.key %>: null<%- separator %>
 <% } -%>
 } as WithID<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
-
-//Export
-export {
-  <%- h.changeCase.camel(h.inflection.singularize(name)) %>A,
-  <%- h.changeCase.camel(h.inflection.singularize(name)) %>B
-};

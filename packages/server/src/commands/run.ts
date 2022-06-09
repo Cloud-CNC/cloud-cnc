@@ -9,7 +9,7 @@ import app from '@/routes/index';
 import createServer from '@/lib/server';
 import log from '@/lib/log';
 import {program} from 'commander';
-import {connect} from 'mongoose';
+import {connect} from '@/lib/mongoose';
 import {mode, http, mongoUrl} from '@/lib/config';
 
 //Register the command

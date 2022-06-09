@@ -4,16 +4,28 @@
 
 //Imports
 import Joi from 'joi';
-import {Document, model as createModel} from 'mongoose';
 import joigoose from '@/lib/joigoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
+import mongooseSearch from '@cme-pro/mongoose-search';
+import {Document, PaginateModel, Schema, SearchModel, model as createModel} from 'mongoose';
 
 //Account interface
-interface IAccount
+export interface IAccount
 {
   /**
    * Account password
    */
   password: string;
+
+  /**
+   * Account role IDs
+   */
+  roles: string[];
+
+  /**
+   * Account username
+   */
+  username: string;
 
   /**
    * Arbitrary plugin data
@@ -23,42 +35,50 @@ interface IAccount
   pluginData?: object;
 
   /**
-   * Account roles
-   */
-  roles: string[];
-
-  /**
-   * Whether or not TOTP is enabled
-   */
-  totpEnabled: boolean;
-
-  /**
    * TOTP secret (Only present if TOTP is enabled)
    */
   totpSecret?: string;
 
   /**
-   * Account username
+   * Whether or not TOTP is enabled
    */
-  username: string;
+  totpEnabled: boolean;
 }
 
 //Account document
-type IAccountDocument = Document<unknown, any, IAccount>;
+export type IAccountDocument = Document<unknown, any, IAccount>;
 
-//Account schema
-const AccountSchema = Joi.object({
-  password: Joi.string().min(12).required(),
+//Account Joi schema
+export const AccountJoiSchema = Joi.object({
+  password: Joi.string().pattern(/^[ -~]{12,256}$/).meta({
+    _mongoose: {
+      searchable: false
+    }
+  }).required(),
+  roles: Joi.array().items(Joi.string().meta({
+    _mongoose: {
+      searchable: false,
+      // type: 'ObjectId',
+      // ref: null //TODO: add collection name
+    }
+  })).required(),
+  username: Joi.string().pattern(/^[A-Za-z0-9-_]{3,256}$/).meta({
+    _mongoose: {
+      searchable: true
+    }
+  }).required(),
   pluginData: Joi.object().optional(),
-  roles: Joi.array().items(Joi.string()).required(),
-  totpEnabled: Joi.boolean().required(),
-  totpSecret: Joi.string().optional(),
-  username: Joi.string().required()
+  totpSecret: Joi.string().pattern(/^[A-Z2-7]{52}$/).meta({
+    _mongoose: {
+      searchable: false
+    }
+  }).optional(),
+  totpEnabled: Joi.boolean().required()
 });
 
-//Account model
-const Account = createModel<IAccount>('accounts', joigoose.convert(AccountSchema));
-Account.schema.set('toObject', {
+//Account Mongoose schema
+export const AccountMongooseSchema = new Schema(joigoose.convert(AccountJoiSchema) as any);
+AccountMongooseSchema.set('toObject', {
   virtuals: true,
   versionKey: false,
   transform: (document: IAccountDocument, value: any) =>
@@ -73,11 +93,8 @@ Account.schema.set('toObject', {
     }
   }
 });
+AccountMongooseSchema.plugin(mongoosePaginate);
+AccountMongooseSchema.plugin(mongooseSearch);
 
-//Export
-export {
-  IAccount,
-  IAccountDocument,
-  AccountSchema,
-  Account
-};
+//Account model
+export const Account = createModel<IAccount, PaginateModel<IAccount> & SearchModel<IAccount>>('accounts', AccountMongooseSchema);

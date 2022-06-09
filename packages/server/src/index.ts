@@ -14,7 +14,7 @@ import '@/commands/run';
 /**
  * Get the project version
  */
-export const getVersion = () =>
+const getVersion = () =>
 {
   //Resolve the project
   const project = new Project(resolve(__dirname, '..', '..'));

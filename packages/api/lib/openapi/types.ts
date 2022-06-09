@@ -6,50 +6,126 @@
 import {OpenAPIV3} from 'openapi-types';
 
 /**
- * Operation parameter
+ * Operation schema type
  */
-export interface Parameter
+export enum OperationSchemaType
 {
-  /**
-   * Parameter name
-   */
-  name: string;
-
-  /**
-   * Parameter description
-   */
-  description: string;
+  ARRAY = 'array',
+  BOOLEAN = 'boolean',
+  INTEGER = 'integer',
+  NUMBER = 'number',
+  OBJECT = 'object',
+  STRING = 'string'
 }
 
 /**
- * Operation field
+ * Operation schema
  */
-export interface Field
+export interface OperationSchema<T extends OperationSchemaType = any, U = false>
 {
   /**
-   * Field name
+   * Schema type
    */
-  name: string;
+  type: T;
 
   /**
-   * Field description
+   * Schema union (Only one of `allOf`, `anyOf`, `oneOf`, or `not` may be defined)
    */
-  description: string;
+  allOf?: OperationSchema[];
 
   /**
-   * Joi field type literal
+   * Schema union (Only one of `allOf`, `anyOf`, `oneOf`, or `not` may be defined)
    */
-  joiType: string;
+  anyOf?: OperationSchema[];
 
   /**
-   * TypeScript field type literal
+   * Schema union (Only one of `allOf`, `anyOf`, `oneOf`, or `not` may be defined)
    */
-  typescriptType: string;
+  oneOf?: OperationSchema[];
 
   /**
-   * Whether or not the field is required
+   * Schema negation (Only one of `allOf`, `anyOf`, `oneOf`, or `not` may be defined)
    */
-  required: boolean;
+  not?: OperationSchema;
+
+  /**
+   * Schema description
+   */
+  description?: string;
+
+  /**
+   * Minimum items/length/value (Only defined for `ARRAY`, `INTEGER`, `NUMBER`, `OBJECT`, and
+   * `STRING` schema types)
+   */
+  minimum?: T extends OperationSchemaType.ARRAY | OperationSchemaType.INTEGER | OperationSchemaType.NUMBER | OperationSchemaType.OBJECT | OperationSchemaType.STRING ? number : undefined;
+
+  /**
+   * Whether or not the minimum value is exclusive (Only defined for `INTEGER` and `NUMBER` schema
+   * types; defaults to `false`)
+   */
+  exclusiveMinimum?: T extends OperationSchemaType.INTEGER | OperationSchemaType.NUMBER ? boolean : undefined;
+
+  /**
+   * Maximum items/length/value (Only defined for `ARRAY`, `INTEGER`, `NUMBER`, `OBJECT`, and
+   * `STRING` schema types)
+   */
+  maximum?: T extends OperationSchemaType.ARRAY | OperationSchemaType.INTEGER | OperationSchemaType.NUMBER | OperationSchemaType.OBJECT | OperationSchemaType.STRING ? number : undefined;
+
+  /**
+   * Whether or not the maximum value is exclusive (Only defined for `INTEGER` and `NUMBER` schema
+   * types; defaults to `false`)
+   */
+  exclusiveMaximum?: T extends OperationSchemaType.INTEGER | OperationSchemaType.NUMBER ? boolean : undefined;
+
+  /**
+   * Sub-schema (Only defined for `ARRAY` and `OBJECT` schema types; only one of `subSchema and
+   * `subSchemas` may be defined)
+   */
+  subSchema?: T extends OperationSchemaType.ARRAY | OperationSchemaType.OBJECT ? OperationSchema : undefined;
+
+  /**
+   * Whether or not all items must be unique (Only defined for `ARRAY` schema types; defaults to
+   * `false`)
+   */
+  unique: T extends OperationSchemaType.ARRAY ? boolean : undefined;
+
+  /**
+   * Schema key (Only defined for `OBJECT` schema types)
+   */
+  key: T extends OperationSchemaType.OBJECT ? string : undefined;
+
+  /**
+   * Whether or not the field/parameter is required (Only defined for `OBJECT` schema types and
+   * parameters; defaults to `false`)
+   */
+  required: T extends OperationSchemaType.OBJECT ? boolean : (U extends true ? boolean : undefined);
+
+  /**
+   * Sub-schemas (Only defined for `OBJECT` schema types; mutually-exclusively defined with
+   * `subSchema`)
+   */
+  subSchemas?: T extends OperationSchemaType.OBJECT ? OperationSchema[] : undefined;
+
+  /**
+   * Enumerated values (Only defined for `STRING` schema types)
+   */
+  enum?: T extends OperationSchemaType.STRING ? string[] : undefined;
+
+  /**
+   * String format (Only defined for `STRING` schema types)
+   */
+  format?: T extends OperationSchemaType.STRING ? string : undefined;
+
+  /**
+   * Regular expression pattern (Only defined for `STRING` schema types)
+   */
+  pattern?: T extends OperationSchemaType.STRING ? string : undefined;
+
+  /**
+   * Whether or not the field should be included when fuzzy-searching (Only defined for `STRING`
+   * schema types for `ALL` operation types; defaults to false)
+   */
+  searchable?: T extends OperationSchemaType.STRING ? boolean : undefined;
 }
 
 /**
@@ -65,9 +141,30 @@ export enum OperationType
 }
 
 /**
+ * Operation parameter
+ */
+export interface OperationParameter
+{
+  /**
+   * Parameter name
+   */
+  name: string;
+
+  /**
+   * Parameter description
+   */
+  description?: string;
+
+  /**
+   * Parameter schema
+   */
+  schema?: OperationSchema;
+}
+
+/**
  * Action performed upon an entity
  */
-export interface Operation
+export interface EntityOperation
 {
   /**
    * Operation name
@@ -102,12 +199,17 @@ export interface Operation
   /**
    * Operation path parameters
    */
-  parameters: Parameter[];
+  pathParameters: OperationParameter[];
 
   /**
-   * Operation request fields
+   * Operation path parameters
    */
-  requestFields: Field[];
+  queryParameters: OperationParameter[];
+
+  /**
+   * Operation request schema
+   */
+  requestSchema?: OperationSchema;
 
   /**
    * Operation request MIME type
@@ -115,9 +217,9 @@ export interface Operation
   requestMime?: string;
 
   /**
-   * Operation response fields
+   * Operation response schema
    */
-  responseFields: Field[];
+  responseSchema?: OperationSchema;
 
   /**
    * Operation response MIME type
@@ -148,5 +250,5 @@ export interface Entity
   /**
    * Entity operations
    */
-  operations: Operation[];
+  operations: EntityOperation[];
 }

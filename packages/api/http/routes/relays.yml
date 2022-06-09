@@ -9,6 +9,7 @@ _id:
 
 name:
   description: Relay name
+  x-searchable: true
   type: string
   pattern: ^[ -~]{3,256}$
 
@@ -61,6 +62,10 @@ taints:
 
 # Routes
 all:
+  parameters:
+    - $ref: '../schemas.yml#/allRequest/page'
+    - $ref: '../schemas.yml#/allRequest/limit'
+    - $ref: '../schemas.yml#/allRequest/query'
   get:
     operationId: getAllRelays
     x-operation-type: all
@@ -73,25 +78,37 @@ all:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: object
-                required:
-                  - id
-                  - name
-                  - labels
-                  - taints
-                properties:
-                  id:
-                    $ref: '#/_id'
-                  name:
-                    $ref: '#/name'
-                  labels:
-                    $ref: '#/labels'
-                  taints:
-                    $ref: '#/taints'
-                  pluginData:
-                    $ref: '../schemas.yml#/pluginData'
+              type: object
+              required:
+                - relays
+                - page
+                - pages
+              properties:
+                relays:
+                  description: Filtered relays
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - name
+                      - labels
+                      - taints
+                    properties:
+                      id:
+                        $ref: '#/_id'
+                      name:
+                        $ref: '#/name'
+                      labels:
+                        $ref: '#/labels'
+                      taints:
+                        $ref: '#/taints'
+                      pluginData:
+                        $ref: '../schemas.yml#/pluginData'
+                page:
+                  $ref: '../schemas.yml#/allResponse/page'
+                pages:
+                  $ref: '../schemas.yml#/allResponse/pages'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -146,7 +163,10 @@ id:
       in: path
       required: true
       schema:
-        $ref: '#/_id'
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
   get:
     operationId: getRelay
     x-operation-type: get

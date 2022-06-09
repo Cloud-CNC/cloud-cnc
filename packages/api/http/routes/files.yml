@@ -9,13 +9,15 @@ _id:
 
 name:
   description: File name
+  x-searchable: true
   type: string
   pattern: ^[ -~]{3,256}$
 
 description:
   description: File description
+  x-searchable: true
   type: string
-  pattern: ^[ -~]{0,1024}$
+  pattern: ^[ -~]{1,1024}$
 
 state:
   description: |
@@ -65,6 +67,10 @@ estimate:
 
 # Routes
 all:
+  parameters:
+    - $ref: '../schemas.yml#/allRequest/page'
+    - $ref: '../schemas.yml#/allRequest/limit'
+    - $ref: '../schemas.yml#/allRequest/query'
   get:
     operationId: getAllFiles
     x-operation-type: all
@@ -77,30 +83,42 @@ all:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: object
-                required:
-                  - id
-                  - name
-                  - lifecycle
-                  - acl
-                  - estimate
-                properties:
-                  id:
-                    $ref: '#/_id'
-                  name:
-                    $ref: '#/name'
-                  description:
-                    $ref: '#/description'
-                  state:
-                    $ref: '#/state'
-                  acl:
-                    $ref: '#/acl'
-                  estimate:
-                    $ref: '#/estimate'
-                  pluginData:
-                    $ref: '../schemas.yml#/pluginData'
+              type: object
+              required:
+                - files
+                - page
+                - pages
+              properties:
+                files:
+                  description: Filtered files
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - name
+                      - lifecycle
+                      - acl
+                      - estimate
+                    properties:
+                      id:
+                        $ref: '#/_id'
+                      name:
+                        $ref: '#/name'
+                      description:
+                        $ref: '#/description'
+                      state:
+                        $ref: '#/state'
+                      acl:
+                        $ref: '#/acl'
+                      estimate:
+                        $ref: '#/estimate'
+                      pluginData:
+                        $ref: '../schemas.yml#/pluginData'
+                page:
+                  $ref: '../schemas.yml#/allResponse/page'
+                pages:
+                  $ref: '../schemas.yml#/allResponse/pages'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -166,7 +184,10 @@ raw:
       in: path
       required: true
       schema:
-        $ref: '#/_id'
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
   get:
     operationId: getRawFile
     x-operation-type: get
@@ -194,7 +215,10 @@ id:
       in: path
       required: true
       schema:
-        $ref: '#/_id'
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
   get:
     operationId: getFile
     x-operation-type: get

@@ -26,23 +26,36 @@ test.afterEach.always('Restore sandbox', () =>
 
 //Tests
 <% for (const [operation, separator] of h.list(entity.operations, '\n\n')) { -%>
+<% const requestSchema = (operation.requestSchema != null && operation.requestSchema.type == 'object' && operation.requestSchema.subSchemas.length > 0) ? operation.requestSchema : null; -%>
+<% let responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema : null; -%>
 test.serial('<%- operation.description %>', async ctx =>
 {
 <% switch (operation.type) { case 'all': -%>
-<% if (operation.responseFields.length > 0) { -%>
+<% responseSchema = responseSchema != null ? responseSchema.subSchemas.find(subSchema => subSchema.key == h.changeCase.lower(h.inflection.pluralize(name))) : null; -%>
   //Test data
-  const output = [
-    {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+  const input = {
+    query: '', //TODO: add query
+    page: 1,
+    limit: 2
+  };
+
+  const output = {
+<% if (responseSchema != null) { -%>
+    <%- h.changeCase.camel(h.inflection.pluralize(name)) %>: [
+      {
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchema.subSchemas, ',')) { -%>
+        <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
 <% } -%>
-    },
-    {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- field.name %><%- separator %>
+      },
+      {
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchema.subSchemas, ',')) { -%>
+        <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- subSchema.key %><%- separator %>
 <% } -%>
-    }
-  ];
+      }
+    ],
+    page: 1,
+    pages: 1
+  };
 
   //Stub the callHook method
   const callHook = sandbox.stub(hooks, 'callHook').resolves();
@@ -50,51 +63,80 @@ test.serial('<%- operation.description %>', async ctx =>
   //Stub the toObject method
   const toObject = sandbox.stub()
     .onCall(0)
-    .returns(output[0])
+    .returns(output.<%- h.changeCase.camel(h.inflection.pluralize(name)) %>[0])
     .onCall(1)
-    .returns(output[1]);
+    .returns(output.<%- h.changeCase.camel(h.inflection.pluralize(name)) %>[1]);
 
 <% } -%>
-  //Stub the find method
-  const find = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'find')
-    .resolves(<% if (operation.responseFields.length > 0) { %>Array(2).fill({
-      toObject
-    })<% } %>);
+  //Stub the paginate method
+  const paginate = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'paginate')
+    .resolves({
+<% if (responseSchema != null) { -%>
+      docs: Array(2).fill({
+        toObject
+      }),
+<% } -%>
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: 2,
+      offset: 0,
+      page: 1,
+      pagingCounter: 1,
+      totalDocs: 2,
+      totalPages: 1
+    });
 
   //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
-  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = <% } %>await <%- operation.name %>();
+  <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = <% } %>await <%- operation.name %>(input);
 
   //Ensure the result is expected
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.pluralize(name)) %>, output);
 <% } -%>
-  ctx.assert(find.calledOnceWithExactly({}<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: 1<%- separator %>
+  ctx.assert(paginate.calledOnceWithExactly({}, {
+    page: 1,
+<% if (responseSchema != null) { -%>
+    projection: {
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchema.subSchemas, ',')) { -%>
+      <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
-  }<% } %>));
-<% if (operation.responseFields.length > 0) { -%>
+    },<% } %>
+    limit: 2
+  }));
+<% if (responseSchema != null) { -%>
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledTwice);
 <% } -%>
-  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre'));
-  ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', Array(2).fill({
-    toObject
-  })));
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre', input));
+  ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
+<% if (responseSchema != null) { -%>
+    docs: Array(2).fill({
+      toObject
+    }),
+<% } -%>
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 2,
+    offset: 0,
+    page: 1,
+    pagingCounter: 1,
+    totalDocs: 2,
+    totalPages: 1
+  }));
   ctx.assert(callHook.calledTwice);
 <% break; case 'create': -%>
   //Test data
-<% if (operation.requestFields.length > 0) { -%>
+<% if (requestSchema != null) { -%>
   const input = {
-<% for (const [field, separator] of h.list(operation.requestFields, ',')) { -%>
-    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
 <% } -%>
   };
 
-<% } if (operation.responseFields.length > 0) { -%>
+<% } if (responseSchema != null) { -%>
   const output = {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
 <% } -%>
   };
 
@@ -113,27 +155,27 @@ test.serial('<%- operation.description %>', async ctx =>
     });
 
   //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% if (operation.requestFields.length > 0) { %>input<% } %>);
+  <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% if (requestSchema != null) { %>input<% } %>);
 
   //Ensure the result is expected
-<% if (operation.responseFields.length > 0) { -%>
-  ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %><% if (operation.responseFields.length > 0) { %>, output<% } %>);
+<% if (responseSchema != null) { -%>
+  ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %><% if (responseSchema != null) { %>, output<% } %>);
 <% } -%>
-  //@ts-ignore Sinon types are outdated
-  ctx.assert(create.calledOnceWithExactly(<% if (operation.requestFields.length > 0) { %>input<% } %>));
+  //@ts-expect-error Sinon types are outdated
+  ctx.assert(create.calledOnceWithExactly(<% if (requestSchema != null) { %>input<% } %>));
   ctx.assert(save.calledOnceWithExactly());
-  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre'<% if (operation.requestFields.length > 0) { %>, input<% } %>));
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre'<% if (requestSchema != null) { %>, input<% } %>));
   ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
     id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id,
     save
   } as any));
   ctx.assert(callHook.calledTwice);
 <% break; case 'get': -%>
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   //Test data
   const output = {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
 <% } -%>
   };
   
@@ -141,7 +183,7 @@ test.serial('<%- operation.description %>', async ctx =>
   //Stub the callHook method
   const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   //Stub the toObject method
   const toObject = sandbox.stub().returns(output);
 
@@ -149,45 +191,45 @@ test.serial('<%- operation.description %>', async ctx =>
   //Stub the findById method
   const findById = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findById')
     .resolves({
-      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>,
       toObject<% } %>
     });
 
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id);
+  <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id);
 
   //Ensure the result is expected
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
 <% } -%>
-  ctx.assert(findById.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: 1<%- separator %>
+  ctx.assert(findById.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>, {
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
   }<% } %>));
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
 <% } -%>
   ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre', <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id));
   ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
-    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>,
     toObject<% } %>
   } as any));
   ctx.assert(callHook.calledTwice);
 <% break; case 'update': -%>
   //Test data
-<% if (operation.requestFields.length > 0) { -%>
+<% if (requestSchema != null) { -%>
   const input = {
-<% for (const [field, separator] of h.list(operation.requestFields, ',')) { -%>
-    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- field.name %><%- separator %>
+<% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- subSchema.key %><%- separator %>
 <% } -%>
   };
 
-<% } if (operation.responseFields.length > 0) { -%>
+<% } if (responseSchema != null) { -%>
   const output = {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
 <% } -%>
   };
 
@@ -195,7 +237,7 @@ test.serial('<%- operation.description %>', async ctx =>
   //Stub the callHook method
   const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   //Stub the toObject method
   const toObject = sandbox.stub().returns(output);
 
@@ -203,43 +245,42 @@ test.serial('<%- operation.description %>', async ctx =>
   //Stub the findByIdAndUpdate method
   const findByIdAndUpdate = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findByIdAndUpdate')
     .resolves({
-      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>,
       toObject<% } %>
     });
 
   //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.requestFields.length > 0) { %>, input<% } %>);
+  <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (requestSchema != null) { %>, input<% } %>);
 
   //Ensure the result is expected
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
 <% } -%>
-  ctx.assert(findByIdAndUpdate.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id, {
-    $set: input
-  }<% if (operation.responseFields.length > 0) { %>, {
+  ctx.assert(findByIdAndUpdate.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id, input<% if (responseSchema != null) { %>, {
     new: true,
+    overwrite: true,
     projection: {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+      <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
     }
   }<% } %>));
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
 <% } -%>
-  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre'<% if (operation.requestFields.length > 0) { %>, input<% } %>));
+  ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre', <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (requestSchema != null) { %>, input<% } %>));
   ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
-    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>,
     toObject<% } %>
   } as any));
   ctx.assert(callHook.calledTwice);
 <% break; case 'delete': -%>
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   //Test data
   const output = {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- field.name %><%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
 <% } -%>
   };
 
@@ -247,7 +288,7 @@ test.serial('<%- operation.description %>', async ctx =>
   //Stub the callHook method
   const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   //Stub the toObject method
   const toObject = sandbox.stub().returns(output);
 
@@ -255,31 +296,31 @@ test.serial('<%- operation.description %>', async ctx =>
   //Stub the findByIdAndDelete method
   const findByIdAndDelete = sandbox.stub(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, 'findByIdAndDelete')
     .resolves({
-      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+      id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>,
       toObject<% } %>
     });
   
   //Delete the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  <% if (operation.responseFields.length > 0) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id);
+  <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id);
 
   //Ensure the result is expected
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   ctx.deepEqual(<%- h.changeCase.camel(h.inflection.singularize(name)) %>, output);
 <% } -%>
-  ctx.assert(findByIdAndDelete.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>, {
+  ctx.assert(findByIdAndDelete.calledOnceWithExactly(<%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>, {
     projection: {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+      <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
     }
   }<% } %>));
-<% if (operation.responseFields.length > 0) { -%>
+<% if (responseSchema != null) { -%>
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
 <% } -%>
   ctx.assert(callHook.getCall(0).calledWithExactly('<%- operation.name %>:pre', <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id));
   ctx.assert(callHook.getCall(1).calledWithExactly('<%- operation.name %>:post', {
-    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (operation.responseFields.length > 0) { %>,
+    id: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.id<% if (responseSchema != null) { %>,
     toObject<% } %>
   } as any));
   ctx.assert(callHook.calledTwice);

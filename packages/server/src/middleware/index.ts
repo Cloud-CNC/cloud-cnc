@@ -8,7 +8,6 @@ import compose from 'koa-compose';
 import error from './error';
 import helmet from './helmet';
 import log from './log';
-import sanitize from './sanitize';
 import session from './session';
 
 //Compose middleware
@@ -17,7 +16,6 @@ const middleware = compose([
   log,
   helmet,
   body,
-  sanitize,
   session
 ]);
 

@@ -6,7 +6,7 @@
 import Joi from 'joi';
 import Router from '@koa/router';
 import checkPermission from '@/middleware/permission';
-import validate from '@/middleware/validate';
+import safe from '@/middleware/safe';
 import {
   getAllAccounts,
   createAccount,
@@ -24,28 +24,32 @@ router
   /**
    * Get all accounts
    */
-  .get('/accounts/all', checkPermission('getAllAccounts'), async ctx =>
+  .get('/accounts/all', checkPermission('getAllAccounts'), safe(undefined, undefined, Joi.object({
+    page: Joi.number().min(1).optional(),
+    limit: Joi.number().min(1).max(100).optional(),
+    query: Joi.string().pattern(/^[A-Za-z0-9-_]{1,256}$/).optional()
+  })), async ctx =>
   {
     //Get all accounts
-    const accounts = await getAllAccounts();
+    const res = await getAllAccounts(ctx.safe.query);
 
     //Return the accounts
-    ctx.response.body = accounts;
+    ctx.response.body = res;
   })
 
   /**
    * Create an account
    */
-  .post('/accounts/create', checkPermission('createAccount'), validate(Joi.object({
-    username: Joi.string().required(),
-    password: Joi.string().min(12).required(),
+  .post('/accounts/create', checkPermission('createAccount'), safe(Joi.object({
+    username: Joi.string().pattern(/^[A-Za-z0-9-_]{3,256}$/).required(),
+    password: Joi.string().pattern(/^[ -~]{12,256}$/).required(),
     totpEnabled: Joi.boolean().required(),
     roles: Joi.array().items(Joi.string()).required(),
     pluginData: Joi.object().optional()
-  })), async ctx =>
+  }), undefined, undefined), async ctx =>
   {
     //Create the account
-    const account = await createAccount(ctx.request.body);
+    const account = await createAccount(ctx.safe.body);
 
     //Return the account
     ctx.response.body = account;
@@ -54,7 +58,11 @@ router
   /**
    * Start/stop impersonating an account
    */
-  /*.post('/accounts/:id/impersonate', checkPermission('impersonateAccount'), async ctx =>
+  /*.post('/accounts/:id/impersonate', checkPermission('impersonateAccount'), safe(Joi.object({
+    enabled: Joi.boolean().required()
+  }), Joi.object({
+    id: Joi.string().optional()
+  }), undefined), async ctx =>
   {
     //TODO: fully invoke controller
     await impersonateAccount();
@@ -63,12 +71,14 @@ router
   /**
    * Get an account
    */
-  .get('/accounts/:id', checkPermission('getAccount'), async ctx =>
+  .get('/accounts/:id', checkPermission('getAccount'), safe(undefined, Joi.object({
+    id: Joi.string().optional()
+  }), undefined), async ctx =>
   {
     try
     {
       //Get the account
-      const account = await getAccount(ctx.params.id!);
+      const account = await getAccount(ctx.safe.params.id!);
 
       //Return the account
       ctx.response.body = account;
@@ -91,18 +101,20 @@ router
   /**
    * Update an account
    */
-  .patch('/accounts/:id', checkPermission('updateAccount'), validate(Joi.object({
-    username: Joi.string().optional(),
-    password: Joi.string().min(12).optional(),
+  .patch('/accounts/:id', checkPermission('updateAccount'), safe(Joi.object({
+    username: Joi.string().pattern(/^[A-Za-z0-9-_]{3,256}$/).optional(),
+    password: Joi.string().pattern(/^[ -~]{12,256}$/).optional(),
     totpEnabled: Joi.boolean().optional(),
     roles: Joi.array().items(Joi.string()).optional(),
     pluginData: Joi.object().optional()
-  })), async ctx =>
+  }), Joi.object({
+    id: Joi.string().optional()
+  }), undefined), async ctx =>
   {
     try
     {
       //Update the account
-      const account = await updateAccount(ctx.params.id!, ctx.request.body);
+      const account = await updateAccount(ctx.safe.params.id!, ctx.safe.body);
 
       //Return the account
       ctx.response.body = account;
@@ -125,12 +137,14 @@ router
   /**
    * Delete an account
    */
-  .delete('/accounts/:id', checkPermission('deleteAccount'), async ctx =>
+  .delete('/accounts/:id', checkPermission('deleteAccount'), safe(undefined, Joi.object({
+    id: Joi.string().optional()
+  }), undefined), async ctx =>
   {
     try
     {
       //Delete the account
-      await deleteAccount(ctx.params.id!);
+      await deleteAccount(ctx.safe.params.id!);
 
       //Return nothing
       ctx.response.body = null;

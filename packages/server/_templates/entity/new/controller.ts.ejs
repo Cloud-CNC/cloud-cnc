@@ -9,36 +9,50 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 import hooks from '@/lib/hooks';
 import log from '@/lib/log';
 import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-import {WithID} from '@/lib/types';
+import {Filter, WithID, WithPagination} from '@/lib/types';
 
-<% for (const operation of entity.operations) { -%>
+<% for (const [operation, operationSeparator] of h.list(entity.operations, '\n\n')) { -%>
+<% const requestSchema = (operation.requestSchema != null && operation.requestSchema.type == 'object' && operation.requestSchema.subSchemas.length > 0) ? operation.requestSchema : null; -%>
+<% let responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema : null; -%>
 /**
 <%- h.multiline(operation.description, 1) %>
  */
 <% switch (operation.type) { case 'all': -%>
-const <%- operation.name %> = async ()<% if (operation.responseFields.length > 0) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>[]><% } %> =>
+<% responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema.subSchemas.find(subSchema => subSchema.key == h.changeCase.lower(h.inflection.pluralize(name))) : null; -%>
+export const <%- operation.name %> = async (filter: Filter)<% if (responseSchema != null) { %>: Promise<WithPagination<'<%- h.changeCase.camel(h.inflection.pluralize(name)) %>', WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchema.subSchemas.filter(subSchema => subSchema.key != 'id'), ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>[]>><% } %> =>
 {
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:pre');
+  await hooks.callHook('<%- operation.name %>:pre', filter);
+
+  //Generate the query
+  const query = filter.query != null ? <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.searchQuery(filter.query) : {};
 
   //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
-  const <%- h.changeCase.camel(h.inflection.pluralize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.find({<% if (operation.ownable) { %>owner<% } %>}<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: 1<%- separator %>
+  const result = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.paginate(query, {
+    page: filter.page ?? 1,<% if (responseSchema != null) { %>
+    projection: {
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchema.subSchemas, ',')) { -%>
+      <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
-  }<% } %>);
+    },<% } %>
+    limit: filter.limit ?? 25
+  });
 
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.pluralize(name)) %>);
+  await hooks.callHook('<%- operation.name %>:post', result.docs);
 
   //Log
   log.debug('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
-<% if (operation.responseFields.length > 0) { %>
-  return <%- h.changeCase.camel(h.inflection.pluralize(name)) %>.map(<%- h.changeCase.camel(h.inflection.singularize(name)) %> => <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject());
+<% if (responseSchema != null) { %>
+  return {
+    <%- h.changeCase.camel(h.inflection.pluralize(name)) %>: result.docs.map(<%- h.changeCase.camel(h.inflection.singularize(name)) %> => <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject()),
+    page: result.page!,
+    pages: result.totalPages
+  };
 <% } -%>
 };
 <% break; case 'create': -%>
-const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>)<% if (operation.responseFields.length > 0) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields.filter(field => field.name != 'id'), ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>><% } %> =>
+export const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% if (requestSchema != null) { for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% }} %>>)<% if (responseSchema != null) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas.filter(subSchema => subSchema.key != 'id'), ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>><% } %> =>
 {
   //Invoke hook
   await hooks.callHook('<%- operation.name %>:pre', create);
@@ -54,24 +68,24 @@ const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inf
 
   //Log
   log.debug(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% if (operation.responseFields.length > 0) { %>
+<% if (responseSchema != null) { %>
   return {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: <% if (field.name == 'id') { %><%- h.changeCase.camel(h.inflection.singularize(name)) %>.<%- field.name %><% } else { %>null //TODO: add data<% } %><%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: <% if (subSchema.key == 'id') { %><%- h.changeCase.camel(h.inflection.singularize(name)) %>.<%- subSchema.key %><% } else { %>null //TODO: add data<% } %><%- separator %>
 <% } -%>
   };
 <% } -%>
 };
 <% break; case 'get': -%>
-const <%- operation.name %> = async (id: string)<% if (operation.responseFields.length > 0) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>><% } %> =>
+export const <%- operation.name %> = async (id: string)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
 {
   //Invoke hook
   await hooks.callHook('<%- operation.name %>:pre', id);
 
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findById(id<% if (operation.responseFields.length > 0) { %>, {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-    <%- field.name %>: 1<%- separator %>
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findById(id<% if (responseSchema != null) { %>, {
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+    <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
   }<% } %>);
 
@@ -86,24 +100,23 @@ const <%- operation.name %> = async (id: string)<% if (operation.responseFields.
 
   //Log
   log.debug(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% if (operation.responseFields.length > 0) { %>
+<% if (responseSchema != null) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
 };
 <% break; case 'update': -%>
-const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.requestFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>>)<% if (operation.responseFields.length > 0) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>><% } %> =>
+export const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
 {
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:pre', update);
+  await hooks.callHook('<%- operation.name %>:pre', id, update);
 
-  //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndUpdate(id, {
-    $set: update
-  }<% if (operation.responseFields.length > 0) { %>, {
+  //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndUpdate(id, update<% if (responseSchema != null) { %>, {
     new: true,
+    overwrite: true,
     projection: {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+      <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
     }
   }<% } %>);
@@ -119,21 +132,21 @@ const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%- h.cha
 
   //Log
   log.debug(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% if (operation.responseFields.length > 0) { %>
+<% if (responseSchema != null) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
 };
 <% break; case 'delete': -%>
-const <%- operation.name %> = async (id: string)<% if (operation.responseFields.length > 0) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [field, separator] of h.list(operation.responseFields, ' | ')) { -%>'<%- field.name %>'<%- separator %><% } %>>><% } %> =>
+export const <%- operation.name %> = async (id: string)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
 {
   //Invoke hook
   await hooks.callHook('<%- operation.name %>:pre', id);
 
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndDelete(id<% if (operation.responseFields.length > 0) { %>, {
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndDelete(id<% if (responseSchema != null) { %>, {
     projection: {
-<% for (const [field, separator] of h.list(operation.responseFields, ',')) { -%>
-      <%- field.name %>: 1<%- separator %>
+<% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ',')) { -%>
+      <%- subSchema.key %>: 1<%- separator %>
 <% } -%>
     }
   }<% } %>);
@@ -149,12 +162,12 @@ const <%- operation.name %> = async (id: string)<% if (operation.responseFields.
 
   //Log
   log.debug(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
-<% if (operation.responseFields.length > 0) { %>
+<% if (responseSchema != null) { %>
   return <%- h.changeCase.camel(h.inflection.singularize(name)) %>.toObject();
 <% } -%>
 };
 <% break; default: -%>
-const <%- operation.name %> = async () =>
+export const <%- operation.name %> = async () =>
 {
   //Invoke hook
   //TODO: add hook arguments
@@ -169,11 +182,5 @@ const <%- operation.name %> = async () =>
   //TODO: log
 };
 <% break; } -%>
-
+<%- operationSeparator -%>
 <% } -%>
-//Export
-export {
-<% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
-  <%- operation.name %><%- separator %>
-<% } -%>
-};

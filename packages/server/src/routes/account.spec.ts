@@ -28,26 +28,35 @@ test.serial('Get all accounts', async ctx =>
 
   //Make the request
   const res = await request(app.callback())
-    .get('/accounts/all');
+    .get('/accounts/all')
+    .query({
+      // query: '', //TODO: add query
+      page: 1,
+      limit: 2
+    });
 
   //Ensure the response is expected
   ctx.assert(res.headers['content-type'].includes('application/json'));
-  ctx.deepEqual(res.body, [
-    {
-      id: accountDocumentA.id,
-      username: accountA.username,
-      totpEnabled: accountA.totpEnabled,
-      roles: accountA.roles,
-      pluginData: accountA.pluginData
-    },
-    {
-      id: accountDocumentB.id,
-      username: accountB.username,
-      totpEnabled: accountB.totpEnabled,
-      roles: accountB.roles,
-      pluginData: accountB.pluginData
-    }
-  ]);
+  ctx.deepEqual(res.body, {
+    page: 1,
+    pages: 1,
+    accounts: [
+      {
+        id: accountDocumentA.id,
+        username: accountA.username,
+        totpEnabled: accountA.totpEnabled,
+        roles: accountA.roles,
+        pluginData: accountA.pluginData
+      },
+      {
+        id: accountDocumentB.id,
+        username: accountB.username,
+        totpEnabled: accountB.totpEnabled,
+        roles: accountB.roles,
+        pluginData: accountB.pluginData
+      }
+    ]
+  });
   ctx.is(res.status, 200);
 });
 
@@ -74,11 +83,11 @@ test.serial('Create an account', async ctx =>
   //Get the account
   const accountDocument = await Account.findById(res.body.id, {
     password: 1,
-    pluginData: 1,
     roles: 1,
-    totpEnabled: 1,
+    username: 1,
+    pluginData: 1,
     totpSecret: 1,
-    username: 1
+    totpEnabled: 1
   }) as Record<string, any>;
 
   //Ensure the document exists
@@ -86,11 +95,11 @@ test.serial('Create an account', async ctx =>
 
   //Ensure the account was created correctly
   ctx.deepEqual(accountDocument.password, accountA.password);
-  ctx.deepEqual(accountDocument.pluginData, accountA.pluginData);
   ctx.deepEqual(accountDocument.roles, accountA.roles);
-  ctx.deepEqual(accountDocument.totpEnabled, accountA.totpEnabled);
-  ctx.deepEqual(accountDocument.totpSecret, accountA.totpSecret);
   ctx.deepEqual(accountDocument.username, accountA.username);
+  ctx.deepEqual(accountDocument.pluginData, accountA.pluginData);
+  ctx.deepEqual(accountDocument.totpSecret, accountA.totpSecret);
+  ctx.deepEqual(accountDocument.totpEnabled, accountA.totpEnabled);
 });
 
 /*test.serial('Start/stop impersonating an account', async ctx =>
@@ -101,13 +110,12 @@ test.serial('Create an account', async ctx =>
   const res = await request(app.callback())
     //TODO: add path parameters
     .post('/accounts/:id/impersonate')
-    .set('content-type', 'application/json')
-    .send({
-      //TODO: add request body
-    });
+    .set('content-type', 'application/json');
+    //TODO: add request body/query parameters
 
   //Ensure the response is expected
   ctx.is(res.status, 204);
+
   //TODO: ensure the database was updated correctly
 });*/
 
@@ -156,19 +164,17 @@ test.serial('Update an account', async ctx =>
 
   //Ensure the response is expected
   ctx.assert(res.headers['content-type'].includes('application/json'));
-  ctx.deepEqual(res.body, {
-    totpSecret: accountB.totpSecret
-  });
+  ctx.deepEqual(res.body, {});
   ctx.is(res.status, 200);
 
   //Get the account
   const updatedAccountDocument = await Account.findById(accountDocument.id, {
     password: 1,
-    pluginData: 1,
     roles: 1,
-    totpEnabled: 1,
+    username: 1,
+    pluginData: 1,
     totpSecret: 1,
-    username: 1
+    totpEnabled: 1
   }) as Record<string, any>;
 
   //Ensure the document exists
@@ -176,11 +182,11 @@ test.serial('Update an account', async ctx =>
 
   //Ensure the account was created correctly
   ctx.deepEqual(updatedAccountDocument.password, accountB.password);
-  ctx.deepEqual(updatedAccountDocument.pluginData, accountB.pluginData);
   ctx.deepEqual(updatedAccountDocument.roles, accountB.roles);
-  ctx.deepEqual(updatedAccountDocument.totpEnabled, accountB.totpEnabled);
-  ctx.deepEqual(updatedAccountDocument.totpSecret, accountB.totpSecret);
   ctx.deepEqual(updatedAccountDocument.username, accountB.username);
+  ctx.deepEqual(updatedAccountDocument.pluginData, accountB.pluginData);
+  ctx.deepEqual(updatedAccountDocument.totpSecret, accountB.totpSecret);
+  ctx.deepEqual(updatedAccountDocument.totpEnabled, accountB.totpEnabled);
 });
 
 test.serial('Delete an account', async ctx =>

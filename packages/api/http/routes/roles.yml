@@ -9,6 +9,7 @@ _id:
 
 name:
   description: Role name
+  x-searchable: true
   type: string
   pattern: ^[ -~]{3,256}$
 
@@ -39,6 +40,10 @@ priorityLimits:
 
 # Routes
 all:
+  parameters:
+    # - $ref: '../schemas.yml#/allRequest/page'
+    - $ref: '../schemas.yml#/allRequest/limit'
+    - $ref: '../schemas.yml#/allRequest/query'
   get:
     operationId: getAllRoles
     x-operation-type: all
@@ -51,25 +56,37 @@ all:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: object
-                required:
-                  - id
-                  - name
-                  - permissions
-                  - priorityLimits
-                properties:
-                  id:
-                    $ref: '#/_id'
-                  name:
-                    $ref: '#/name'
-                  permissions:
-                    $ref: '#/permissions'
-                  priorityLimits:
-                    $ref: '#/priorityLimits'
-                  pluginData:
-                    $ref: '../schemas.yml#/pluginData'
+              type: object
+              required:
+                - roles
+                - page
+                - pages
+              properties:
+                roles:
+                  description: Filtered roles
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - name
+                      - permissions
+                      - priorityLimits
+                    properties:
+                      id:
+                        $ref: '#/_id'
+                      name:
+                        $ref: '#/name'
+                      permissions:
+                        $ref: '#/permissions'
+                      priorityLimits:
+                        $ref: '#/priorityLimits'
+                      pluginData:
+                        $ref: '../schemas.yml#/pluginData'
+                page:
+                  $ref: '../schemas.yml#/allResponse/page'
+                pages:
+                  $ref: '../schemas.yml#/allResponse/pages'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -129,7 +146,10 @@ id:
       in: path
       required: true
       schema:
-        $ref: '#/_id'
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
   get:
     operationId: getRole
     x-operation-type: get

@@ -4,7 +4,7 @@
 
 //Imports
 import {accountA, accountB} from '!/fixtures/account';
-import {Account, IAccount} from '@/models/account';
+import {Account} from '@/models/account';
 import {createSandbox} from 'sinon';
 import {
   getAllAccounts,
@@ -28,22 +28,32 @@ test.afterEach.always('Restore sandbox', () =>
 test.serial('Get all accounts', async ctx =>
 {
   //Test data
-  const output = [
-    {
-      id: accountA.id,
-      username: accountA.username,
-      totpEnabled: accountA.totpEnabled,
-      roles: accountA.roles,
-      pluginData: accountA.pluginData
-    },
-    {
-      id: accountB.id,
-      username: accountB.username,
-      totpEnabled: accountB.totpEnabled,
-      roles: accountB.roles,
-      pluginData: accountB.pluginData
-    }
-  ];
+  const input = {
+    // query: '', //TODO: add query
+    page: 1,
+    limit: 2
+  };
+
+  const output = {
+    accounts: [
+      {
+        id: accountA.id,
+        username: accountA.username,
+        totpEnabled: accountA.totpEnabled,
+        roles: accountA.roles,
+        pluginData: accountA.pluginData
+      },
+      {
+        id: accountB.id,
+        username: accountB.username,
+        totpEnabled: accountB.totpEnabled,
+        roles: accountB.roles,
+        pluginData: accountB.pluginData
+      }
+    ],
+    page: 1,
+    pages: 1
+  };
 
   //Stub the callHook method
   const callHook = sandbox.stub(hooks, 'callHook').resolves();
@@ -51,34 +61,58 @@ test.serial('Get all accounts', async ctx =>
   //Stub the toObject method
   const toObject = sandbox.stub()
     .onCall(0)
-    .returns(output[0])
+    .returns(output.accounts[0])
     .onCall(1)
-    .returns(output[1]);
+    .returns(output.accounts[1]);
 
-  //Stub the find method
-  const find = sandbox.stub(Account, 'find')
-    .resolves(Array(2).fill({
-      toObject
-    }));
+  //Stub the paginate method
+  const paginate = sandbox.stub(Account, 'paginate')
+    .resolves({
+      docs: Array(2).fill({
+        toObject
+      }),
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: 2,
+      offset: 0,
+      page: 1,
+      pagingCounter: 1,
+      totalDocs: 2,
+      totalPages: 1
+    });
 
   //Get all accounts
-  const accounts = await getAllAccounts();
+  const accounts = await getAllAccounts(input);
 
   //Ensure the result is expected
   ctx.deepEqual(accounts, output);
-  ctx.assert(find.calledOnceWithExactly({}, {
-    id: 1,
-    username: 1,
-    totpEnabled: 1,
-    roles: 1,
-    pluginData: 1
+  ctx.assert(paginate.calledOnceWithExactly({}, {
+    page: 1,
+    projection: {
+      id: 1,
+      username: 1,
+      totpEnabled: 1,
+      roles: 1,
+      pluginData: 1
+    },
+    limit: 2
   }));
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledTwice);
-  ctx.assert(callHook.getCall(0).calledWithExactly('getAllAccounts:pre'));
-  ctx.assert(callHook.getCall(1).calledWithExactly('getAllAccounts:post', Array(2).fill({
-    toObject
-  })));
+  ctx.assert(callHook.getCall(0).calledWithExactly('getAllAccounts:pre', input));
+  ctx.assert(callHook.getCall(1).calledWithExactly('getAllAccounts:post', {
+    docs: Array(2).fill({
+      toObject
+    }),
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 2,
+    offset: 0,
+    page: 1,
+    pagingCounter: 1,
+    totalDocs: 2,
+    totalPages: 1
+  }));
   ctx.assert(callHook.calledTwice);
 });
 
@@ -117,15 +151,9 @@ test.serial('Create an account', async ctx =>
   //Ensure the result is expected
   ctx.deepEqual(account, output);
   //@ts-expect-error Sinon types are outdated
-  ctx.assert(create.calledOnceWithExactly({
-    ...input,
-    totpSecret: 'dummy-totp-secret'
-  } as IAccount));
+  ctx.assert(create.calledOnceWithExactly(input));
   ctx.assert(save.calledOnceWithExactly());
-  ctx.assert(callHook.getCall(0).calledWithExactly('createAccount:pre', {
-    ...input,
-    totpSecret: 'dummy-totp-secret'
-  } as IAccount));
+  ctx.assert(callHook.getCall(0).calledWithExactly('createAccount:pre', input));
   ctx.assert(callHook.getCall(1).calledWithExactly('createAccount:post', {
     id: accountA.id,
     save
@@ -216,23 +244,16 @@ test.serial('Update an account', async ctx =>
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
-  ctx.assert(findByIdAndUpdate.calledOnceWithExactly(accountA.id, {
-    $set: {
-      ...input,
-      totpSecret: undefined
-    } as IAccount
-  }, {
+  ctx.assert(findByIdAndUpdate.calledOnceWithExactly(accountA.id, input, {
     new: true,
+    overwrite: true,
     projection: {
       totpSecret: 1
     }
   }));
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
-  ctx.assert(callHook.getCall(0).calledWithExactly('updateAccount:pre', {
-    ...input,
-    totpSecret: undefined
-  } as IAccount));
+  ctx.assert(callHook.getCall(0).calledWithExactly('updateAccount:pre', accountA.id, input));
   ctx.assert(callHook.getCall(1).calledWithExactly('updateAccount:post', {
     id: accountA.id,
     toObject

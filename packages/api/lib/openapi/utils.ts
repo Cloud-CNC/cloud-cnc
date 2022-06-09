@@ -7,388 +7,284 @@ const MAX_DEPTH = 5;
 
 //Imports
 import {OpenAPIV3} from 'openapi-types';
-import {check as checkRegex} from 'recheck';
+import {OperationSchema, OperationSchemaType} from './types';
+import {check as rawCheckRegex} from 'recheck';
+import {inspect} from 'util';
+import {memoize} from 'lodash';
+
+//Memoize ReDoS checker
+const checkRegex = memoize(rawCheckRegex);
 
 /**
- * Translate an OAS3 schema to a Joi type
- * @param schema OAS3 schema
- * @param depth Recursion depth
- * @returns Joi type definition
+ * Translate an OAS3 schema to an operation schema
+ * @param input OAS3 schema
  */
-export const joiType = async (schema: OpenAPIV3.SchemaObject, depth = 0): Promise<string> =>
+const translateSchema = async (input: OpenAPIV3.SchemaObject, depth = 0): Promise<OperationSchema<any, boolean>> =>
 {
+  //Translate
+  const output = {
+    description: input.description
+  } as OperationSchema;
+
   //Prevent infinite recursion
   if (depth > MAX_DEPTH)
   {
-    return '/*TODO: add recursive reference*/';
+    //Update the schema
+    output.description += '//TODO: add recursive reference';
   }
+  //Complex types
+  else if (input.oneOf != null)
+  {
+    //Cast oneOf
+    const oneOf = input.oneOf as OpenAPIV3.SchemaObject[];
 
-  let type: string;
+    //Generate sub-schemas
+    const subSchemas: OperationSchema[] = [];
+    for (const value of oneOf)
+    {
+      //Translate the sub-schema
+      const subSchema = await translateSchema(value, depth + 1);
 
-  //Translate
-  if (schema.oneOf != null)
-  {
-    //Update the type
-    type = `Joi.alternatives().try(${schema.oneOf.map(value => joiType(value as OpenAPIV3.SchemaObject, depth + 1)).join(', ')}).match('one')`;
+      //Add the sub-schema
+      subSchemas.push(subSchema);
+    }
+
+    //Update the schema
+    output.oneOf = subSchemas;
   }
-  else if (schema.anyOf != null)
+  else if (input.anyOf != null)
   {
-    //Update the type
-    type = `Joi.alternatives().try(${schema.anyOf.map(value => joiType(value as OpenAPIV3.SchemaObject, depth + 1)).join(', ')}).match('any')`;
+    //Cast anyOf
+    const anyOf = input.anyOf as OpenAPIV3.SchemaObject[];
+
+    //Generate sub-schemas
+    const subSchemas: OperationSchema[] = [];
+    for (const value of anyOf)
+    {
+      //Translate the sub-schema
+      const subSchema = await translateSchema(value, depth + 1);
+
+      //Add the sub-schema
+      subSchemas.push(subSchema);
+    }
+
+    //Update the schema
+    output.anyOf = subSchemas;
   }
-  else if (schema.allOf != null)
+  else if (input.allOf != null)
   {
-    //Update the type
-    type = `Joi.alternatives().try(${schema.allOf.map(value => joiType(value as OpenAPIV3.SchemaObject, depth + 1)).join(', ')}).match('all')`;
+    //Cast allOf
+    const allOf = input.allOf as OpenAPIV3.SchemaObject[];
+
+    //Generate sub-schemas
+    const subSchemas: OperationSchema[] = [];
+    for (const value of allOf)
+    {
+      //Translate the sub-schema
+      const subSchema = await translateSchema(value, depth + 1);
+
+      //Add the sub-schema
+      subSchemas.push(subSchema);
+    }
+
+    //Update the schema
+    output.allOf = subSchemas;
   }
-  else if (schema.not != null)
+  else if (input.not != null)
   {
-    //Update the type
-    type = `Joi.any().not(${await joiType(schema.not as OpenAPIV3.SchemaObject, depth + 1)})`;
+    //Translate the sub-schema
+    const subSchema = await translateSchema(input.not as OpenAPIV3.SchemaObject, depth + 1);
+
+    //Update the schema
+    output.not = subSchema;
   }
   //Regular types
   else
   {
-    switch (schema.type)
+    switch (input.type)
     {
       case 'array':
+        //Update the schema
+        output.type = OperationSchemaType.ARRAY;
+        output.unique = false;
+
         //Well-defined arrays
-        if (schema.items != null)
+        if (input.items != null)
         {
           //Cast items
-          const items = schema.items as OpenAPIV3.SchemaObject;
+          const items = input.items as OpenAPIV3.SchemaObject;
 
-          //Update the type
-          type = `Joi.array().items(${await joiType(items, depth + 1)})`;
+          //Translate sub-schema
+          output.subSchema = await translateSchema(items, depth + 1);
 
           //Add limits
-          if (schema.minItems != null && schema.maxItems != null && schema.minItems == schema.maxItems)
+          if (input.minItems != null)
           {
-            type += `.length(${schema.minItems})`;
+            output.minimum = input.minItems;
           }
 
-          if (schema.minItems != null)
+          if (input.maxItems != null)
           {
-            type += `.min(${schema.minItems})`;
-          }
-
-          if (schema.maxItems != null)
-          {
-            type += `.max(${schema.maxItems})`;
+            output.maximum = input.maxItems;
           }
 
           //Add unique
-          if (schema.uniqueItems)
+          if (input.uniqueItems)
           {
-            type += '.unique()';
+            output.unique = input.uniqueItems;
           }
-        }
-        //Unknown arrays
-        else
-        {
-          //Update the type
-          type = 'Joi.array()';
         }
 
         break;
 
       case 'boolean':
-        //Update the type
-        type = 'Joi.boolean()';
+        //Update the schema
+        output.type = OperationSchemaType.BOOLEAN;
 
         break;
 
       case 'integer':
       case 'number':
-        //Update the type
-        type = 'Joi.number()';
+        //Update the schema
+        output.type = input.type;
+        output.exclusiveMinimum = false;
+        output.exclusiveMaximum = false;
 
         //Add limits
-        if (schema.minimum != null)
+        if (input.minimum != null)
         {
-          type += schema.exclusiveMinimum ? `.greater(${schema.minimum})` : `.min(${schema.minimum})`;
+          output.minimum = input.minimum;
         }
 
-        if (schema.maximum != null)
+        if (input.maximum != null)
         {
-          type += schema.exclusiveMaximum ? `.less(${schema.maximum})` : `.max(${schema.maximum})`;
+          output.maximum = input.maximum;
+        }
+
+        //Add exclusivity
+        if (input.exclusiveMinimum != null)
+        {
+          output.exclusiveMinimum = input.exclusiveMinimum;
+        }
+
+        if (input.exclusiveMaximum != null)
+        {
+          output.exclusiveMaximum = input.exclusiveMaximum;
         }
 
         break;
 
       case 'object':
+        //Update the schema
+        output.type = OperationSchemaType.OBJECT;
+        output.exclusiveMinimum = true;
+        output.exclusiveMaximum = true;
+
         //Well-defined objects
-        if (schema.properties != null)
+        if (input.properties != null)
         {
           //Cast properties
-          const properties = schema.properties as Record<string, OpenAPIV3.SchemaObject>;
+          const properties = input.properties as Record<string, OpenAPIV3.SchemaObject>;
 
-          //Translate property types
-          const propertyTypes = (
-            await Promise.all(
-              Object
-                .entries(properties)
-                .map(async ([key, value]) => `${key}: ${await joiType(value, depth + 1)}${schema.required?.includes(key) ? '.required()' : '.optional()'}`)
-            )
-          ).join(',\n');
+          //Generate sub-schemas
+          const subSchemas: OperationSchema[] = [];
+          for (const [key, value] of Object.entries(properties))
+          {
+            //Translate the sub-schema
+            const subSchema = await translateSchema(value, depth + 1);
 
-          //Update the type
-          type = `Joi.object(${propertyTypes})`;
+            //Update the sub-schema
+            subSchema.key = key;
+            subSchema.required = input.required?.includes(key) ?? false;
+
+            //Add the sub-schema
+            subSchemas.push(subSchema);
+          }
+
+          //Update the schema
+          output.subSchemas = subSchemas;
         }
         //Well-defined map objects
-        else if (typeof schema.additionalProperties == 'object')
+        else if (typeof input.additionalProperties == 'object')
         {
           //Cast additional properties
-          const additionalProperties = schema.additionalProperties as OpenAPIV3.SchemaObject;
+          const additionalProperties = input.additionalProperties as OpenAPIV3.SchemaObject;
 
-          //Update the type
-          type = `Joi.object().pattern(${await joiType(additionalProperties, depth + 1)})`;
-        }
-        //Unknown objects
-        else
-        {
-          //Update the type
-          type = 'Joi.object()';
+          //Translate the sub-schema
+          const subSchema = await translateSchema(additionalProperties, depth + 1);
+
+          //Update the schema
+          output.subSchema = subSchema;
         }
 
         //Add limits
-        if (schema.minProperties != null && schema.maxProperties != null && schema.minProperties == schema.maxProperties)
+        if (input.minProperties != null)
         {
-          type += `.length(${schema.minProperties})`;
+          output.minimum = input.minProperties;
         }
 
-        if (schema.minProperties != null)
+        if (input.maxProperties != null)
         {
-          type += `.min(${schema.minProperties})`;
-        }
-
-        if (schema.maxProperties != null)
-        {
-          type += `.max(${schema.maxProperties})`;
+          output.maximum = input.maxProperties;
         }
 
         break;
 
       case 'string':
+        //Update the schema
+        output.type = OperationSchemaType.STRING;
+        output.searchable = (input as Record<string, any>)['x-searchable'] ?? false;
+
         //Enums
-        if (schema.enum != null)
+        if (input.enum != null)
         {
-          //Update the type
-          type = `Joi.string().valid(${schema.enum.map(value => `'${value}'`).join(', ')})`;
-        }
-        //Dates
-        else if (schema.format == 'date' || schema.format == 'date-time')
-        {
-          //Update the type
-          type = 'Joi.date()';
-        }
-        //Binary
-        else if (schema.format == 'binary')
-        {
-          //Update the type
-          type = 'Joi.binary()';
-        }
-        //Object ID
-        else if (schema.format == 'object-id')
-        {
-          //Update the type
-          type = `Joi.string().meta({
-  _mongoose: {
-    type: 'ObjectId',
-    ref: null /*TODO: add collection name*/
-  }
-})`;
+          //Update the schema
+          output.enum = input.enum;
         }
         //Regular strings
         else
         {
-          //Update the type
-          type = 'Joi.string()';
+          //Add format
+          if (input.format != null)
+          {
+            output.format = input.format;
+          }
 
           //Add pattern
-          if (schema.pattern != null)
+          if (input.pattern != null)
           {
             //Ensure the pattern is vulnerable to ReDoS
-            const diagnostics = await checkRegex(schema.pattern, '');
+            const diagnostics = await checkRegex(input.pattern, '');
 
             if (diagnostics.status != 'safe')
             {
-              throw new Error(`Potentially ReDoS vulnerable pattern "${schema.pattern}"!`);
+              throw new Error(`Potentially ReDoS vulnerable pattern ${input.pattern}!`);
             }
 
-            type += `.pattern(${schema.pattern})`;
+            output.pattern = input.pattern;
           }
 
           //Add limits
-          if (schema.minLength != null && schema.maxLength != null && schema.minLength == schema.maxLength)
+          if (input.minLength != null)
           {
-            type += `.length(${schema.minLength})`;
+            output.minimum = input.minLength;
           }
 
-          if (schema.minLength != null)
+          if (input.maxLength != null)
           {
-            type += `.min(${schema.minLength})`;
-          }
-
-          if (schema.maxLength != null)
-          {
-            type += `.max(${schema.maxLength})`;
+            output.maximum = input.maxLength;
           }
         }
 
         break;
 
       default:
-        throw new Error(`Cannot translate OAS3 type "${schema.type}"!`);
+        throw new Error(`Cannot translate OAS3 type ${inspect(input)}!`);
     }
   }
 
-  return type;
+  return output;
 };
 
-/**
- * Translate an OAS3 schema to a Typescript type
- * @param schema OAS3 schema
- * @param depth Recursion depth
- * @returns TypeScript type literal
- */
-export const typescriptType = async (schema: OpenAPIV3.SchemaObject, depth = 0): Promise<string> =>
-{
-  //Prevent infinite recursion
-  if (depth > MAX_DEPTH)
-  {
-    return '/*TODO: add recursive reference*/';
-  }
-
-  let type: string;
-
-  //Translate
-  if (schema.oneOf != null)
-  {
-    //Update the type
-    type = schema.oneOf.map(value => typescriptType(value as OpenAPIV3.SchemaObject, depth + 1)).join(' | ');
-  }
-  else if (schema.anyOf != null)
-  {
-    //Update the type
-    type = schema.anyOf.map(value => typescriptType(value as OpenAPIV3.SchemaObject, depth + 1)).join(' | ');
-  }
-  else if (schema.allOf != null)
-  {
-    //Update the type
-    type = schema.allOf.map(value => typescriptType(value as OpenAPIV3.SchemaObject, depth + 1)).join(' & ');
-  }
-  else if (schema.not != null)
-  {
-    //Update the type
-    type = 'never /*TODO: add restrictions*/';
-  }
-  //Regular types
-  else
-  {
-    switch (schema.type)
-    {
-      case 'array':
-        //Well-defined arrays
-        if (schema.items != null)
-        {
-          //Cast items
-          const items = schema.items as OpenAPIV3.SchemaObject;
-
-          //Update the type
-          type = `${await typescriptType(items, depth + 1)}[]`;
-        }
-        //Unknown arrays
-        else
-        {
-          //Update the type
-          type = 'unknown[]';
-        }
-
-        break;
-
-      case 'boolean':
-        //Update the type
-        type = 'boolean';
-
-        break;
-
-      case 'integer':
-      case 'number':
-        //Update the type
-        type = 'number';
-
-        break;
-
-      case 'object':
-        //Well-defined objects
-        if (schema.properties != null)
-        {
-          //Cast properties
-          const properties = schema.properties as Record<string, OpenAPIV3.SchemaObject>;
-
-          //Translate property types
-          const propertyTypes = (
-            await Promise.all(
-              Object
-              .entries(properties)
-              .map(async ([key, value]) => `${key}${!schema.required?.includes(key) ? '?' : ''}: ${await typescriptType(value, depth + 1)}`)
-            )
-          ).join(',\n');
-
-          //Update the type
-          type = `{${propertyTypes}}`;
-        }
-        //Well-defined map objects
-        else if (typeof schema.additionalProperties == 'object')
-        {
-          //Cast additional properties
-          const additionalProperties = schema.additionalProperties as OpenAPIV3.SchemaObject;
-
-          //Update the type
-          type = `Record<string, ${await typescriptType(additionalProperties, depth + 1)}>`;
-        }
-        //Unknown objects
-        else
-        {
-          //Update the type
-          type = 'object';
-        }
-
-        break;
-
-      case 'string':
-        //Enums
-        if (schema.enum != null)
-        {
-          //Update the type
-          type = schema.enum.map(value => `'${value}'`).join(' | ');
-        }
-        //Dates
-        else if (schema.format == 'date' || schema.format == 'date-time')
-        {
-          //Update the type
-          type = 'Date';
-        }
-        //Binary
-        else if (schema.format == 'binary')
-        {
-          //Update the type
-          type = 'Buffer';
-        }
-        //Regular strings
-        else
-        {
-          //Update the type
-          type = 'string';
-        }
-
-        break;
-
-      default:
-        throw new Error(`Cannot translate OAS3 type "${schema.type}"!`);
-    }
-  }
-
-  return type;
-};
+//Export
+export default translateSchema;

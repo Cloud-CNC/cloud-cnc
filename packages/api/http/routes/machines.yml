@@ -9,6 +9,7 @@ _id:
 
 name:
   description: Machine name
+  x-searchable: true
   type: string
   pattern: ^[ -~]{3,256}$
 
@@ -64,6 +65,10 @@ taints:
 
 # Routes
 all:
+  parameters:
+    - $ref: '../schemas.yml#/allRequest/page'
+    - $ref: '../schemas.yml#/allRequest/limit'
+    - $ref: '../schemas.yml#/allRequest/query'
   get:
     operationId: getAllMachines
     x-operation-type: all
@@ -76,28 +81,40 @@ all:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: object
-                required:
-                  - 'id'
-                  - 'name'
-                  - 'relay'
-                  - 'labels'
-                  - 'taints'
-                properties:
-                  id:
-                    $ref: '#/_id'
-                  name:
-                    $ref: '#/name'
-                  relay:
-                    $ref: '#/relay'
-                  labels:
-                    $ref: '#/labels'
-                  taints:
-                    $ref: '#/taints'
-                  pluginData:
-                    $ref: '../schemas.yml#/pluginData'
+              type: object
+              required:
+                - machines
+                - page
+                - pages
+              properties:
+                machines:
+                  description: Filtered machines
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - name
+                      - relay
+                      - labels
+                      - taints
+                    properties:
+                      id:
+                        $ref: '#/_id'
+                      name:
+                        $ref: '#/name'
+                      relay:
+                        $ref: '#/relay'
+                      labels:
+                        $ref: '#/labels'
+                      taints:
+                        $ref: '#/taints'
+                      pluginData:
+                        $ref: '../schemas.yml#/pluginData'
+                page:
+                  $ref: '../schemas.yml#/allResponse/page'
+                pages:
+                  $ref: '../schemas.yml#/allResponse/pages'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -119,10 +136,10 @@ create:
           schema:
             type: object
             required:
-              - 'name'
-              - 'relay'
-              - 'labels'
-              - 'taints'
+              - name
+              - relay
+              - labels
+              - taints
             properties:
               name:
                 $ref: '#/name'
@@ -142,7 +159,7 @@ create:
             schema:
               type: object
               required:
-                - 'id'
+                - id
               properties:
                 id:
                   $ref: '#/_id'
@@ -160,7 +177,10 @@ id:
       in: path
       required: true
       schema:
-        $ref: '#/_id'
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
   get:
     operationId: getMachine
     x-operation-type: get
@@ -175,10 +195,10 @@ id:
             schema:
               type: object
               required:
-                - 'name'
-                - 'relay'
-                - 'labels'
-                - 'taints'
+                - name
+                - relay
+                - labels
+                - taints
               properties:
                 name:
                   $ref: '#/name'

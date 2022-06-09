@@ -9,5 +9,6 @@ export default {
   require: [
     'ts-node/register',
     'tsconfig-paths/register'
-  ]
+  ],
+  timeout: '15s'
 };

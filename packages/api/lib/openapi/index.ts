@@ -3,17 +3,17 @@
  */
 
 //Imports
-import {Entity, Field, Operation, Parameter} from './types';
+import {Entity, EntityOperation, OperationParameter, OperationSchema} from './types';
 import {OpenAPIV3} from 'openapi-types';
 import {default as SwaggerParser} from 'swagger-parser';
-import {joiType, typescriptType} from './utils';
+import translateSchema from './utils';
 import {resolve} from 'path';
 
 /**
  * Get entities from the OpenAPI schema
  * @returns Entities
  */
-export const getEntities = async () =>
+const getEntities = async () =>
 {
   //Initialize the parser
   const parser = new SwaggerParser();
@@ -52,8 +52,9 @@ export const getEntities = async () =>
     }
 
     //Aggregate parameters and operations
-    const parameters: Parameter[] = [];
-    const operations: Operation[] = [];
+    const pathParameters: OperationParameter[] = [];
+    const queryParameters: OperationParameter[] = [];
+    const operations: EntityOperation[] = [];
 
     for (const [entryKey, entryValue] of Object.entries(pathValue))
     {
@@ -62,13 +63,41 @@ export const getEntities = async () =>
         //Add parameters
         case 'parameters': {
           //Cast
-          const entry = entryValue as OpenAPIV3.ParameterObject[];
+          const parameters = entryValue as OpenAPIV3.ParameterObject[];
 
-          //Map and add
-          parameters.push(...entry.map(entry => ({
-            name: entry.name,
-            description: entry.description
-          } as Parameter)));
+          for (const rawParameter of parameters)
+          {
+            //Translate the schema
+            let parameterSchema: OperationSchema<any, true> | undefined;
+            
+            if (rawParameter.schema != null)
+            {
+              parameterSchema = await translateSchema(rawParameter.schema as OpenAPIV3.SchemaObject) as OperationSchema<any, true>;
+              parameterSchema.required = rawParameter.required ?? false;
+            }
+
+            //Map
+            const parameter = {
+              name: rawParameter.name,
+              description: rawParameter.description,
+              schema: parameterSchema
+            } as OperationParameter;
+
+            //Add
+            switch (rawParameter.in)
+            {
+              case 'path':
+                pathParameters.push(parameter);
+                break;
+
+              case 'query':
+                queryParameters.push(parameter);
+                break;
+
+              default:
+                throw new Error(`Unknown parameter type ${rawParameter.in}!`);
+            }
+          }
 
           break;
         }
@@ -93,65 +122,39 @@ export const getEntities = async () =>
             throw new Error('Operation ID and summary must be provided!');
           }
 
-          //Aggregate operation fields and MIME types
-          const requestFields: Field[] = [];
+          //Aggregate operation schemas and MIME types
+          let requestSchema: OperationSchema | undefined;
           let requestMime: string | undefined;
 
           if (requestBody?.content != null)
           {
-            for (const [contentKey, contentValue] of Object.entries(requestBody.content))
+            //Get the contents
+            const contents = Object.entries(requestBody?.content ?? {});
+
+            //Ensure only one request content schemas was specified
+            if (contents.length == 1)
             {
-              //Cast
-              let schema = contentValue.schema as OpenAPIV3.SchemaObject;
+              //Get the content schema
+              const contentSchema = contents[0]![1].schema;
 
-              //Skip empty schemas
-              if (schema == null)
+              if (contentSchema == null)
               {
-                continue;
+                throw new Error('Request content schema must be defined!');
               }
 
-              //Resolve arrays
-              if (schema.type == 'array')
-              {
-                schema = schema.items as OpenAPIV3.SchemaObject;
-              }
+              //Translate the schema
+              requestSchema = await translateSchema(contentSchema as OpenAPIV3.SchemaObject);
 
-              //Skip non-object-schema or property-less contents
-              if (schema.type != 'object' || schema.properties == null)
-              {
-                continue;
-              }
-
-              //Convert fields
-              for (const [propertyKey, propertyValue] of Object.entries(schema.properties))
-              {
-                //Cast
-                const property = propertyValue as OpenAPIV3.SchemaObject;
-
-                //Skip id fields
-                if (propertyKey == 'id')
-                {
-                  continue;
-                }
-
-                //Add
-                requestFields.push({
-                  name: propertyKey,
-                  description: property.description,
-                  joiType: await joiType(property),
-                  typescriptType: await typescriptType(property),
-                  required: schema.required?.includes(propertyKey) ?? false
-                } as Field);
-              }
-
-              //Set the MIME type
-              requestMime = contentKey;
-
-              break;
+              //Update the MIME type
+              requestMime = contents[0]![0];
+            }
+            else if (contents.length > 1)
+            {
+              throw new Error('Only one request content schema per operation is supported!');
             }
           }
 
-          const responseFields: Field[] = [];
+          let responseSchema: OperationSchema | undefined;
           let responseMime: string | undefined;
           let responseStatus = -1;
 
@@ -172,51 +175,31 @@ export const getEntities = async () =>
             //Update the response status
             responseStatus = statusCode;
 
-            if (response.content != null)
+            if (response?.content != null)
             {
-              for (const [contentKey, contentValue] of Object.entries(response.content))
+              //Get the contents
+              const contents = Object.entries(response?.content ?? {});
+
+              //Ensure only one response content schemas was specified
+              if (contents.length == 1)
               {
-                //Cast
-                let schema = contentValue.schema as OpenAPIV3.SchemaObject;
+                //Get the content schema
+                const contentSchema = contents[0]![1].schema;
 
-                //Skip empty schemas
-                if (schema == null)
+                if (contentSchema == null)
                 {
-                  continue;
+                  throw new Error('Response content schema must be defined!');
                 }
 
-                //Resolve arrays
-                if (schema.type == 'array')
-                {
-                  schema = schema.items as OpenAPIV3.SchemaObject;
-                }
+                //Translate the schema
+                responseSchema = await translateSchema(contentSchema as OpenAPIV3.SchemaObject);
 
-                //Skip non-JSON, non-object-schema, or property-less contents
-                if (contentKey != 'application/json' || schema.type != 'object' || schema.properties == null)
-                {
-                  continue;
-                }
-
-                //Convert fields
-                for (const [propertyKey, propertyValue] of Object.entries(schema.properties))
-                {
-                  //Cast
-                  const property = propertyValue as OpenAPIV3.SchemaObject;
-
-                  //Add
-                  responseFields.push({
-                    name: propertyKey,
-                    description: property.description,
-                    joiType: await joiType(property),
-                    typescriptType: await typescriptType(property),
-                    required: schema.required?.includes(propertyKey) ?? false
-                  } as Field);
-                }
-
-                //Set the MIME type
-                responseMime = contentKey;
-
-                break;
+                //Update the MIME type
+                responseMime = contents[0]![0];
+              }
+              else if (contents.length > 1)
+              {
+                throw new Error('Only one request content schema per operation is supported!');
               }
             }
 
@@ -234,10 +217,11 @@ export const getEntities = async () =>
             type: operationRecord['x-operation-type'],
             method: entryKey,
             path,
-            parameters,
-            requestFields,
+            pathParameters,
+            queryParameters,
+            requestSchema,
             requestMime,
-            responseFields,
+            responseSchema,
             responseMime,
             responseStatus
           });
@@ -252,3 +236,6 @@ export const getEntities = async () =>
 
   return entities;
 };
+
+//Export
+export default getEntities;

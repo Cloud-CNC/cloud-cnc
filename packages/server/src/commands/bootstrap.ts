@@ -6,7 +6,7 @@
 import Joi from 'joi';
 import log from '@/lib/log';
 import {IAccount} from '@/models/account';
-import {connect, disconnect} from 'mongoose';
+import {connect, disconnect} from '@/lib/mongoose';
 import {createAccount} from '@/controllers/account';
 import {format as formatTotpSecret, url as generateOtpauthUrl} from '@/lib/totp';
 import {generate as generatePassword} from '@/lib/password';

@@ -1,7 +1,7 @@
 ---
 to: src/lib/hooks.ts
 inject: true
-after: //Import
+after: //Models
 prepend: true
 ---
 import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';

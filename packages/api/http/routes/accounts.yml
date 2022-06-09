@@ -3,11 +3,13 @@
 # Types
 _id:
   description: Account ID
+  type: string
   format: object-id
   pattern: ^[A-Fa-f0-9]{24}$
 
 username:
   description: Account username
+  x-searchable: true
   type: string
   pattern: ^[A-Za-z0-9-_]{3,256}$
 
@@ -28,6 +30,7 @@ totpSecret:
 
 roles:
   description: Account role IDs
+  x-searchable: true
   type: array
   items:
     type: string
@@ -36,6 +39,10 @@ roles:
 
 # Routes
 all:
+  parameters:
+    - $ref: '../schemas.yml#/allRequest/page'
+    - $ref: '../schemas.yml#/allRequest/limit'
+    - $ref: '../schemas.yml#/allRequest/query'
   get:
     operationId: getAllAccounts
     x-operation-type: all
@@ -48,25 +55,37 @@ all:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                type: object
-                required:
-                  - id
-                  - username
-                  - totpEnabled
-                  - roles
-                properties:
-                  id:
-                    $ref: '#/_id'
-                  username:
-                    $ref: '#/username'
-                  totpEnabled:
-                    $ref: '#/totpEnabled'
-                  roles:
-                    $ref: '#/roles'
-                  pluginData:
-                    $ref: '../schemas.yml#/pluginData'
+              type: object
+              required:
+                - accounts
+                - page
+                - pages
+              properties:
+                accounts:
+                  description: Filtered accounts
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - username
+                      - totpEnabled
+                      - roles
+                    properties:
+                      id:
+                        $ref: '#/_id'
+                      username:
+                        $ref: '#/username'
+                      totpEnabled:
+                        $ref: '#/totpEnabled'
+                      roles:
+                        $ref: '#/roles'
+                      pluginData:
+                        $ref: '../schemas.yml#/pluginData'
+                page:
+                  $ref: '../schemas.yml#/allResponse/page'
+                pages:
+                  $ref: '../schemas.yml#/allResponse/pages'
       '400':
         $ref: '../responses.yml#/bad-request'
       '401':
@@ -131,7 +150,10 @@ impersonate:
       in: path
       required: true
       schema:
-        $ref: '#/_id'
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
   post:
     operationId: impersonateAccount
     tags:
@@ -168,7 +190,10 @@ id:
       in: path
       required: true
       schema:
-        $ref: '#/_id'
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
   get:
     operationId: getAccount
     x-operation-type: get
