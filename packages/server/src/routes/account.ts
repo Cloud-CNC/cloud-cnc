@@ -88,13 +88,14 @@ router
       //Log
       ctx.log.error(error);
 
-      //Reject
-      ctx.throw({
+      //Set the response
+      ctx.response.body = {
         error: {
           name: 'Invalid account!',
           description: 'The specified account is invalid!'
         }
-      }, 400);
+      };
+      ctx.response.status = 400;
     }
   })
 
@@ -124,13 +125,14 @@ router
       //Log
       ctx.log.error(error);
 
-      //Reject
-      ctx.throw({
+      //Set the response
+      ctx.response.body = {
         error: {
           name: 'Invalid account!',
           description: 'The specified account is invalid!'
         }
-      }, 400);
+      };
+      ctx.response.status = 400;
     }
   })
 
@@ -154,13 +156,14 @@ router
       //Log
       ctx.log.error(error);
 
-      //Reject
-      ctx.throw({
+      //Set the response
+      ctx.response.body = {
         error: {
           name: 'Invalid account!',
           description: 'The specified account is invalid!'
         }
-      }, 400);
+      };
+      ctx.response.status = 400;
     }
   });
 

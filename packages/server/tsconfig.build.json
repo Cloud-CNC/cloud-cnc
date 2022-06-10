@@ -2,7 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     /* Modules */
-    "rootDir": "src",
+    "rootDirs": [
+      "src",
+      "../search/src"
+    ],
 
     /* Emit */
     "outDir": "dist"

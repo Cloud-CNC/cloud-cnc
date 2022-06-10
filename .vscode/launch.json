@@ -42,8 +42,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "outputCapture": "std",
-      "preLaunchTask": "npm: build - packages/server"
+      "outputCapture": "std"
     },
     {
       "name": "Run the server",
@@ -64,8 +63,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "outputCapture": "std",
-      "preLaunchTask": "npm: build - packages/server"
+      "outputCapture": "std"
     },
     {
       "name": "Run server tests",

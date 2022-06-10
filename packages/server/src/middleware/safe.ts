@@ -9,13 +9,12 @@ import {RouterMiddlewareContext} from '@/lib/types';
 import {sanitize} from 'mongodb-sanitize';
 
 /**
- * Validate the value against the schema and emit errors via the Koa context
+ * Validate the value against the schema
  * @param schema Joi schema
  * @param value Value to validate
- * @param ctx Koa context
  * @returns Validated value
  */
-const validateSchema = (schema: ObjectSchema, value: any, ctx: RouterMiddlewareContext) =>
+const validateSchema = (schema: ObjectSchema, value: any) =>
 {
   //Validate the request value
   const res = schema.validate(value);
@@ -23,23 +22,12 @@ const validateSchema = (schema: ObjectSchema, value: any, ctx: RouterMiddlewareC
   //Invalid requests
   if (res.error != null)
   {
-    //Log
-    ctx.log.error({ctx, res}, 'Invalid request!');
-
-    //Reject
-    ctx.throw({
-      error: {
-        name: 'Invalid request!',
-        description: res.error
-      }
-    }, 400);
+    throw res.error;
   }
-
   //Suspect requests
-  if (res.warning != null)
+  else if (res.warning != null)
   {
-    //Log
-    ctx.log.warn({ctx, res}, 'Suspect request!');
+    throw res.warning;
   }
 
   return res.value;
@@ -65,19 +53,39 @@ const validate = (body?: ObjectSchema, params?: ObjectSchema, query?: ObjectSche
   };
 
   //Validate request data
-  if (body != null)
+  try
   {
-    ctx.safe.body = validateSchema(body, ctx.safe.body, ctx);
-  }
+    if (body != null)
+    {
+      ctx.safe.body = validateSchema(body, ctx.safe.body);
+    }
 
-  if (params != null)
-  {
-    ctx.safe.params = validateSchema(params, ctx.safe.params, ctx);
-  }
+    if (params != null)
+    {
+      ctx.safe.params = validateSchema(params, ctx.safe.params);
+    }
 
-  if (query != null)
+    if (query != null)
+    {
+      ctx.safe.query = validateSchema(query, ctx.safe.query);
+    }
+  }
+  catch (error)
   {
-    ctx.safe.query = validateSchema(query, ctx.safe.query, ctx);
+    //Log
+    ctx.log.error({ctx, error}, 'Invalid request!');
+
+    //Set the response
+    ctx.response.body = {
+      error: {
+        name: 'Invalid request!',
+        description: error
+      }
+    };
+    ctx.response.status = 400;
+
+    //Abort middleware execution
+    return;
   }
 
   return next();

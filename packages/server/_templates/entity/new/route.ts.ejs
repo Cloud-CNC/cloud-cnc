@@ -83,13 +83,14 @@ router
       //Log
       ctx.log.error(error);
 
-      //Reject
-      ctx.throw({
+      //Set the response
+      ctx.response.body = {
         error: {
           name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
           description: 'The specified <%- h.changeCase.no(h.inflection.singularize(name)) %> is invalid!'
         }
-      }, 400);
+      };
+      ctx.response.status = 400;
     }
 <% break; case 'update': -%>
     try
@@ -110,13 +111,14 @@ router
       //Log
       ctx.log.error(error);
 
-      //Reject
-      ctx.throw({
+      //Set the response
+      ctx.response.body = {
         error: {
           name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
           description: 'The specified <%- h.changeCase.no(h.inflection.singularize(name)) %> is invalid!'
         }
-      }, 400);
+      };
+      ctx.response.status = 400;
     }
 <% break; case 'delete': -%>
     try
@@ -137,13 +139,14 @@ router
       //Log
       ctx.log.error(error);
 
-      //Reject
-      ctx.throw({
+      //Set the response
+      ctx.response.body = {
         error: {
           name: 'Invalid <%- h.changeCase.no(h.inflection.singularize(name)) %>!',
           description: 'The specified <%- h.changeCase.no(h.inflection.singularize(name)) %> is invalid!'
         }
-      }, 400);
+      };
+      ctx.response.status = 400;
     }
 <% break; default: -%>
     //TODO: fully invoke controller
