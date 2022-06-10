@@ -255,7 +255,7 @@ const joiType = (schema: OperationSchema, metadata = false): string =>
 };
 
 /**
- * Translate an operation schema to a Typescript type
+ * Translate an operation schema to a TypeScript type
  * @param schema Operation schema
  * @returns TypeScript type literal
  */

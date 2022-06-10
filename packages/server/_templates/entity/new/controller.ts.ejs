@@ -6,12 +6,13 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
  */
 
 //Imports
+import generateQuery from '@/lib/search';
 import hooks from '@/lib/hooks';
 import log from '@/lib/log';
 import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 import {Filter, WithID, WithPagination} from '@/lib/types';
 
-<% for (const [operation, operationSeparator] of h.list(entity.operations, '\n\n')) { -%>
+<% for (const [operation, operationSeparator] of h.list(entity.operations, '\r\n')) { -%>
 <% const requestSchema = (operation.requestSchema != null && operation.requestSchema.type == 'object' && operation.requestSchema.subSchemas.length > 0) ? operation.requestSchema : null; -%>
 <% let responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema : null; -%>
 /**
@@ -25,7 +26,11 @@ export const <%- operation.name %> = async (filter: Filter)<% if (responseSchema
   await hooks.callHook('<%- operation.name %>:pre', filter);
 
   //Generate the query
-  const query = filter.query != null ? <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.searchQuery(filter.query) : {};
+  const query = filter.query != null ? generateQuery<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>(filter.query, [
+<% for (const [schema, separator] of h.list(schemas.filter(schema => schema.searchable), ',')) { -%>
+    '<%- schema.key %>'<%- separator %>
+<% } -%>
+  ]) : {};
 
   //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
   const result = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.paginate(query, {
@@ -39,7 +44,7 @@ export const <%- operation.name %> = async (filter: Filter)<% if (responseSchema
   });
 
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:post', result.docs);
+  await hooks.callHook('<%- operation.name %>:post', result);
 
   //Log
   log.debug('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');

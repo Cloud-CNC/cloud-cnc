@@ -9,8 +9,7 @@ to: src/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 import Joi from 'joi';
 import joigoose from '@/lib/joigoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import mongooseSearch from '@cme-pro/mongoose-search';
-import {Document, PaginateModel, Schema, SearchModel, model as createModel} from 'mongoose';
+import {Document, PaginateModel, Schema, model as createModel} from 'mongoose';
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> interface
 export interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
@@ -52,7 +51,6 @@ export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Mo
   }
 });
 <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema.plugin(mongoosePaginate);
-<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema.plugin(mongooseSearch);
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> model
-export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, PaginateModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>> & SearchModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema);
+export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, PaginateModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema);

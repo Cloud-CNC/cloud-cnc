@@ -8,6 +8,7 @@ Core monorepo
 
 ## Auxillary Packages
 * [API specifications](packages/api)
+* [Human-centric search language](packages/search)
 
 ### FAQ
 * Q: Why does this use both [`tsc-alias`](https://github.com/justkey007/tsc-alias) and

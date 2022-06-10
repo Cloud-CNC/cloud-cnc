@@ -1,5 +1,5 @@
 /**
- * @fileoverview Typescript types
+ * @fileoverview TypeScript types
  */
 
 //Imports

@@ -13,6 +13,7 @@
     "@typescript-eslint/parser": "^5.27.0",
     "eslint": "^8.17.0",
     "eslint-plugin-redos": "^4.4.0",
+    "eslint-plugin-security-node": "^1.1.1",
     "lerna": "^4.0.0",
     "ts-node": "^10.8.1",
     "tsc-alias": "^1.6.8",
@@ -26,8 +27,5 @@
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
-  },
-  "dependencies": {
-    "eslint-plugin-security-node": "^1.1.1"
   }
 }

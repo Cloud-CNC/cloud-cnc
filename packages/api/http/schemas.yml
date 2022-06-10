@@ -47,7 +47,7 @@ allRequest:
     in: query
     schema:
       type: string
-      pattern: ^[A-Za-z0-9-_]{1,256}$
+      pattern: ^[ -~]{1,256}$
 
 allResponse:
   page:

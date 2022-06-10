@@ -3,6 +3,7 @@
  */
 
 //Imports
+import generateQuery from '@/lib/search';
 import hooks from '@/lib/hooks';
 import log from '@/lib/log';
 import {Account, IAccount} from '@/models/account';
@@ -17,7 +18,9 @@ export const getAllAccounts = async (filter: Filter): Promise<WithPagination<'ac
   await hooks.callHook('getAllAccounts:pre', filter);
 
   //Generate the query
-  const query = filter.query != null ? Account.searchQuery(filter.query) : {};
+  const query = filter.query != null ? generateQuery<IAccount>(filter.query, [
+    'username'
+  ]) : {};
 
   //Get all accounts
   const result = await Account.paginate(query, {

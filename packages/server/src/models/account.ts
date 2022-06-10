@@ -6,8 +6,7 @@
 import Joi from 'joi';
 import joigoose from '@/lib/joigoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import mongooseSearch from '@cme-pro/mongoose-search';
-import {Document, PaginateModel, Schema, SearchModel, model as createModel} from 'mongoose';
+import {Document, PaginateModel, Schema, model as createModel} from 'mongoose';
 
 //Account interface
 export interface IAccount
@@ -94,7 +93,6 @@ AccountMongooseSchema.set('toObject', {
   }
 });
 AccountMongooseSchema.plugin(mongoosePaginate);
-AccountMongooseSchema.plugin(mongooseSearch);
 
 //Account model
-export const Account = createModel<IAccount, PaginateModel<IAccount> & SearchModel<IAccount>>('accounts', AccountMongooseSchema);
+export const Account = createModel<IAccount, PaginateModel<IAccount>>('accounts', AccountMongooseSchema);

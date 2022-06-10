@@ -27,7 +27,7 @@ router
   .get('/accounts/all', checkPermission('getAllAccounts'), safe(undefined, undefined, Joi.object({
     page: Joi.number().min(1).optional(),
     limit: Joi.number().min(1).max(100).optional(),
-    query: Joi.string().pattern(/^[A-Za-z0-9-_]{1,256}$/).optional()
+    query: Joi.string().pattern(/^[ -~]{1,256}$/).optional()
   })), async ctx =>
   {
     //Get all accounts

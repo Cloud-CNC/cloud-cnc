@@ -1,0 +1,27 @@
+{
+  "name": "search",
+  "private": true,
+  "description": "Human-centric search language",
+  "author": "Cloud CNC contributors",
+  "license": "MIT",
+  "scripts": {
+    "generate:declaration": "ts-node scripts/generate-declaration.ts",
+    "test": "ava src/**/*.spec.ts"
+  },
+  "dependencies": {
+    "chevrotain": "^10.1.2"
+  },
+  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/search",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182",
+    "ava": "^4.3.0",
+    "lodash": "^4.17.21"
+  }
+}

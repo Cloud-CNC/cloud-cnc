@@ -19,7 +19,7 @@ test.afterEach.always('Reset MongoDB', reset);
 test.after('Stop MongoDB', stop);
 
 //Tests
-<% for (const [operation, separator] of h.list(entity.operations, '\n\n')) { -%>
+<% for (const [operation, separator] of h.list(entity.operations, '\r\n\r\n')) { -%>
 <% const requestSchema = (operation.requestSchema != null && operation.requestSchema.type == 'object' && operation.requestSchema.subSchemas.length > 0) ? operation.requestSchema : null; -%>
 <% let responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema : null; -%>
 test.serial('<%- operation.description %>', async ctx =>

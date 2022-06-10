@@ -29,7 +29,7 @@ test.serial('Get all accounts', async ctx =>
 {
   //Test data
   const input = {
-    // query: '', //TODO: add query
+    query: 'jane OR "john-doe"',
     page: 1,
     limit: 2
   };
@@ -86,7 +86,26 @@ test.serial('Get all accounts', async ctx =>
 
   //Ensure the result is expected
   ctx.deepEqual(accounts, output);
-  ctx.assert(paginate.calledOnceWithExactly({}, {
+  ctx.assert(paginate.calledOnceWithExactly({
+    $or: [
+      {
+        $or: [
+          {
+            username: /jan/
+          },
+          {
+            username: /ane/
+          },
+          {
+            username: /jane/
+          }
+        ]
+      },
+      {
+        username: /john-doe/
+      }
+    ]
+  }, {
     page: 1,
     projection: {
       id: 1,

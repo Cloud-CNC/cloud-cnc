@@ -30,7 +30,7 @@ test.serial('Get all accounts', async ctx =>
   const res = await request(app.callback())
     .get('/accounts/all')
     .query({
-      // query: '', //TODO: add query
+      query: 'jane OR "john-doe"',
       page: 1,
       limit: 2
     });
