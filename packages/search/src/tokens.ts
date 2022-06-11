@@ -3,7 +3,8 @@
  */
 
 //Imports
-import {Lexer, createToken} from 'chevrotain';
+import {Lexer, createToken, tokenMatcher} from 'chevrotain';
+import {last} from 'lodash';
 
 //Patterns
 const WhitespacePattern = /\s+/;
@@ -19,8 +20,7 @@ const ClosingStringPatterns = [
   OrPattern,
   NotPattern,
   OpeningParanthesisPattern,
-  ClosingParanthesisPattern,
-  QuotePattern
+  ClosingParanthesisPattern
 ];
 // eslint-disable-next-line security-node/non-literal-reg-expr
 const ClosingStringPattern = new RegExp(`^(${ClosingStringPatterns.map(pattern => pattern.source).join('|')})`);
@@ -72,8 +72,14 @@ export const Quote = createToken({
 export const String = createToken({
   name: 'String',
   pattern: {
-    exec: (text, offset) =>
+    exec: (text, offset, tokens) =>
     {
+      //Get the last token
+      const lastToken = last(tokens);
+
+      //Get if inside of a literal string
+      const inLiteral = lastToken != null && tokenMatcher(lastToken, Quote);
+
       //Iterate over remaining characters
       let result = '';
       for (let i = offset; i < text.length; i++)
@@ -82,7 +88,13 @@ export const String = createToken({
         const remainingText = text.substring(i);
 
         //End of string
-        if (ClosingStringPattern.test(remainingText))
+        if (
+          //End of literal string
+          (inLiteral && QuotePattern.test(text[i]!)) ||
+
+          //End of non-literal string
+          (!inLiteral && ClosingStringPattern.test(remainingText))
+        )
         {
           //Strip trailing whitespace
           result = result.trimEnd();

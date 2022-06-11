@@ -84,7 +84,7 @@ test('Parse parantheses', ctx =>
 test('Parse single quoted literal string', ctx =>
 {
   //Tokenize the text
-  const lexerResult = lexer.tokenize('\'much literally\'');
+  const lexerResult = lexer.tokenize('\'much OR literally\'');
 
   //Parse the tokens
   parser.input = lexerResult.tokens;
@@ -94,13 +94,13 @@ test('Parse single quoted literal string', ctx =>
   ctx.is(parser.errors.length, 0);
   ctx.is(cst.name, 'expression');
   ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].name'), 'literalSearchExpression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].children.string[0].image'), 'much literally');
+  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].children.string[0].image'), 'much OR literally');
 });
 
 test('Parse double quoted literal string', ctx =>
 {
   //Tokenize the text
-  const lexerResult = lexer.tokenize('"much literally"');
+  const lexerResult = lexer.tokenize('"much OR literally"');
 
   //Parse the tokens
   parser.input = lexerResult.tokens;
@@ -110,7 +110,7 @@ test('Parse double quoted literal string', ctx =>
   ctx.is(parser.errors.length, 0);
   ctx.is(cst.name, 'expression');
   ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].name'), 'literalSearchExpression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].children.string[0].image'), 'much literally');
+  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].children.string[0].image'), 'much OR literally');
 });
 
 test('Parse non-literal string', ctx =>

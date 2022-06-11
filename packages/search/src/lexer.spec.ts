@@ -96,7 +96,7 @@ test('Tokenize double quote', ctx =>
 test('Tokenize literal string', ctx =>
 {
   //Tokenize the text
-  const result = lexer.tokenize('"much literally"');
+  const result = lexer.tokenize('"much OR literally"');
 
   //Ensure the result is expected
   ctx.is(result.errors.length, 0);
@@ -105,7 +105,7 @@ test('Tokenize literal string', ctx =>
   ctx.assert(tokenMatcher(result.tokens[0]!, Quote));
   ctx.assert(tokenMatcher(result.tokens[1]!, String));
   ctx.assert(tokenMatcher(result.tokens[2]!, Quote));
-  ctx.is(result.tokens[1]!.image, 'much literally');
+  ctx.is(result.tokens[1]!.image, 'much OR literally');
 });
 
 test('Tokenize non-literal string', ctx =>
