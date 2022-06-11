@@ -20,10 +20,11 @@
     "@stoplight/spectral-cli": "^6.3.0",
     "@types/lodash": "^4.14.182"
   },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/relay",
+  "homepage": "https://cloud-cnc.github.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/api"
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"

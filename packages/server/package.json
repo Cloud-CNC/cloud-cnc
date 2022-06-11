@@ -60,10 +60,11 @@
     "sinon": "^14.0.0",
     "supertest": "^6.2.3"
   },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/server",
+  "homepage": "https://cloud-cnc.github.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/server"
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"

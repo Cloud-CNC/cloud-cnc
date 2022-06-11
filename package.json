@@ -20,7 +20,7 @@
     "tsconfig-paths": "^4.0.0",
     "tsup": "^6.1.2"
   },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc#readme",
+  "homepage": "https://cloud-cnc.github.io",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"

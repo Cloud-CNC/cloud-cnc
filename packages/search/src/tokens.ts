@@ -111,6 +111,7 @@ export const String = createToken({
       return [result];
     }
   },
+  // eslint-disable-next-line camelcase
   line_breaks: true
 });
 

@@ -6,10 +6,11 @@
   "author": "Cloud CNC contributors",
   "license": "MIT",
   "scripts": {},
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/ui",
+  "homepage": "https://cloud-cnc.github.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/ui"
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"

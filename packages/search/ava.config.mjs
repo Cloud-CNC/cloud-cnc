@@ -10,5 +10,5 @@ export default {
     'ts-node/register',
     'tsconfig-paths/register'
   ],
-  timeout: '15s'
+  timeout: '30s'
 };

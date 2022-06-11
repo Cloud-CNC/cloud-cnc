@@ -23,10 +23,11 @@
     "pino": "^8.0.0",
     "semver": "^7.3.7"
   },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/plugin-sdk",
+  "homepage": "https://cloud-cnc.github.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/plugin-sdk"
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"

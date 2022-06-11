@@ -12,10 +12,11 @@
   "dependencies": {
     "chevrotain": "^10.1.2"
   },
-  "homepage": "https://github.com/Cloud-CNC/cloud-cnc/blob/main/packages/search",
+  "homepage": "https://cloud-cnc.github.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git"
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/search"
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
