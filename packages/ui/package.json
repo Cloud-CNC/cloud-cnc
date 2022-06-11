@@ -1,6 +1,7 @@
 {
   "name": "ui",
   "private": true,
+  "version": "0.0.1-alpha.0",
   "description": "User interface",
   "author": "Cloud CNC contributors",
   "license": "MIT",

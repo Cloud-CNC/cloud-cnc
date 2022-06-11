@@ -4,4 +4,4 @@ inject: true
 after: //Routes
 prepend: true
 ---
-import <%- h.changeCase.camel(h.inflection.singularize(name), false) %> from '@/routes/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import <%- h.changeCase.camel(h.inflection.singularize(name), false) %> from '@/server/routes/<%- h.changeCase.param(h.inflection.singularize(name)) %>';

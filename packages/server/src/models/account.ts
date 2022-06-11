@@ -4,7 +4,7 @@
 
 //Imports
 import Joi from 'joi';
-import joigoose from '@/lib/joigoose';
+import joigoose from '@/server/lib/joigoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import {Document, PaginateModel, Schema, model as createModel} from 'mongoose';
 

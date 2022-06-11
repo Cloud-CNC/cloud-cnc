@@ -8,12 +8,12 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "baseUrl": ".",
+
+    /* Emit */
+    "declaration": true
   },
   "include": [
     "**/*.ts",
     "**/*.d.ts"
-  ],
-  "ts-node": {
-    "files": true
-  }
+  ]
 }

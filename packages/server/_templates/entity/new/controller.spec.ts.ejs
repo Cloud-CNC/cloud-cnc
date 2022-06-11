@@ -7,14 +7,14 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.sp
 
 //Imports
 import {<%- h.changeCase.camel(h.inflection.singularize(name)) %>A, <%- h.changeCase.camel(h.inflection.singularize(name)) %>B} from '!/fixtures/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/server/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 import {createSandbox} from 'sinon';
+import {hooks} from '@/server/lib/hooks';
 import {
 <% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
   <%- operation.name %><%- separator %>
 <% } -%>
 } from './<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-import hooks from '@/lib/hooks';
 import test from 'ava';
 
 //Sinon sandbox

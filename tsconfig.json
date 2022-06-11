@@ -1,7 +1,16 @@
 {
   "compilerOptions": {
-    /* Projects */
-    "incremental": true,
+    /* Modules */
+    "resolveJsonModule": true,
+    "paths": {
+      "@/api/*": ["../api/lib/*"],
+      "@/plugin-sdk/*": ["../plugin-sdk/src/*"],
+      "@/relay/*": ["../relay/src/*"],
+      "@/search/*": ["../search/src/*"],
+      "@/server/*": ["../server/src/*"],
+      "@/ui/*": ["../ui/src/*"],
+      "!/*": ["./test/*"]
+    },
 
     /* JavaScript Support */
     "allowJs": true,

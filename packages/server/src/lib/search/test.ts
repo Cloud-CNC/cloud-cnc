@@ -1,5 +1,5 @@
 //Imports
-import {IAccount} from '@/models/account';
+import {IAccount} from '@/server/models/account';
 import generateQuery from '.';
 
 const main = async () =>

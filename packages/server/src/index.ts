@@ -3,30 +3,18 @@
  */
 
 //Imports
-import {Project} from '@lerna/project';
 import {program} from 'commander';
-import {resolve} from 'path';
+import {version} from '../package.json';
 
 //Commands
-import '@/commands/bootstrap';
-import '@/commands/run';
-
-/**
- * Get the project version
- */
-const getVersion = () =>
-{
-  //Resolve the project
-  const project = new Project(resolve(__dirname, '..', '..'));
-
-  return project.version;
-};
+import '@/server/commands/bootstrap';
+import '@/server/commands/run';
 
 //Create the root command
 const command = program
   .name('server')
   .description('Cloud CNC API server')
-  .version(getVersion());
+  .version(version);
 
 //Process arguments and options
 command.parse(process.argv);

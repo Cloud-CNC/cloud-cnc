@@ -4,8 +4,8 @@
 
 //Imports
 import {FilterQuery} from 'mongoose';
-import parser from '#/search/src/parser';
-import lexer from '#/search/src/lexer';
+import parser from '@/search/parser';
+import lexer from '@/search/lexer';
 import interpreter from './interpreter';
 
 /**

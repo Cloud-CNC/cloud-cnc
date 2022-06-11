@@ -5,8 +5,8 @@
 //Imports
 import Joi from 'joi';
 import Router from '@koa/router';
-import checkPermission from '@/middleware/permission';
-import safe from '@/middleware/safe';
+import checkPermission from '@/server/middleware/permission';
+import safe from '@/server/middleware/safe';
 import {
   getAllAccounts,
   createAccount,
@@ -14,7 +14,7 @@ import {
   getAccount,
   updateAccount,
   deleteAccount
-} from '@/controllers/account';
+} from '@/server/controllers/account';
 
 //Router setup
 const router = new Router();

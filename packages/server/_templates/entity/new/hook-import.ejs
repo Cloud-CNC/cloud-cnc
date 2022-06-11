@@ -4,4 +4,4 @@ inject: true
 after: //Models
 prepend: true
 ---
-import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document} from '@/server/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';

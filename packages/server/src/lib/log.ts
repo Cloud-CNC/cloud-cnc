@@ -5,7 +5,7 @@
 //Imports
 import pino, {DestinationStream} from 'pino';
 import pretty from 'pino-pretty';
-import {log} from '@/lib/config';
+import {log} from '@/server/lib/config';
 
 //Generate the stream
 let stream: DestinationStream;

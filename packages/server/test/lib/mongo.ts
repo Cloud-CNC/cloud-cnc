@@ -4,7 +4,7 @@
 
 //Imports
 import {MongoMemoryServer} from 'mongodb-memory-server';
-import {connect as mongooseConnect, disconnect as mongooseDisconnect} from '@/lib/mongoose';
+import {connect as mongooseConnect, disconnect as mongooseDisconnect} from '@/server/lib/mongoose';
 import {connection} from 'mongoose';
 
 //MongoDB server used for all tests

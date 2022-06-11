@@ -5,7 +5,7 @@
 //Imports
 import redisStore from 'koa-redis';
 import session from 'koa-session-minimal';
-import {redisUrl} from '@/lib/config';
+import {redisUrl} from '@/server/lib/config';
 
 //Middleware
 const middleware = session({

@@ -1,18 +1,18 @@
 {
   "name": "server",
   "private": true,
+  "version": "0.0.1-alpha.0",
   "description": "API server",
   "author": "Cloud CNC contributors",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && tsc-alias --project tsconfig.build.json",
-    "start": "node dist/server/src/index.js",
+    "build": "tsup src/index.ts",
+    "start": "node dist/index.js",
     "start:debug": "ts-node --require tsconfig-paths/register src/index.ts",
     "test": "ava src/**/*.spec.ts"
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
-    "@lerna/project": "^5.0.0",
     "argon2": "^0.28.5",
     "canihazusername": "^2.3.4",
     "chevrotain": "^10.1.2",

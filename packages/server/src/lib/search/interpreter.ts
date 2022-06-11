@@ -4,9 +4,9 @@
 
 //Imports
 import generateNgrams from './ngrams';
-import parser from '#/search/src/parser';
-import {And, Or} from '#/search/src/tokens';
-import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParanthesisExpressionCstChildren} from '#/search/src/cst';
+import parser from '@/search/parser';
+import {And, Or} from '@/search/tokens';
+import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParanthesisExpressionCstChildren} from '@/search/cst';
 import {FilterQuery} from 'mongoose';
 import {escapeRegExp} from 'lodash';
 import {tokenMatcher} from 'chevrotain';

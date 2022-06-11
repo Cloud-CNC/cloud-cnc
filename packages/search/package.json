@@ -1,6 +1,7 @@
 {
   "name": "search",
   "private": true,
+  "version": "0.0.1-alpha.0",
   "description": "Human-centric search language",
   "author": "Cloud CNC contributors",
   "license": "MIT",

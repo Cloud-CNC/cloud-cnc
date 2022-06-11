@@ -6,11 +6,11 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
  */
 
 //Imports
-import generateQuery from '@/lib/search';
-import hooks from '@/lib/hooks';
-import log from '@/lib/log';
-import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-import {Filter, WithID, WithPagination} from '@/lib/types';
+import generateQuery from '@/server/lib/search';
+import log from '@/server/lib/log';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/server/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {Filter, WithID, WithPagination} from '@/server/lib/types';
+import {hooks} from '@/server/lib/hooks';
 
 <% for (const [operation, operationSeparator] of h.list(entity.operations, '\r\n')) { -%>
 <% const requestSchema = (operation.requestSchema != null && operation.requestSchema.type == 'object' && operation.requestSchema.subSchemas.length > 0) ? operation.requestSchema : null; -%>

@@ -3,7 +3,7 @@
  */
 
 //Imports
-import {hash as hashConfig} from '@/lib/config';
+import {hash as hashConfig} from '@/server/lib/config';
 import {cpus} from 'os';
 import {Options as ArgonOptions, argon2id, hash as argonHash, verify as argonVerify} from 'argon2';
 import {GenerateOptions as GeneratePasswordOptions, generate as generatePassword} from 'generate-password';

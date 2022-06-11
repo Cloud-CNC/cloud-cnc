@@ -4,14 +4,14 @@
 
 //Imports
 import Joi from 'joi';
-import log from '@/lib/log';
-import {IAccount} from '@/models/account';
-import {connect, disconnect} from '@/lib/mongoose';
-import {createAccount} from '@/controllers/account';
-import {format as formatTotpSecret, url as generateOtpauthUrl} from '@/lib/totp';
-import {generate as generatePassword} from '@/lib/password';
-import {generate as generateUsername} from '@/lib/username';
-import {mongoUrl} from '@/lib/config';
+import log from '@/server/lib/log';
+import {IAccount} from '@/server/models/account';
+import {connect, disconnect} from '@/server/lib/mongoose';
+import {createAccount} from '@/server/controllers/account';
+import {format as formatTotpSecret, url as generateOtpauthUrl} from '@/server/lib/totp';
+import {generate as generatePassword} from '@/server/lib/password';
+import {generate as generateUsername} from '@/server/lib/username';
+import {mongoUrl} from '@/server/lib/config';
 import {program} from 'commander';
 import {toString as renderQRCode} from 'qrcode';
 

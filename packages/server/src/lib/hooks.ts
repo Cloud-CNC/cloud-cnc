@@ -3,15 +3,15 @@
  */
 
 //Import
-import {Filter} from '@/lib/types';
+import {Filter} from '@/server/lib/types';
 import {PaginateResult} from 'mongoose';
 import {createHooks} from 'hookable';
 
 //Models
-import {IAccount, IAccountDocument} from '@/models/account';
+import {IAccount, IAccountDocument} from '@/server/models/account';
 
 //Hooks
-interface Hooks
+export interface Hooks
 {
   //Account entity
   'getAllAccounts:pre': (filter: Filter) => void | Promise<void>;
@@ -29,7 +29,4 @@ interface Hooks
 }
 
 //Create the hookable instance
-const hooks = createHooks<Hooks>();
-
-//Export
-export default hooks;
+export const hooks = createHooks<Hooks>();

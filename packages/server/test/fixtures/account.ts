@@ -3,8 +3,8 @@
  */
 
 //Imports
-import {IAccount} from '@/models/account';
-import {WithID} from '@/lib/types';
+import {IAccount} from '@/server/models/account';
+import {WithID} from '@/server/lib/types';
 
 //Fixtures
 //TODO: add realistic data

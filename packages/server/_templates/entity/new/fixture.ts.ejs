@@ -6,8 +6,8 @@ to: test/fixtures/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
  */
 
 //Imports
-import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-import {WithID} from '@/lib/types';
+import {I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/server/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {WithID} from '@/server/lib/types';
 
 //Fixtures
 //TODO: add realistic data
