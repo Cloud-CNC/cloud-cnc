@@ -1,0 +1,1 @@
+<Swagger url="/http-api.yml"></Swagger>

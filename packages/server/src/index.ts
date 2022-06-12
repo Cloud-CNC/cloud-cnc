@@ -13,8 +13,8 @@ import '@/server/commands/run';
 //Create the root command
 const command = program
   .name('server')
-  .description('Cloud CNC API server')
-  .version(version);
+  .version(version)
+  .description('Cloud CNC API server');
 
 //Process arguments and options
 command.parse(process.argv);

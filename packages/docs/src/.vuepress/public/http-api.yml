@@ -1,0 +1,2021 @@
+openapi: 3.0.3
+info:
+  title: Cloud CNC HTTP API
+  description: >
+    ## Preface
+
+    This specification is the canonical source for the Cloud CNC HTTP API. The HTTP API is used
+
+    between the client and API server(s) for administrative tasks (eg: creating a file, deleting a
+
+    machine). Some of the concepts in Cloud CNC are based on [Kubernetes](https://kubernetes.io)
+
+    (Specifically affinities, labels, taints, and tolerations). The key words "MUST", "MUST NOT",
+
+    "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"
+
+    in this document are to be interpreted as described in
+
+    [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+
+
+    ## Glossary
+
+    * ACL: Access Control List
+
+    * RBAC: Role-Based Access Control
+
+    * TOTP: Time-based One Time Password ([RFC 6238](https://tools.ietf.org/html/rfc6238))
+
+    * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule
+
+    compatible jobs on (eg: working-area dimensions)
+
+    * Affinities: labels from a machine/relay that a given job would prefer to be scheduled on (eg:
+
+    GCODE support)
+
+    * Taints: similar to labels; unfavorable properties about a machine/relay that the job-
+
+    scheduling
+
+    algorithm uses to avoid scheduling incompatible jobs (eg: low filament)
+
+    * Tolerations: similar to affinities; taints from a machine/relay that a given job can tolerate
+
+    (eg: unheated bed)
+
+
+    ## Access control
+
+
+    ### API routes
+
+    Access to API routes are controlled by RBAC. Each route has a permission name; permission names
+
+    can be added to a role to grant that role access to that route; any user whose a member of that
+
+    role inherits all of that role's permissions.
+
+
+    The format of RBAC permissions is `[operation ID]` (eg: `getAllMachines`) for variant-less
+
+    operations and `[operation ID]:[operation variant]` (eg: `getAccount:own`) for variant-full
+
+    operations.
+
+
+    ### Individual entities
+
+    Access to individual entities (eg: files or machines) are controlled by ACLs. Each entity has a
+
+    hash map, where the keys are identify the accessor and the values represent the accessor's
+
+    permissions.
+
+
+    The format of ACL accessors is `[entity name]:[entity ID]` (eg:
+
+    `account:6109ba1dc24de13eb8fa0c94` or `role:6109ba287a72978d7d621f97`). The entity name is one
+
+    of `account` for account entities or `role` for role entities.
+
+
+    ## Custom attributes
+
+
+    ### Operation attributes
+
+    * `x-operation-type` (enum): common operation types. Valid values are:
+      * `all`: get all entity instances. The request body MUST equal `schemas.yml#/filter`; the
+        response body MUST include the properties `schemas.yml#/page`, `schemas.yml#/pages`, and the
+        projected (filtered) entity properties properties as `page`, `pages`, and the plural,
+        lowercase name of the entity (respectively) . 
+      * `create`: create an entity instance. The response body must be a body with the projected
+        (filtered) entity properties.
+      * `get`: get an entity instance by ID. The response body must be a body with the projected
+        (filtered) entity properties.
+      * `update`: update an entity instance by ID. The response body must be a body with the
+        projected (filtered) entity properties.
+      * `delete`: delete an entity instance by ID. The response body must be a body with the
+        projected (filtered) entity properties.
+
+    ### Schema attributes
+
+    * `x-searchable` (boolean): whether or not the field should be included when fuzzy-searching.
+      If not present, the field will be excluded from fuzzy-searching. Only allowed when
+      `x-operation-type` equals `all`.
+  version: 2.0.0
+  license:
+    name: MIT
+    url: https://github.com/cloud-cnc/cloud-cnc/blob/main/LICENSE
+tags:
+  - name: sessions
+    description: User sessions
+  - name: accounts
+    description: User accounts
+  - name: roles
+    description: RBAC roles
+  - name: files
+    description: CAD, 2D/3D model, and/or machine-code files
+  - name: jobs
+    description: Machine jobs
+  - name: relays
+    description: Command relays
+  - name: machines
+    description: CNC machines
+paths:
+  /sessions/login/userpass:
+    post:
+      operationId: loginUserpass
+      tags:
+        - sessions
+      summary: Log in to an account with a username and password
+      description: The client MUST invoke `/login/totp` if TOTP is enabled.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  description: Account username
+                  type: string
+                  pattern: ^[A-Za-z0-9-_]{3,256}$
+                password:
+                  description: Account password
+                  type: string
+                  format: password
+                  pattern: ^[ -~]{12,256}$
+      responses:
+        "200":
+          description: OK
+          headers:
+            Set-Cookie:
+              description: Session cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - valid
+                  - totp
+                properties:
+                  valid:
+                    type: boolean
+                    description: Whether or not the username and password were valid
+                  totp:
+                    type: boolean
+                    description: Whether or not the account has TOTP enabled (And therefore whether
+                      or not the client needs to make a request to
+                      `/sessions/totp`)
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /sessions/login/totp:
+    post:
+      operationId: loginTotp
+      tags:
+        - sessions
+      summary: Log in to an account with TOTP
+      description: The client MUST invoke `/login/userpass` prior to invoking this route.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - totp
+              properties:
+                totp:
+                  description: The TOTP
+                  type: string
+                  pattern: ^[0-9]{6}$
+      responses:
+        "200":
+          description: OK
+          headers:
+            Set-Cookie:
+              description: Session cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - valid
+                properties:
+                  valid:
+                    type: boolean
+                    description: Whether or not the TOTP was valid
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /sessions/revoke:
+    post:
+      operationId: revoke
+      tags:
+        - sessions
+      summary: Revoke all other sessions for the current account
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /sessions/logout:
+    post:
+      operationId: logout
+      tags:
+        - sessions
+      summary: Log out of an account
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /accounts/all:
+    parameters:
+      - $ref: "#/paths/~1jobs~1all/parameters/0"
+      - $ref: "#/paths/~1jobs~1all/parameters/1"
+      - $ref: "#/paths/~1jobs~1all/parameters/2"
+    get:
+      operationId: getAllAccounts
+      x-operation-type: all
+      tags:
+        - accounts
+      summary: Get all accounts
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - accounts
+                  - page
+                  - pages
+                properties:
+                  accounts:
+                    description: Filtered accounts
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - username
+                        - totpEnabled
+                        - roles
+                      properties:
+                        id:
+                          $ref: "#/paths/~1accounts~1create/post/responses/200/content/application~1json/\
+                            schema/properties/id"
+                        username:
+                          $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/username"
+                        totpEnabled:
+                          $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/totpEnabled"
+                        roles:
+                          $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/roles"
+                        pluginData:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/pluginData"
+                  page:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/page"
+                  pages:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/pages"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /accounts/create:
+    post:
+      operationId: createAccount
+      x-operation-type: create
+      tags:
+        - accounts
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+                - totpEnabled
+                - roles
+              properties:
+                username:
+                  description: Account username
+                  x-searchable: true
+                  type: string
+                  pattern: ^[A-Za-z0-9-_]{3,256}$
+                password:
+                  description: Account password
+                  type: string
+                  format: password
+                  pattern: ^[ -~]{12,256}$
+                totpEnabled:
+                  description: Whether or not TOTP is enabled
+                  type: boolean
+                roles:
+                  description: Account role IDs
+                  x-searchable: true
+                  type: array
+                  items:
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    description: Account ID
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+                  totpSecret:
+                    description: TOTP secret (Only present if TOTP is enabled)
+                    type: string
+                    pattern: ^[A-Z2-7]{52}$
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/accounts/{id}/impersonate":
+    parameters:
+      - name: id
+        description: Account ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    post:
+      operationId: impersonateAccount
+      tags:
+        - accounts
+      summary: Start/stop impersonating an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - enabled
+              properties:
+                enabled:
+                  description: Whether to start impersonating or stop impersonating
+                  type: boolean
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/accounts/{id}":
+    parameters:
+      - name: id
+        description: >
+          Account ID
+
+          You can use the `me` alias to use the session's effective user account ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    get:
+      operationId: getAccount
+      x-operation-type: get
+      tags:
+        - accounts
+      summary: Get an account
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - username
+                  - totpEnabled
+                  - roles
+                properties:
+                  username:
+                    $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/username"
+                  totpEnabled:
+                    $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/totpEnabled"
+                  roles:
+                    $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/roles"
+                  pluginData:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/pluginData"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    patch:
+      operationId: updateAccount
+      x-operation-type: update
+      tags:
+        - accounts
+      summary: Update an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/username"
+                password:
+                  $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/password"
+                totpEnabled:
+                  $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/totpEnabled"
+                roles:
+                  $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/roles"
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totpSecret:
+                    $ref: "#/paths/~1accounts~1create/post/responses/200/content/application~1json/\
+                      schema/properties/totpSecret"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    delete:
+      operationId: deleteAccount
+      x-operation-type: delete
+      tags:
+        - accounts
+      summary: Delete an account
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /roles/all:
+    parameters:
+      - $ref: "#/paths/~1jobs~1all/parameters/1"
+      - $ref: "#/paths/~1jobs~1all/parameters/2"
+    get:
+      operationId: getAllRoles
+      x-operation-type: all
+      tags:
+        - roles
+      summary: Get all roles
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - roles
+                  - page
+                  - pages
+                properties:
+                  roles:
+                    description: Filtered roles
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - permissions
+                        - priorityLimits
+                      properties:
+                        id:
+                          $ref: "#/paths/~1roles~1create/post/responses/200/content/application~1json/sch\
+                            ema/properties/id"
+                        name:
+                          $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                            a/properties/name"
+                        permissions:
+                          $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                            a/properties/permissions"
+                        priorityLimits:
+                          $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                            a/properties/priorityLimits"
+                        pluginData:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/pluginData"
+                  page:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/page"
+                  pages:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/pages"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /roles/create:
+    post:
+      operationId: createRole
+      x-operation-type: create
+      tags:
+        - roles
+      summary: Create a role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - permissions
+                - priorityLimits
+              properties:
+                name:
+                  description: Role name
+                  x-searchable: true
+                  type: string
+                  pattern: ^[ -~]{3,256}$
+                permissions:
+                  description: RBAC role permissions. These permissions will be granted to all
+                    role members.
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                priorityLimits:
+                  description: >
+                    Job scheduling priority limits (If a user inherits multiple limits,
+                    the effective limit is the
+
+                    smallest minimum and greatest maximum, so as to maximize the range of allowed job scheduling
+
+                    priorities)
+                  type: object
+                  properties:
+                    minimum:
+                      description: Minimum priority (MUST be less than or equal to the maximum limit)
+                      type: integer
+                      minimum: 0
+                      maximum: 10000
+                    maximum:
+                      description: Maximum priority (MUST be greater than or equal to the minimum
+                        limit)
+                      type: integer
+                      minimum: 0
+                      maximum: 10000
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    description: Role ID
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/roles/{id}":
+    parameters:
+      - name: id
+        description: Role ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    get:
+      operationId: getRole
+      x-operation-type: get
+      tags:
+        - roles
+      summary: Get a role
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - permissions
+                  - priorityLimits
+                properties:
+                  name:
+                    $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                      a/properties/name"
+                  permissions:
+                    $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                      a/properties/permissions"
+                  priorityLimits:
+                    $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                      a/properties/priorityLimits"
+                  pluginData:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/pluginData"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    patch:
+      operationId: updateRole
+      x-operation-type: update
+      tags:
+        - roles
+      summary: Update a role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                    a/properties/name"
+                permissions:
+                  $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                    a/properties/permissions"
+                priorityLimits:
+                  $ref: "#/paths/~1roles~1create/post/requestBody/content/application~1json/schem\
+                    a/properties/priorityLimits"
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    delete:
+      operationId: deleteRole
+      x-operation-type: delete
+      tags:
+        - roles
+      summary: Delete a role
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /files/all:
+    parameters:
+      - $ref: "#/paths/~1jobs~1all/parameters/0"
+      - $ref: "#/paths/~1jobs~1all/parameters/1"
+      - $ref: "#/paths/~1jobs~1all/parameters/2"
+    get:
+      operationId: getAllFiles
+      x-operation-type: all
+      tags:
+        - files
+      summary: Get all files
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - files
+                  - page
+                  - pages
+                properties:
+                  files:
+                    description: Filtered files
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - lifecycle
+                        - acl
+                        - estimate
+                      properties:
+                        id:
+                          $ref: "#/paths/~1files~1create/post/responses/200/content/application~1json/sch\
+                            ema/properties/id"
+                        name:
+                          $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                            hema/properties/name"
+                        description:
+                          $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                            hema/properties/description"
+                        state:
+                          $ref: "#/paths/~1files~1%7Bid%7D/patch/requestBody/content/multipart~1form-data\
+                            /schema/properties/state"
+                        acl:
+                          $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                            hema/properties/acl"
+                        estimate:
+                          $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                            hema/properties/estimate"
+                        pluginData:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/pluginData"
+                  page:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/page"
+                  pages:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/pages"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /files/create:
+    post:
+      operationId: createFile
+      x-operation-type: create
+      tags:
+        - files
+      summary: Create a file
+      description: "*Note: route accepts `multipart/form-data`, not `application/json`.*"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - acl
+                - binary
+                - estimate
+              properties:
+                name:
+                  description: File name
+                  x-searchable: true
+                  type: string
+                  pattern: ^[ -~]{3,256}$
+                description:
+                  description: File description
+                  x-searchable: true
+                  type: string
+                  pattern: ^[ -~]{1,1024}$
+                acl:
+                  description: >
+                    File access control list
+
+                    * Keys: ACL permission keys
+
+                    * Values: ACL permission values
+
+
+                    *Note: if sending over `multipart/form-data`, this field MUST be a JSON-encoded string.*
+                  type: object
+                  additionalProperties:
+                    description: >
+                      File subject permission
+
+                      * `admin`: the subject can read and write the file's name, description, state, content,
+                        estimate, and plugin data as well as delete the file and update the file's ACL
+                      * `write`: the subject can only read and write the file's name, description, state, content,
+                        estimate, and plugin data
+                      * `read`: the subject can only read the file's name, description, state, content, estimate,
+                        and plugin data
+                    type: string
+                    enum:
+                      - admin
+                      - write
+                      - read
+                binary:
+                  $ref: "#/paths/~1files~1%7Bid%7D~1raw/get/responses/200/content/application~1oc\
+                    tet-stream/schema"
+                estimate:
+                  description: Job processing time estimate (In seconds)
+                  type: integer
+                  minimum: 0
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    description: File ID
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/files/{id}/raw":
+    parameters:
+      - name: id
+        description: File ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    get:
+      operationId: getRawFile
+      x-operation-type: get
+      tags:
+        - files
+      summary: Get a raw file
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                description: File binary data
+                type: string
+                format: binary
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/files/{id}":
+    parameters:
+      - name: id
+        description: File ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    get:
+      operationId: getFile
+      x-operation-type: get
+      tags:
+        - files
+      summary: Get a file
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - state
+                  - acl
+                  - estimate
+                properties:
+                  name:
+                    $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                      hema/properties/name"
+                  description:
+                    $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                      hema/properties/description"
+                  state:
+                    $ref: "#/paths/~1files~1%7Bid%7D/patch/requestBody/content/multipart~1form-data\
+                      /schema/properties/state"
+                  acl:
+                    $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                      hema/properties/acl"
+                  estimate:
+                    $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                      hema/properties/estimate"
+                  pluginData:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/pluginData"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    patch:
+      operationId: updateFile
+      x-operation-type: update
+      tags:
+        - files
+      summary: Update a file
+      description: >
+        *Note: route accepts `multipart/form-data`, not
+        `application/json`.*
+
+
+        If the client is implementing a "trash" system, the client SHOULD use this route and update
+
+        the file state to `deleted` to signify that the file is pending permanent deletion instead of
+
+        invoking the `DELETE /files/{id}` route.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                    hema/properties/name"
+                description:
+                  $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                    hema/properties/description"
+                state:
+                  description: >
+                    File lifecycle state
+
+                    * `present`: the file is present; both the metadata and data are accessible
+
+                    * `deleted`: the file is in the trash; only the metadata is accessible
+                  type: string
+                  enum:
+                    - present
+                    - deleted
+                acl:
+                  $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                    hema/properties/acl"
+                binary:
+                  $ref: "#/paths/~1files~1%7Bid%7D~1raw/get/responses/200/content/application~1oc\
+                    tet-stream/schema"
+                estimate:
+                  $ref: "#/paths/~1files~1create/post/requestBody/content/multipart~1form-data/sc\
+                    hema/properties/estimate"
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    delete:
+      operationId: deleteFile
+      x-operation-type: delete
+      tags:
+        - files
+      summary: Delete a file
+      description: >
+        *Note: this route permanently and irreversibly deletes the file.*
+
+
+        If the client is implementing a "trash" system, the client SHOULD use the `PATCH /files/{id}`
+
+        route and update the file state to `deleted` to signify that the file is pending permanent
+
+        deletion instead of invoking this route.
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /jobs/all:
+    parameters:
+      - name: page
+        description: >
+          Current page number. If this is equal to `1`, then this is the
+          first page; if this is equal
+
+          to `pages`, then this is the last page.
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+      - name: limit
+        description: Maximum items per page (Default is `25`)
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+      - name: query
+        description: Fuzzy-search query
+        in: query
+        schema:
+          type: string
+          pattern: ^[ -~]{1,256}$
+    get:
+      operationId: getAllJobs
+      x-operation-type: all
+      tags:
+        - jobs
+      summary: Get all jobs
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - jobs
+                  - page
+                  - pages
+                properties:
+                  jobs:
+                    description: Filtered jobs
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - file
+                        - affinities
+                        - tolerations
+                        - priority
+                        - state
+                      properties:
+                        id:
+                          $ref: "#/paths/~1jobs~1create/post/responses/200/content/application~1json/sche\
+                            ma/properties/id"
+                        name:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/name"
+                        file:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/file"
+                        affinities:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/affinities"
+                        tolerations:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/affinities"
+                        priority:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/priority"
+                        state:
+                          $ref: "#/paths/~1jobs~1%7Bid%7D/get/responses/200/content/application~1json/sch\
+                            ema/properties/state"
+                        pluginData:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/pluginData"
+                  page:
+                    description: >
+                      Current page number. If this is equal to `1`, then this is the
+                      first page; if this is equal
+
+                      to `pages`, then this is the last page.
+                    type: integer
+                    minimum: 1
+                  pages:
+                    description: Total page count
+                    type: integer
+                    minimum: 1
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                description: Generic error schema
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    description: Error information
+                    type: object
+                    required:
+                      - name
+                    properties:
+                      name:
+                        description: Short yet descriptive message
+                        type: string
+                        pattern: ^[ -~]{1,256}$
+                      description:
+                        description: Longer message, detailing how to avoid/fix the underlying cause for
+                          the error
+                        type: string
+                        pattern: ^[ -~]{1,1024}$
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/paths/~1jobs~1all/get/responses/400/content/application~1json/schema"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/paths/~1jobs~1all/get/responses/400/content/application~1json/schema"
+  /jobs/create:
+    post:
+      operationId: createJob
+      x-operation-type: create
+      tags:
+        - jobs
+      summary: Create a job
+      description: >
+        The client MUST have at least `read` ACL permissions on the file to
+        schedule a job for it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - file
+                - affinities
+                - tolerations
+                - priority
+              properties:
+                name:
+                  description: Job name
+                  x-searchable: true
+                  type: string
+                  pattern: ^[ -~]{3,256}$
+                file:
+                  description: Job file ID
+                  type: string
+                  format: object-id
+                  pattern: ^[A-Fa-f0-9]{24}$
+                affinities:
+                  description: Label/taint filter
+                  type: object
+                  properties:
+                    operator:
+                      description: >
+                        Filter operator
+
+
+                        # `and`
+
+                        * Summary: performs a logical AND (`&&`) on all arguments
+
+                        * Arguments: `boolean` (2 or more)
+
+                        * Returns: `boolean`
+
+
+                        # `or`
+
+                        * Summary: performs a logical OR (`||`) on all arguments
+
+                        * Arguments: `boolean` (2 or more)
+
+                        * Returns: `boolean`
+
+
+                        # `not`
+
+                        * Summary: performs a logical NOT (`!`) on the argument
+
+                        * Arguments: `boolean`
+
+                        * Returns: `boolean`
+
+
+                        # `equal`
+
+                        * Summary: performs a logical comparison (`==`) on all arguments
+
+                        * Arguments: `[any type]` (2 or more; all arguments must have the same type)
+
+                        * Returns: `boolean`
+
+
+                        # `includes`
+
+                        * Summary: checks if the first argument is included in the second argument
+
+                        * Arguments: `[any type]`, `array` (Items must have the same type as the first argument)
+
+                        * Returns: `boolean`
+
+
+                        # `greaterThan`
+
+                        * Summary: performs a numerical greater than comparison (`>`) on the arguments
+
+                        * Arguments: `number` (2)
+
+                        * Returns `boolean`
+
+
+                        # `greaterThanOrEqual`
+
+                        * Summary: performs a numerical greater than or equal to comparison (`>=`) on the arguments
+
+                        * Arguments: `number` (2)
+
+                        * Returns `boolean`
+
+
+                        # `lessThan`
+
+                        * Summary: performs a numerical less than comparison (`<`) on the arguments
+
+                        * Arguments: `number` (2)
+
+                        * Returns `boolean`
+
+
+                        # `lessThanOrEqual`
+
+                        * Summary: performs a numerical less than or equal to comparison (`<=`) on the arguments
+
+                        * Arguments: `number` (2)
+
+                        * Returns `boolean`
+                      type: string
+                      enum:
+                        - and
+                        - or
+                        - not
+                        - equal
+                        - includes
+                        - greaterThan
+                        - greaterThanOrEqual
+                        - lessThan
+                        - lessThanOrEqual
+                    arguments:
+                      description: Operator arguments (Refer to individual operators for more
+                        information)
+                      type: array
+                      items:
+                        oneOf:
+                          - $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                              /properties/affinities"
+                          - type: array
+                          - type: boolean
+                          - type: number
+                          - type: string
+                tolerations:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/affinities"
+                priority:
+                  description: Job priority (Lower indicates a higher priority)
+                  type: integer
+                  minimum: 0
+                  maximum: 10000
+                pluginData:
+                  description: >
+                    Arbitrary plugin data
+
+                    * Keys: plugin identifier (Plugins SHOULD use an RFC 3986 URI)
+
+                    * Values: arbitrary, plugin-specific data (Plugins SHOULD only modify their respective data)
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    description: Job ID
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/jobs/{id}":
+    parameters:
+      - name: id
+        description: Job ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    get:
+      operationId: getJob
+      x-operation-type: get - jobs
+      tags:
+        - jobs
+      summary: Get a job
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - file
+                  - affinities
+                  - tolerations
+                  - priority
+                  - state
+                properties:
+                  name:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/name"
+                  file:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/file"
+                  affinities:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/affinities"
+                  tolerations:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/affinities"
+                  priority:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/priority"
+                  state:
+                    description: Job lifecycle state
+                    type: object
+                    properties:
+                      stage:
+                        description: >
+                          Job lifecycle state stage
+
+                          * `waiting`: the job is waiting to be scheduled
+
+                          * `processing`: the job is being processed by a machine
+
+                          * `complete`: the job successfully completed
+
+                          * `aborted`: the job unsuccessfully completed
+                        type: string
+                        enum:
+                          - waiting
+                          - processing
+                          - complete
+                          - aborted
+                      machine:
+                        description: Assigned machine ID (During the `waiting` stage, this is an
+                          estimate)
+                        type: string
+                        format: object-id
+                        pattern: ^[A-Fa-f0-9]{24}$
+                      start:
+                        description: Start time (During the `waiting` stage, this is an estimate)
+                        type: string
+                        format: date-time
+                      end:
+                        description: End time (During the `waiting` and `processing` stages, this is an
+                          estimate)
+                        type: string
+                        format: date-time
+                  pluginData:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/pluginData"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    patch:
+      operationId: updateJob
+      x-operation-type: update
+      tags:
+        - jobs
+      summary: Update a job
+      description: >
+        The client MUST have at least `read` ACL permissions on the file to
+        schedule a job for it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/name"
+                file:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/file"
+                affinities:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/affinities"
+                tolerations:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/affinities"
+                priority:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/priority"
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "204":
+          description: OK
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    delete:
+      operationId: deleteJob
+      x-operation-type: delete
+      tags:
+        - jobs
+      summary: Delete a job
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /relays/all:
+    parameters:
+      - $ref: "#/paths/~1jobs~1all/parameters/0"
+      - $ref: "#/paths/~1jobs~1all/parameters/1"
+      - $ref: "#/paths/~1jobs~1all/parameters/2"
+    get:
+      operationId: getAllRelays
+      x-operation-type: all
+      tags:
+        - relays
+      summary: Get all relays
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - relays
+                  - page
+                  - pages
+                properties:
+                  relays:
+                    description: Filtered relays
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - labels
+                        - taints
+                      properties:
+                        id:
+                          $ref: "#/paths/~1relays~1create/post/responses/200/content/application~1json/sc\
+                            hema/properties/id"
+                        name:
+                          $ref: "#/paths/~1relays~1create/post/requestBody/content/application~1json/sche\
+                            ma/properties/name"
+                        labels:
+                          $ref: "#/paths/~1relays~1%7Bid%7D/patch/requestBody/content/application~1json/s\
+                            chema/properties/labels"
+                        taints:
+                          $ref: "#/paths/~1relays~1%7Bid%7D/patch/requestBody/content/application~1json/s\
+                            chema/properties/taints"
+                        pluginData:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/pluginData"
+                  page:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/page"
+                  pages:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/pages"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /relays/create:
+    post:
+      operationId: createRelay
+      x-operation-type: create
+      tags:
+        - relays
+      summary: Create a relay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: Relay name
+                  x-searchable: true
+                  type: string
+                  pattern: ^[ -~]{3,256}$
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - key
+                properties:
+                  id:
+                    description: Relay ID
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+                  key:
+                    description: Relay key
+                    type: string
+                    pattern: ^[A-Za-z0-9-_]{64}$
+                    format: password
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/relays/{id}":
+    parameters:
+      - name: id
+        description: Relay ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    get:
+      operationId: getRelay
+      x-operation-type: get
+      tags:
+        - relays
+      summary: Get a relay
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - labels
+                  - taints
+                properties:
+                  name:
+                    $ref: "#/paths/~1relays~1create/post/requestBody/content/application~1json/sche\
+                      ma/properties/name"
+                  labels:
+                    $ref: "#/paths/~1relays~1%7Bid%7D/patch/requestBody/content/application~1json/s\
+                      chema/properties/labels"
+                  taints:
+                    $ref: "#/paths/~1relays~1%7Bid%7D/patch/requestBody/content/application~1json/s\
+                      chema/properties/taints"
+                  pluginData:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/pluginData"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    patch:
+      operationId: updateRelay
+      x-operation-type: update
+      tags:
+        - relays
+      summary: Update a relay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/paths/~1relays~1create/post/requestBody/content/application~1json/sche\
+                    ma/properties/name"
+                labels:
+                  description: Relay labels (Not to be confused with machine labels)
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                taints:
+                  description: >
+                    Relay taints (Not to be confused with machine taints). Well known
+                    ones are:
+
+                    * `relay.cloud-cnc/incompatible-version`: the API server and relay versions are incompatible with each other<sup>1</sup>
+
+                    * `relay.cloud-cnc/offline`: the relay is offline<sup>1</sup>
+
+
+                    <sup>1</sup> automatically added and removed
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    delete:
+      operationId: deleteRelay
+      x-operation-type: delete
+      tags:
+        - relays
+      summary: Delete a relay
+      description: "*Note: this route will kick the relay if it's currently connected.*"
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /machines/all:
+    parameters:
+      - $ref: "#/paths/~1jobs~1all/parameters/0"
+      - $ref: "#/paths/~1jobs~1all/parameters/1"
+      - $ref: "#/paths/~1jobs~1all/parameters/2"
+    get:
+      operationId: getAllMachines
+      x-operation-type: all
+      tags:
+        - machines
+      summary: Get all machines
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - machines
+                  - page
+                  - pages
+                properties:
+                  machines:
+                    description: Filtered machines
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - relay
+                        - labels
+                        - taints
+                      properties:
+                        id:
+                          $ref: "#/paths/~1machines~1create/post/responses/200/content/application~1json/\
+                            schema/properties/id"
+                        name:
+                          $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/name"
+                        relay:
+                          $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/relay"
+                        labels:
+                          $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/labels"
+                        taints:
+                          $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/taints"
+                        pluginData:
+                          $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                            /properties/pluginData"
+                  page:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/page"
+                  pages:
+                    $ref: "#/paths/~1jobs~1all/get/responses/200/content/application~1json/schema/p\
+                      roperties/pages"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  /machines/create:
+    post:
+      operationId: createMachine
+      x-operation-type: create
+      tags:
+        - machines
+      summary: Create a machine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - relay
+                - labels
+                - taints
+              properties:
+                name:
+                  description: Machine name
+                  x-searchable: true
+                  type: string
+                  pattern: ^[ -~]{3,256}$
+                relay:
+                  description: Relay ID
+                  type: string
+                  format: object-id
+                  pattern: ^[A-Fa-f0-9]{24}$
+                labels:
+                  description: Machine labels (Not to be confused with relay labels)
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                taints:
+                  description: >
+                    Machine taints (Not to be confused with relay taints). Well known
+                    ones are:
+
+                    * `machine.cloud-cnc/emergency-stopped`: the machine is stopped as a result of an emergency-stop
+
+                    signal<sup>1</sup>
+
+                    * `machine.cloud-cnc/busy`: the machine is currently busy<sup>1</sup>
+
+                    * `machine.cloud-cnc/offline`: the machine is offline<sup>1</sup>
+
+
+                    <sup>1</sup> automatically added and removed
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    description: Machine ID
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/machines/{id}":
+    parameters:
+      - name: id
+        description: Machine ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    get:
+      operationId: getMachine
+      x-operation-type: get
+      tags:
+        - machines
+      summary: Get a machine
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                  - relay
+                  - labels
+                  - taints
+                properties:
+                  name:
+                    $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/name"
+                  relay:
+                    $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/relay"
+                  labels:
+                    $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/labels"
+                  taints:
+                    $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/taints"
+                  pluginData:
+                    $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                      /properties/pluginData"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    patch:
+      operationId: updateMachine
+      x-operation-type: update
+      tags:
+        - machines
+      summary: Update a machine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/name"
+                relay:
+                  $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/relay"
+                labels:
+                  $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/labels"
+                taints:
+                  $ref: "#/paths/~1machines~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/taints"
+                pluginData:
+                  $ref: "#/paths/~1jobs~1create/post/requestBody/content/application~1json/schema\
+                    /properties/pluginData"
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+    delete:
+      operationId: deleteMachine
+      x-operation-type: delete
+      tags:
+        - machines
+      summary: Delete a machine
+      responses:
+        "204":
+          $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+components:
+  securitySchemes:
+    session:
+      description: >
+        The security scheme used by established user clients. Note: this is
+        the same session scheme
+
+        used by the Websocket API.
+      in: cookie
+      name: session
+      type: apiKey
+security:
+  - session: []

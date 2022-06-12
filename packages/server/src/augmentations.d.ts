@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
- * @fileoverview Local type augmentation
+ * @fileoverview TypeScript type augmentations
  */
 
 //Imports

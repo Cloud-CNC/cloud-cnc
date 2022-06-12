@@ -1,0 +1,351 @@
+asyncapi: 2.4.0
+info:
+  title: Cloud CNC Websocket API
+  description: >
+    ## Preface
+
+    This specification is the canonical source for the Cloud CNC Websocket API. The Websocket API is
+
+    used between the user client, API server(s), and command relays for direct machine/relay
+
+    communication. Some of the concepts in Cloud CNC are based on
+
+    [Kubernetes](https://kubernetes.io) (Specifically affinities, labels, taints, and tolerations).
+
+    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+
+    "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in
+
+    [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+
+
+    ## Glossary
+
+    * Labels: properties about a machine/relay that the job-scheduling algorithm uses to schedule compatible jobs on (eg: working-area dimensions)
+
+    * Affinities: labels from a machine/relay that a given job would prefer to be scheduled on (eg: GCODE support)
+
+    * Taints: similar to labels; unfavorable properties about a machine/relay that the job-scheduling algorithm uses to avoid scheduling incompatible jobs (eg: low filament)
+
+    * Tolerations: similar to affinities; taints from a machine/relay that a given job can tolerate (eg: unheated bed)
+  version: 2.0.0
+  license:
+    name: MIT
+    url: https://github.com/cloud-cnc/cloud-cnc/blob/main/LICENSE
+tags:
+  - name: relays
+    description: Command relays
+  - name: machines
+    description: CNC machines
+channels:
+  relays/authentication:
+    description: >
+      Relay authentication. *Note: this is a psuedo-channel and actual
+      communication is done via
+
+      [Socket.IO's auth system](https://socket.io/docs/v4/middlewares/#sending-credentials).*
+    publish:
+      operationId: onRelayLoginRequest
+      tags:
+        - name: relay
+      summary: Login requests sent from the relay to the API server
+      message:
+        messageId: relayLoginRequest
+        description: Relay login request
+        payload:
+          type: object
+          required:
+            - id
+            - key
+          properties:
+            id:
+              $ref: "#/channels/relays~1%7Bid%7D~1status/parameters/id/schema"
+            key:
+              description: Relay key
+              type: string
+              pattern: ^[A-Za-z0-9-_]{64}$
+              format: password
+            pluginData:
+              description: >
+                Arbitrary plugin data
+
+                * Keys: plugin identifier (Plugins SHOULD use an RFC 3986 URI)
+
+                * Values: arbitrary, plugin-specific data (Plugins SHOULD only modify their respective data)
+              type: object
+              additionalProperties: true
+  "relays/{id}/status":
+    description: >
+      Relay status. When a relay starts, it MAY send the
+      `relayStatusBackwardRequest` message.
+
+      The API server MUST respond by sending the `relayStatusBackwardResponse` with the last known
+
+      status. Whenever a relay has a status update, or if the API server sends a
+
+      `relayStatusForwardRequest` message, the relay MUST send a `relayStatusForwardResponse` message
+
+      to update the API server.
+    parameters:
+      id:
+        description: Relay ID
+        location: $message.payload#/target
+        schema:
+          description: Relay ID
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    publish:
+      operationId: onRelayStatusBackwardRequestOrForwardResponse
+      tags:
+        - name: relay
+      summary: Status update
+      security:
+        - session: []
+      message:
+        oneOf:
+          - messageId: relayStatusBackwardRequest
+            description: Status update request sent from the relay to the API server
+            payload:
+              description: Relay status request
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  $ref: "#/channels/relays~1%7Bid%7D~1status/parameters/id/schema"
+                pluginData:
+                  $ref: "#/channels/relays~1authentication/publish/message/payload/properties/plu\
+                    ginData"
+          - messageId: relayStatusForwardResponse
+            description: Status update response sent from the relay to the API server
+            payload:
+              description: Relay status response
+              type: object
+              required:
+                - id
+                - machines
+                - labels
+                - taints
+              properties:
+                id:
+                  $ref: "#/channels/relays~1%7Bid%7D~1status/parameters/id/schema"
+                machines:
+                  description: IDs of the machines the relay is responsible for
+                  type: array
+                  items:
+                    type: string
+                    format: object-id
+                    pattern: ^[A-Fa-f0-9]{24}$
+                labels:
+                  description: Relay labels (Not to be confused with machine labels)
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                taints:
+                  description: >
+                    Relay taints (Not to be confused with machine taints). Well known
+                    ones are:
+
+                    * `relay.cloud-cnc/incompatible-version`: the API server and relay versions are incompatible with each other<sup>1</sup>
+
+                    * `relay.cloud-cnc/offline`: the relay is offline<sup>1</sup>
+
+
+                    <sup>1</sup> automatically added and removed
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                pluginData:
+                  $ref: "#/channels/relays~1authentication/publish/message/payload/properties/plu\
+                    ginData"
+    subscribe:
+      operationId: onRelayStatusBackwardResponseOrForwardRequest
+      tags:
+        - name: relay
+      summary: Status update
+      security:
+        - session: []
+      message:
+        oneOf:
+          - messageId: relayStatusBackwardResponse
+            description: Status update response sent from the API server to the relay
+            payload:
+              $ref: "#/channels/relays~1%7Bid%7D~1status/publish/message/oneOf/1/payload"
+          - messageId: relayStatusForwardRequest
+            description: Status update request sent from the API server to the relay
+            payload:
+              $ref: "#/channels/relays~1%7Bid%7D~1status/publish/message/oneOf/0/payload"
+  "machines/{id}/io":
+    description: User input/machine output
+    parameters:
+      id:
+        description: Machine ID
+        location: $message.payload#/id
+        schema:
+          description: Machine ID
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    publish:
+      operationId: onOutput
+      tags:
+        - name: machine
+      summary: >
+        Output sent from the machine to the user via the relay. *Note: this is
+        a `publish` operation
+
+        from the relay's perspective but a `subscribe` operation from the user's perspective.*
+      security:
+        - session: []
+      message:
+        messageId: output
+        description: Machine output
+        payload:
+          description: User input/machine output
+          type: object
+          required:
+            - id
+            - raw
+          properties:
+            id:
+              $ref: "#/channels/machines~1%7Bid%7D~1io/parameters/id/schema"
+            raw:
+              description: Raw data
+              type: string
+              format: binary
+            pluginData:
+              $ref: "#/channels/relays~1authentication/publish/message/payload/properties/plu\
+                ginData"
+    subscribe:
+      operationId: onInput
+      tags:
+        - name: io
+      summary: >
+        Input sent from the user to the machine via the relay. *Note: this is a
+        `subscribe` operation
+
+        from the relay's perspective but a `publish` operation from the user's perspective.*
+      security:
+        - session: []
+      message:
+        messageId: input
+        description: User input
+        payload:
+          $ref: "#/channels/machines~1%7Bid%7D~1io/publish/message/payload"
+  "machines/{id}/status":
+    description: >
+      Machine status. When a relay starts, it MAY send the
+      `machineStatusBackwardRequest` message.
+
+      The API server MUST respond by sending the `machineStatusBackwardResponse` with the last known
+
+      status. Whenever a machine has a status update, or if the API server sends a
+
+      `machineStatusForwardRequest` message, the relay MUST send a `machineStatusForwardResponse`
+
+      message to update the API server.
+    parameters:
+      id:
+        description: Machine ID
+        location: $message.payload#/id
+        schema:
+          $ref: "#/channels/machines~1%7Bid%7D~1io/parameters/id/schema"
+    publish:
+      operationId: onMachineStatusBackwardRequestOrForwardResponse
+      tags:
+        - name: machine
+      summary: Status update
+      security:
+        - session: []
+      message:
+        oneOf:
+          - messageId: machineStatusBackwardRequest
+            description: Status update request sent from the relay to the API server
+            payload:
+              description: Machine status request
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  $ref: "#/channels/machines~1%7Bid%7D~1io/parameters/id/schema"
+                pluginData:
+                  $ref: "#/channels/relays~1authentication/publish/message/payload/properties/plu\
+                    ginData"
+          - messageId: machineStatusForwardResponse
+            description: Status update response sent from the relay to the API server
+            payload:
+              description: Machine status response
+              type: object
+              required:
+                - id
+                - labels
+                - taints
+              properties:
+                id:
+                  $ref: "#/channels/machines~1%7Bid%7D~1io/parameters/id/schema"
+                labels:
+                  description: Machine labels (Not to be confused with relay labels)
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                taints:
+                  description: >
+                    Machine taints (Not to be confused with relay taints). Well known
+                    ones are:
+
+                    * `machine.cloud-cnc/emergency-stopped`: the machine is stopped as a result of an
+
+                    emergency-stop signal<sup>1</sup>
+
+                    * `machine.cloud-cnc/busy`: the machine is currently busy<sup>1</sup>
+
+                    * `machine.cloud-cnc/offline`: the machine is offline<sup>1</sup>
+
+
+                    <sup>1</sup> automatically added and removed
+                  type: array
+                  items:
+                    type: string
+                    pattern: ^[ -~]{3,256}$
+                pluginData:
+                  $ref: "#/channels/relays~1authentication/publish/message/payload/properties/plu\
+                    ginData"
+    subscribe:
+      operationId: onMachineStatusBackwardResponseOrForwardRequest
+      tags:
+        - name: machine
+      summary: Status update
+      security:
+        - session: []
+      message:
+        oneOf:
+          - messageId: machineStatusBackwardResponse
+            description: Status update response sent from the API server to the relay
+            payload:
+              $ref: "#/channels/machines~1%7Bid%7D~1status/publish/message/oneOf/1/payload"
+          - messageId: machineStatusForwardRequest
+            description: Status update request sent from the API server to the relay
+            payload:
+              $ref: "#/channels/machines~1%7Bid%7D~1status/publish/message/oneOf/0/payload"
+servers:
+  server:
+    description: The URL is the same one you use to access the Cloud CNC user interface
+    protocol: socketio
+    protocolVersion: 4.5.0
+    url: https://your-cloud-cnc-instance.local
+components:
+  securitySchemes:
+    session:
+      description: >
+        The security scheme used by established user and relay clients.
+        Note: this is the same
+
+        session scheme used by the HTTP API.
+      in: cookie
+      name: session
+      type: httpApiKey

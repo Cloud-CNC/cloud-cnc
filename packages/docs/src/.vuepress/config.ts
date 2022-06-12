@@ -6,16 +6,29 @@
 import typedocPlugin from './plugins/typedoc/index';
 import {defaultTheme} from '@vuepress/theme-default';
 import {defineUserConfig} from 'vuepress';
-import {join, resolve} from 'path';
+import {join} from 'path';
+import {registerComponentsPlugin} from '@vuepress/plugin-register-components';
 import {searchPlugin} from '@vuepress/plugin-search';
+import {viteBundler} from '@vuepress/bundler-vite';
 
 //Resolve paths
-const packagesDir = resolve(__dirname, '..', '..', '..');
+const packagesDir = join(__dirname, '..', '..', '..');
 const pluginSdkDir = join(packagesDir, 'plugin-sdk');
 const serverDir = join(packagesDir, 'server');
 
 //Export
 export default defineUserConfig({
+  bundler: viteBundler({
+    vuePluginOptions: {
+      template: {
+        compilerOptions: {
+          isCustomElement: tag => [
+            'asyncapi-component'
+          ].includes(tag)
+        }
+      }
+    }
+  }),
   title: 'Cloud CNC Docs',
   description: 'Documentation for the Cloud CNC ecosystem',
   head: [
@@ -81,13 +94,31 @@ export default defineUserConfig({
       '/docs/': [
         '/docs/branding/',
         {
+          text: 'API',
+          link: '/docs/api',
+          children: [
+            {
+              text: 'HTTP API',
+              link: '/docs/api/http'
+            },
+            {
+              text: 'Websocket API',
+              link: '/docs/api/websocket'
+            }
+          ]
+        },
+        {
           text: 'Plugins',
+          link: '/docs/plugins/',
           children: []
         }
       ]
     }
   }),
   plugins: [
+    registerComponentsPlugin({
+      componentsDir: join(__dirname, 'components')
+    }),
     searchPlugin({
       hotKeys: [
         {
@@ -120,7 +151,7 @@ export default defineUserConfig({
           text: 'API',
           path: [
             '/docs/',
-            1,
+            2,
             'children',
             0
           ]

@@ -6,6 +6,9 @@
   "author": "Cloud CNC contributors",
   "license": "MIT",
   "scripts": {
+    "bundle": "npm run bundle:http && npm run bundle:websocket",
+    "bundle:http": "ts-node scripts/bundle --input http/openapi.yml --output ../docs/src/.vuepress/public/http-api.yml",
+    "bundle:websocket": "ts-node scripts/bundle --input websocket/asyncapi.yml --output ../docs/src/.vuepress/public/websocket-api.yml",
     "lint": "npm run lint:http && npm run lint:websocket",
     "lint:http": "spectral lint http/openapi.yml --ruleset=http/.spectral.yml --fail-severity=info",
     "lint:websocket": "spectral lint websocket/asyncapi.yml --ruleset=websocket/.spectral.yml --fail-severity=info"
@@ -17,8 +20,11 @@
     "swagger-parser": "^10.0.3"
   },
   "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^9.0.9",
     "@stoplight/spectral-cli": "^6.3.0",
-    "@types/lodash": "^4.14.182"
+    "@types/lodash": "^4.14.182",
+    "commander": "^9.3.0",
+    "yaml": "^2.1.1"
   },
   "homepage": "https://cloud-cnc.github.io",
   "repository": {

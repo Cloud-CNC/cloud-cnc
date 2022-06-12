@@ -1,5 +1,5 @@
 /**
- * @fileoverview Generate TypeScript declaration for the parser
+ * @fileoverview TypeScript declaration generator script
  * 
  * **NOTE: this file should be ran via `npm run generate:declaration`!**
  */
