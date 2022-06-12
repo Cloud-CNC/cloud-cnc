@@ -1,0 +1,33 @@
+{
+  "name": "docs",
+  "private": true,
+  "version": "0.0.1-alpha.0",
+  "description": "Documentation",
+  "author": "Cloud CNC contributors",
+  "license": "MIT",
+  "scripts": {
+    "build": "vuepress build src",
+    "dev": "vuepress dev src"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182",
+    "@vuepress/core": "^2.0.0-beta.47",
+    "@vuepress/markdown": "^2.0.0-beta.47",
+    "@vuepress/plugin-git": "^2.0.0-beta.47",
+    "@vuepress/plugin-search": "^2.0.0-beta.47",
+    "@vuepress/theme-default": "^2.0.0-beta.47",
+    "lodash": "^4.17.21",
+    "typedoc": "^0.22.17",
+    "typedoc-plugin-markdown": "^3.12.1",
+    "vuepress": "^2.0.0-beta.47"
+  },
+  "homepage": "https://cloud-cnc.github.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/docs"
+  },
+  "bugs": {
+    "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
+  }
+}

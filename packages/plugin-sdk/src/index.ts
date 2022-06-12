@@ -26,6 +26,7 @@ class PluginSDK
    * Internal entry point
    * 
    * **NOTE: if you're a plugin developer, DO NOT USE THIS METHOD!**
+   * @internal
    * @param rawHostVersion Host Cloud CNC version
    * @param ctx Internal plugin SDK context
    */

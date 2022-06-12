@@ -22,15 +22,32 @@ const panic = (message: string) =>
   process.exit(1);
 };
 
-//App modes
+/**
+ * App modes
+ */
 export enum Mode
 {
+  /**
+   * Development environment
+   */
   DEVELOPMENT = 'development',
+
+  /**
+   * Testing environment (Often in a CI/CD pipeline)
+   */
   TESTING = 'testing',
+
+  /**
+   * Production environment
+   */
   PRODUCTION = 'production'
 }
 
 //Read environment variables
+
+/**
+ * Current app mode
+ */
 let mode: Mode;
 switch (process.env.NODE_ENV)
 {
@@ -47,8 +64,18 @@ switch (process.env.NODE_ENV)
     break;
 }
 
+/**
+ * Logging configuration
+ */
 const log = {
+  /**
+   * Whether or not pretty logging is enabled
+   */
   pretty: process.env.PRETTY == 'true',
+
+  /**
+   * Minimum logging level
+   */
   level: process.env.LOG_LEVEL as LevelWithSilent
 };
 
@@ -70,21 +97,68 @@ if (log.level == null)
   }
 }
 
+/**
+ * Argon2ID hashing options
+ * 
+ * @see https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-argon2-11#section-4
+ */
 const hash = {
+  /**
+   * Iterations
+   * @default `8`
+   */
   iterations: parseInt(process.env.HASH_ITERATIONS ?? '', 10) || 8,
+
+  /**
+   * Memory in KiB
+   * @default `128 MiB`
+   */
   memory: parseInt(process.env.HASH_MEMORY ?? '', 10) || (1024 * 128), //128 MiB
 };
 
+/**
+ * HTTP server options
+ */
 const http = {
+  /**
+   * Server port
+   * @default `80`
+   */
   port: parseInt(process.env.PORT ?? '', 10) || 80,
+
+  /**
+   * Whether or not to enable HTTP2
+   * @default `false`
+   */
   http2: process.env.HTTP2 == 'true',
 
+  /**
+   * Whether or not TLS is enabled
+   * @default `false`
+   */
   tls: process.env.TLS_ENABLED == 'true',
+  
+  /**
+   * TLS certificate path
+   */
   certificate: process.env.TLS_CERTIFICATE ?? '',
+
+  /**
+   * TLS key path
+   */
   key: process.env.TLS_KEY ?? ''
 };
 
+/**
+ * Fully-qualified MongoDB URL including database name
+ * 
+ * **Note: use `127.0.0.1` if `localhost` causes errors!**
+ */
 const mongoUrl = process.env.MONGO_URL ?? '';
+
+/**
+ * Fully-qualified Redis URL
+ */
 const redisUrl = process.env.REDIS_URL ?? '';
 
 //Validate the config

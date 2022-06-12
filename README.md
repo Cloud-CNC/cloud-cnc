@@ -1,5 +1,5 @@
 # Cloud CNC
-Core monorepo
+Main monorepo
 
 ## Core Packages
 * [API specifications](packages/api)

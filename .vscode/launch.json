@@ -7,8 +7,7 @@
     {
       "name": "Run search tests",
       "presentation": {
-        "group": "Search",
-        "order": 3
+        "group": "Search"
       },
       "type": "node",
       "request": "launch",
