@@ -33,7 +33,7 @@ onMounted(() =>
 
 <template>
   <shadow-root class="container">
-    <shadow-style>{{ SwaggerCSS}}</shadow-style>
+    <shadow-style>{{ SwaggerCSS }}</shadow-style>
     <div ref="element"></div>
   </shadow-root>
 </template>

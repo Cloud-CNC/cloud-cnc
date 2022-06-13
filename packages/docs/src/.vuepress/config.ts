@@ -9,7 +9,6 @@ import {defineUserConfig} from 'vuepress';
 import {join} from 'path';
 import {registerComponentsPlugin} from '@vuepress/plugin-register-components';
 import {searchPlugin} from '@vuepress/plugin-search';
-import {viteBundler} from '@vuepress/bundler-vite';
 
 //Resolve paths
 const packagesDir = join(__dirname, '..', '..', '..');
@@ -18,17 +17,6 @@ const serverDir = join(packagesDir, 'server');
 
 //Export
 export default defineUserConfig({
-  bundler: viteBundler({
-    vuePluginOptions: {
-      template: {
-        compilerOptions: {
-          isCustomElement: tag => [
-            'asyncapi-component'
-          ].includes(tag)
-        }
-      }
-    }
-  }),
   title: 'Cloud CNC Docs',
   description: 'Documentation for the Cloud CNC ecosystem',
   head: [
@@ -65,7 +53,7 @@ export default defineUserConfig({
     logo: '/icon-light.png',
     logoDark: '/icon-dark.png',
     repo: 'https://github.com/cloud-cnc/cloud-cnc',
-    docsDir: 'packages/docs',
+    docsDir: 'packages/docs/src',
     navbar: [
       {
         text: 'Home',

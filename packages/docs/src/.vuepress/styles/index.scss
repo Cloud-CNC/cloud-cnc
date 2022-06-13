@@ -1,0 +1,37 @@
+/**
+ * See https://v2.vuepress.vuejs.org/reference/default-theme/styles.html#style-file
+ */
+
+//Original values
+$c-bg-navbar: #ffffff;
+$c-bg-navbar-dark: #22272e;
+
+//Variables
+$c-brand-light: #191919;
+$c-brand-dark: #e5e5e5;
+
+$bg-navbar-opacity-light: 0.5;
+$bg-navbar-opacity-dark: 0.8;
+$bg-navbar-blur-radius: 5px;
+
+//Default theme
+:root {
+  --c-brand: $c-brand-light;
+  --c-brand-light: $c-brand-dark;
+
+  --content-width: 100%;
+
+  --c-bg-navbar: #{rgba($c-bg-navbar, $bg-navbar-opacity-light)};
+}
+
+//Dark theme overrides
+html.dark {
+  --c-brand: $c-brand-light;
+  --c-brand-light: $c-brand-dark;
+
+  --c-bg-navbar: #{rgba($c-bg-navbar-dark, $bg-navbar-opacity-dark)};
+}
+
+.navbar {
+  backdrop-filter: blur($bg-navbar-blur-radius);
+}

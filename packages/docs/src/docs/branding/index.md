@@ -3,18 +3,30 @@
 ## Icons
 
 ### Light icon
-[![Light icon](./icon-light.png)](./icon-light.png)
+![Light icon](./icon-light.png)
 
 ### Dark icon
-[![Dark icon](./icon-dark.png)](./icon-dark.png)
+![Dark icon](./icon-dark.png)
 
 ## Wordmarks
 
 ### Light wordmark
-[![Light wordmark](./wordmark-light.png)](./wordmark-light.png)
+![Light wordmark](./wordmark-light.png)
 
 ### Dark wordmark
-[![Dark wordmark](./wordmark-dark.png)](./wordmark-dark.png)
+![Dark wordmark](./wordmark-dark.png)
+
+## Source
+
+### Light
+<SourceLink path="packages/docs/src/docs/branding/logo-light.svg">
+<img alt="Light logo" src="./logo-light.svg" />
+</SourceLink>
+
+### Dark
+<SourceLink path="packages/docs/src/docs/branding/logo-dark.svg">
+<img alt="Dark logo" src="./logo-dark.svg" />
+</SourceLink>
 
 ## Colors
 

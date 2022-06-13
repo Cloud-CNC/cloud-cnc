@@ -24,7 +24,7 @@ features:
     details: Every core component is free and open source
   - title: Highly Available
     details: Cloud CNC natively supports running multiple instances behind a load-balancer - ideal for running in the cloud
-footer: Made by Wakeful Cloud
+footer: 'Made with ❤️ by the Cloud CNC contributors'
 ---
 
 ::: warning
