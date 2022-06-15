@@ -12,7 +12,7 @@ import {version} from '../package.json';
 import {writeFile} from 'fs/promises';
 
 /**
- * Command lineoptions
+ * Command line options
  */
 interface Options
 {
@@ -32,8 +32,8 @@ const command = program
   .name('server')
   .version(version)
   .description('YAML bundler')
-  .option('-i, --input <file>', 'input file')
-  .option('-o, --output <file>', 'output file')
+  .requiredOption('-i, --input <file>', 'input file')
+  .requiredOption('-o, --output <file>', 'output file')
   .action(async (options: Options) =>
   {
     //Bundle the input

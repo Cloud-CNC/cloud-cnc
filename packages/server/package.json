@@ -6,7 +6,7 @@
   "author": "Cloud CNC contributors",
   "license": "MIT",
   "scripts": {
-    "build": "tsup src/index.ts",
+    "build": "tsup",
     "start": "node dist/index.js",
     "start:debug": "ts-node --require tsconfig-paths/register src/index.ts",
     "test": "ava src/**/*.spec.ts"

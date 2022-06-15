@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /icon-dark.png
+heroImage: /logo.webp
 tagline: Scalable CNC machine orchestration
 actions:
   - text: Quick Start →

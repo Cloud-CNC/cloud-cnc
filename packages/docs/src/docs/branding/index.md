@@ -1,39 +1,48 @@
 # Branding
 
-## Icons
+[[toc]]
 
-### Light icon
-![Light icon](./icon-light.png)
+## Logo
 
-### Dark icon
-![Dark icon](./icon-dark.png)
+### PNG
 
-## Wordmarks
+![Logo (PNG)](./logo.png)
 
-### Light wordmark
-![Light wordmark](./wordmark-light.png)
+Attribute | Value
+--- | ---
+Height | `2048 px`
+Width | `2048 px`
+DPI | `47.981`
+Encoding | `32-bit with alpha`
+Size | `1.52 MiB`
 
-### Dark wordmark
-![Dark wordmark](./wordmark-dark.png)
+### WebP
+![Logo (PNG)](./logo.webp)
 
-## Source
+Attribute | Value
+--- | ---
+Height | `2048 px`
+Width | `2048 px`
+DPI | `72`
+Encoding | `32-bit with alpha`
+Size | `70.2 KiB`
 
-### Light
-<SourceLink path="packages/docs/src/docs/branding/logo-light.svg">
-<img alt="Light logo" src="./logo-light.svg" />
-</SourceLink>
+### SVG
+![Logo (SVG)](./logo.svg)
+*Note: this SVG is also the logo source. You can download the it  <SourceLink path="packages/docs/src/docs/branding/logo.svg">here</SourceLink>.*
 
-### Dark
-<SourceLink path="packages/docs/src/docs/branding/logo-dark.svg">
-<img alt="Dark logo" src="./logo-dark.svg" />
-</SourceLink>
+Attribute | Value
+--- | ---
+Height | `2048 px`
+Width | `2048 px`
+Pixels/Unit | `10.666667`
+Size | `19.7 KiB`
+Editor | [Inkscape](https://inkscape.org)
 
 ## Colors
 
-### Light
-[![#191919](https://img.shields.io/badge/%23191919-191919?style=for-the-badge)](https://color-hex.com/color/191919)
-### Dark
-[![#e5e5e5](https://img.shields.io/badge/%23e5e5e5-e5e5e5?style=for-the-badge)](https://color-hex.com/color/e5e5e5)
+### Primary
+[![#2196f3](https://img.shields.io/badge/%232196f3-2196f3?style=for-the-badge)](https://color-hex.com/color/2196f3) (`#2196f3`)
 
-## Fonts
-[`Sen (400)`](https://fonts.google.com/specimen/Sen)
+### Secondary
+[![#304fff](https://img.shields.io/badge/%23304fff-304fff?style=for-the-badge)](https://color-hex.com/color/304fff) (`#304fff`)

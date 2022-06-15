@@ -13,7 +13,7 @@
     "require": "./dist/index.cjs"
   },
   "scripts": {
-    "build": "tsup src/index.ts"
+    "build": "tsup"
   },
   "dependencies": {
     "@types/koa": "^2.13.4",

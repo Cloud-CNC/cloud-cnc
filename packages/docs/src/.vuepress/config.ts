@@ -17,14 +17,14 @@ const serverDir = join(packagesDir, 'server');
 
 //Export
 export default defineUserConfig({
-  title: 'Cloud CNC Docs',
+  title: 'Cloud CNC',
   description: 'Documentation for the Cloud CNC ecosystem',
   head: [
     [
       'link',
       {
         rel: 'icon',
-        href: '/icon-dark.png'
+        href: '/logo.webp'
       }
     ],
     [
@@ -50,8 +50,7 @@ export default defineUserConfig({
     ]
   ],
   theme: defaultTheme({
-    logo: '/icon-light.png',
-    logoDark: '/icon-dark.png',
+    logo: '/logo.webp',
     repo: 'https://github.com/cloud-cnc/cloud-cnc',
     docsDir: 'packages/docs/src',
     navbar: [
