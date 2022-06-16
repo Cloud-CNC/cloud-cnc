@@ -12,9 +12,10 @@ Attribute | Value
 --- | ---
 Height | `2048 px`
 Width | `2048 px`
-DPI | `47.981`
-Encoding | `32-bit with alpha`
-Size | `1.52 MiB`
+Pixel Density | `300 PPI`
+Color Space | `sRGB`
+Encoding | `32-bit (8 bits/channel with alpha)`
+Size | `2.31 MiB`
 
 ### WebP
 ![Logo (PNG)](./logo.webp)
@@ -23,20 +24,22 @@ Attribute | Value
 --- | ---
 Height | `2048 px`
 Width | `2048 px`
-DPI | `72`
-Encoding | `32-bit with alpha`
-Size | `70.2 KiB`
+Pixel Density | `72 PPI`
+Color Space | `sRGB`
+Encoding | `32-bit (8 bits/channel with alpha)`
+Size | `72.1 KiB`
 
-### SVG
-![Logo (SVG)](./logo.svg)
-*Note: this SVG is also the logo source. You can download the it  <SourceLink path="packages/docs/src/docs/branding/logo.svg">here</SourceLink>.*
+### Source
+![Source](./logo.svg)
+*Note: while this is a valid SVG, it's strongly recommended against directly using it as an image.
+You can download the source <SourceLink path="packages/docs/src/docs/branding/logo.svg">here</SourceLink>.*
 
 Attribute | Value
 --- | ---
 Height | `2048 px`
 Width | `2048 px`
 Pixels/Unit | `10.666667`
-Size | `19.7 KiB`
+Size | `20.0 KiB`
 Editor | [Inkscape](https://inkscape.org)
 
 ## Colors
