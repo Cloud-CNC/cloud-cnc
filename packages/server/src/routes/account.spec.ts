@@ -45,6 +45,7 @@ test.serial('Get all accounts', async ctx =>
         id: accountDocumentA.id,
         username: accountA.username,
         totpEnabled: accountA.totpEnabled,
+        disabled: accountA.disabled,
         roles: accountA.roles,
         pluginData: accountA.pluginData
       },
@@ -52,6 +53,7 @@ test.serial('Get all accounts', async ctx =>
         id: accountDocumentB.id,
         username: accountB.username,
         totpEnabled: accountB.totpEnabled,
+        disabled: accountB.disabled,
         roles: accountB.roles,
         pluginData: accountB.pluginData
       }
@@ -70,6 +72,7 @@ test.serial('Create an account', async ctx =>
       username: accountA.username,
       password: accountA.password,
       totpEnabled: accountA.totpEnabled,
+      disabled: accountA.disabled,
       roles: accountA.roles,
       pluginData: accountA.pluginData
     });
@@ -86,8 +89,10 @@ test.serial('Create an account', async ctx =>
     roles: 1,
     username: 1,
     pluginData: 1,
+    totp: 1,
     totpSecret: 1,
-    totpEnabled: 1
+    totpEnabled: 1,
+    disabled: 1
   }) as Record<string, any>;
 
   //Ensure the document exists
@@ -98,8 +103,10 @@ test.serial('Create an account', async ctx =>
   ctx.deepEqual(accountDocument.roles, accountA.roles);
   ctx.deepEqual(accountDocument.username, accountA.username);
   ctx.deepEqual(accountDocument.pluginData, accountA.pluginData);
+  ctx.deepEqual(accountDocument.totp, accountA.totp);
   ctx.deepEqual(accountDocument.totpSecret, accountA.totpSecret);
   ctx.deepEqual(accountDocument.totpEnabled, accountA.totpEnabled);
+  ctx.deepEqual(accountDocument.disabled, accountA.disabled);
 });
 
 /*test.serial('Start/stop impersonating an account', async ctx =>
@@ -136,6 +143,7 @@ test.serial('Get an account', async ctx =>
   ctx.deepEqual(res.body, {
     username: accountA.username,
     totpEnabled: accountA.totpEnabled,
+    disabled: accountA.disabled,
     roles: accountA.roles,
     pluginData: accountA.pluginData
   });
@@ -155,9 +163,11 @@ test.serial('Update an account', async ctx =>
     .patch(`/accounts/${accountDocument.id}`)
     .set('content-type', 'application/json')
     .send({
+      totp: accountB.totp,
       username: accountB.username,
       password: accountB.password,
       totpEnabled: accountB.totpEnabled,
+      disabled: accountB.disabled,
       roles: accountB.roles,
       pluginData: accountB.pluginData
     });
@@ -173,8 +183,10 @@ test.serial('Update an account', async ctx =>
     roles: 1,
     username: 1,
     pluginData: 1,
+    totp: 1,
     totpSecret: 1,
-    totpEnabled: 1
+    totpEnabled: 1,
+    disabled: 1
   }) as Record<string, any>;
 
   //Ensure the document exists
@@ -185,8 +197,10 @@ test.serial('Update an account', async ctx =>
   ctx.deepEqual(updatedAccountDocument.roles, accountB.roles);
   ctx.deepEqual(updatedAccountDocument.username, accountB.username);
   ctx.deepEqual(updatedAccountDocument.pluginData, accountB.pluginData);
+  ctx.deepEqual(updatedAccountDocument.totp, accountB.totp);
   ctx.deepEqual(updatedAccountDocument.totpSecret, accountB.totpSecret);
   ctx.deepEqual(updatedAccountDocument.totpEnabled, accountB.totpEnabled);
+  ctx.deepEqual(updatedAccountDocument.disabled, accountB.disabled);
 });
 
 test.serial('Delete an account', async ctx =>
@@ -199,7 +213,11 @@ test.serial('Delete an account', async ctx =>
 
   //Make the request
   const res = await request(app.callback())
-    .delete(`/accounts/${accountDocument.id}`);
+    .delete(`/accounts/${accountDocument.id}`)
+    .set('content-type', 'application/json')
+    .send({
+      totp: accountA.totp
+    });
 
   //Ensure the response is expected
   ctx.is(res.status, 204);

@@ -68,9 +68,15 @@ test.serial('<%- operation.description %>', async ctx =>
       <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
 <% } -%>
     });
-<% break; case 'get': case 'delete': -%>
+<% break; case 'get': case 'delete': if (requestSchema != null) { %>
+    .send({
+<% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ',')) { -%>
+      <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>A.<%- subSchema.key %><%- separator %>
+<% } -%>
+    });
+<% } else { -%>
 ;
-<% break; case 'update': %>
+<% } break; case 'update': %>
     .send({
 <% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ',')) { -%>
       <%- subSchema.key %>: <%- h.changeCase.camel(h.inflection.singularize(name)) %>B.<%- subSchema.key %><%- separator %>

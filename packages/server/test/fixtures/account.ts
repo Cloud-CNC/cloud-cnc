@@ -19,7 +19,8 @@ export const accountA = {
     key: 'v1'
   },
   totpSecret: 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR',
-  totpEnabled: true
+  totpEnabled: true,
+  disabled: false
 } as WithID<IAccount>;
 
 export const accountB = {
@@ -33,5 +34,6 @@ export const accountB = {
     key: 'v2'
   },
   totpSecret: undefined,
-  totpEnabled: false
+  totpEnabled: false,
+  disabled: true
 } as WithID<IAccount>;

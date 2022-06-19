@@ -156,6 +156,41 @@ create:
       '500':
         $ref: '../responses.yml#/internal-error'
 
+roll:
+  parameters:
+    - name: id
+      description: Relay ID
+      in: path
+      required: true
+      schema:
+        # Clone of #/_id
+        type: string
+        format: object-id
+        pattern: ^[A-Fa-f0-9]{24}$
+  post:
+    operationId: rollRelayKey
+    tags:
+      - relays
+    summary: Roll (change) a relay's key
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+              properties:
+                key:
+                  $ref: '#/key'
+      '400':
+        $ref: '../responses.yml#/bad-request'
+      '401':
+        $ref: '../responses.yml#/unauthorized'
+      '500':
+        $ref: '../responses.yml#/internal-error'
+
 id:
   parameters:
     - name: id

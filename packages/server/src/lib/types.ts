@@ -7,9 +7,20 @@ import {Context, DefaultContext, DefaultState, ExtendableContext} from 'koa';
 import {RouterParamContext} from '@koa/router';
 
 /**
- * Router middleware context
+ * Router context
  */
-export type RouterMiddlewareContext = ExtendableContext & RouterParamContext<DefaultState, DefaultContext & Context>;
+export type RouterContext = ExtendableContext & RouterParamContext<DefaultState, DefaultContext & Context>;
+
+/**
+ * Operation context
+ */
+export interface OperationContext
+{
+  /**
+   * Koa context
+   */
+  koa?: RouterContext;
+}
 
 /**
  * Entity query filter

@@ -4,14 +4,14 @@
 
 //Imports
 import {Next} from 'koa';
-import {RouterMiddlewareContext} from '@/server/lib/types';
+import {RouterContext} from '@/server/lib/types';
 
 /**
  * Error handling middleware
  * @param ctx Koa context
  * @param next Next middleware
  */
-const error = async (ctx: RouterMiddlewareContext, next: Next) =>
+const error = async (ctx: RouterContext, next: Next) =>
 {
   try
   {

@@ -31,7 +31,9 @@ router
   })), async ctx =>
   {
     //Get all accounts
-    const res = await getAllAccounts(ctx.safe.query);
+    const res = await getAllAccounts(ctx.safe.query, {
+      koa: ctx
+    });
 
     //Return the accounts
     ctx.response.body = res;
@@ -44,12 +46,15 @@ router
     username: Joi.string().pattern(/^[A-Za-z0-9-_]{3,256}$/).required(),
     password: Joi.string().pattern(/^[ -~]{12,256}$/).required(),
     totpEnabled: Joi.boolean().required(),
+    disabled: Joi.boolean().required(),
     roles: Joi.array().items(Joi.string()).required(),
     pluginData: Joi.object().optional()
   }), undefined, undefined), async ctx =>
   {
     //Create the account
-    const account = await createAccount(ctx.safe.body);
+    const account = await createAccount(ctx.safe.body, {
+      koa: ctx
+    });
 
     //Return the account
     ctx.response.body = account;
@@ -78,7 +83,9 @@ router
     try
     {
       //Get the account
-      const account = await getAccount(ctx.safe.params.id!);
+      const account = await getAccount(ctx.safe.params.id, {
+        koa: ctx
+      });
 
       //Return the account
       ctx.response.body = account;
@@ -103,9 +110,11 @@ router
    * Update an account
    */
   .patch('/accounts/:id', checkPermission('updateAccount'), safe(Joi.object({
+    totp: Joi.string().pattern(/^[0-9]{6}$/).optional(),
     username: Joi.string().pattern(/^[A-Za-z0-9-_]{3,256}$/).optional(),
     password: Joi.string().pattern(/^[ -~]{12,256}$/).optional(),
     totpEnabled: Joi.boolean().optional(),
+    disabled: Joi.boolean().optional(),
     roles: Joi.array().items(Joi.string()).optional(),
     pluginData: Joi.object().optional()
   }), Joi.object({
@@ -115,7 +124,9 @@ router
     try
     {
       //Update the account
-      const account = await updateAccount(ctx.safe.params.id!, ctx.safe.body);
+      const account = await updateAccount(ctx.safe.params.id, ctx.safe.body, {
+        koa: ctx
+      });
 
       //Return the account
       ctx.response.body = account;
@@ -139,14 +150,18 @@ router
   /**
    * Delete an account
    */
-  .delete('/accounts/:id', checkPermission('deleteAccount'), safe(undefined, Joi.object({
+  .delete('/accounts/:id', checkPermission('deleteAccount'), safe(Joi.object({
+    totp: Joi.string().pattern(/^[0-9]{6}$/).optional()
+  }), Joi.object({
     id: Joi.string().optional()
   }), undefined), async ctx =>
   {
     try
     {
       //Delete the account
-      await deleteAccount(ctx.safe.params.id!);
+      await deleteAccount(ctx.safe.params.id, ctx.safe.body, {
+        koa: ctx
+      });
 
       //Return nothing
       ctx.response.body = null;

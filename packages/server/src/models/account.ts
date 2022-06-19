@@ -34,6 +34,11 @@ export interface IAccount
   pluginData?: object;
 
   /**
+   * TOTP (Required if TOTP is enabled and changing the password or disabling TOTP)
+   */
+  totp?: string;
+
+  /**
    * TOTP secret (Only present if TOTP is enabled)
    */
   totpSecret?: string;
@@ -42,6 +47,11 @@ export interface IAccount
    * Whether or not TOTP is enabled
    */
   totpEnabled: boolean;
+
+  /**
+   * Whether or not the account is disabled
+   */
+  disabled: boolean;
 }
 
 //Account document
@@ -67,12 +77,18 @@ export const AccountJoiSchema = Joi.object({
     }
   }).required(),
   pluginData: Joi.object().optional(),
+  totp: Joi.string().pattern(/^[0-9]{6}$/).meta({
+    _mongoose: {
+      searchable: false
+    }
+  }).optional(),
   totpSecret: Joi.string().pattern(/^[A-Z2-7]{52}$/).meta({
     _mongoose: {
       searchable: false
     }
   }).optional(),
-  totpEnabled: Joi.boolean().required()
+  totpEnabled: Joi.boolean().required(),
+  disabled: Joi.boolean().required()
 });
 
 //Account Mongoose schema

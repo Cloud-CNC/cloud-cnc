@@ -5,7 +5,7 @@
 //Imports
 import {Next} from 'koa';
 import {ObjectSchema} from 'joi';
-import {RouterMiddlewareContext} from '@/server/lib/types';
+import {RouterContext} from '@/server/lib/types';
 import {sanitize} from 'mongodb-sanitize';
 
 /**
@@ -43,7 +43,7 @@ const validateSchema = (schema: ObjectSchema, value: any) =>
  * @param query Joi query parameters schema
  * @returns Sanitization and validation middleware
  */
-const validate = (body?: ObjectSchema, params?: ObjectSchema, query?: ObjectSchema) => (ctx: RouterMiddlewareContext, next: Next) =>
+const validate = (body?: ObjectSchema, params?: ObjectSchema, query?: ObjectSchema) => (ctx: RouterContext, next: Next) =>
 {
   //Sanitize request data
   ctx.safe = {

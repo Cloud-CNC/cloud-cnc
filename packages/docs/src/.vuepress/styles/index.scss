@@ -7,8 +7,7 @@ $c-bg-navbar: #ffffff;
 $c-bg-navbar-dark: #22272e;
 
 //Variables
-$c-brand-light: #191919;
-$c-brand-dark: #e5e5e5;
+$c-primary: #2196f3;
 
 $bg-navbar-opacity-light: 0.5;
 $bg-navbar-opacity-dark: 0.8;
@@ -16,8 +15,8 @@ $bg-navbar-blur-radius: 5px;
 
 //Default theme
 :root {
-  --c-brand: $c-brand-light;
-  --c-brand-light: $c-brand-dark;
+  --c-brand: #{$c-primary};
+  --c-brand-light: #{$c-primary};
 
   --content-width: 100%;
 
@@ -26,8 +25,8 @@ $bg-navbar-blur-radius: 5px;
 
 //Dark theme overrides
 html.dark {
-  --c-brand: $c-brand-light;
-  --c-brand-light: $c-brand-dark;
+  --c-brand: #{$c-primary};
+  --c-brand-light: #{$c-primary};
 
   --c-bg-navbar: #{rgba($c-bg-navbar-dark, $bg-navbar-opacity-dark)};
 }

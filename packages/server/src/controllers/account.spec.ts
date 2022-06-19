@@ -6,6 +6,7 @@
 import {accountA, accountB} from '!/fixtures/account';
 import {Account} from '@/server/models/account';
 import {createSandbox} from 'sinon';
+import {hooks} from '@/server/lib/hooks';
 import {
   getAllAccounts,
   createAccount,
@@ -14,7 +15,6 @@ import {
   updateAccount,
   deleteAccount
 } from './account';
-import {hooks} from '@/server/lib/hooks';
 import test from 'ava';
 
 //Sinon sandbox
@@ -40,6 +40,7 @@ test.serial('Get all accounts', async ctx =>
         id: accountA.id,
         username: accountA.username,
         totpEnabled: accountA.totpEnabled,
+        disabled: accountA.disabled,
         roles: accountA.roles,
         pluginData: accountA.pluginData
       },
@@ -47,6 +48,7 @@ test.serial('Get all accounts', async ctx =>
         id: accountB.id,
         username: accountB.username,
         totpEnabled: accountB.totpEnabled,
+        disabled: accountB.disabled,
         roles: accountB.roles,
         pluginData: accountB.pluginData
       }
@@ -82,10 +84,11 @@ test.serial('Get all accounts', async ctx =>
     });
 
   //Get all accounts
-  const accounts = await getAllAccounts(input);
+  const accounts = await getAllAccounts(input, {});
 
   //Ensure the result is expected
   ctx.deepEqual(accounts, output);
+  //TODO: add query
   ctx.assert(paginate.calledOnceWithExactly({
     $or: [
       {
@@ -111,6 +114,7 @@ test.serial('Get all accounts', async ctx =>
       id: 1,
       username: 1,
       totpEnabled: 1,
+      disabled: 1,
       roles: 1,
       pluginData: 1
     },
@@ -118,7 +122,7 @@ test.serial('Get all accounts', async ctx =>
   }));
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledTwice);
-  ctx.assert(callHook.getCall(0).calledWithExactly('getAllAccounts:pre', input));
+  ctx.assert(callHook.getCall(0).calledWithExactly('getAllAccounts:pre', input, {}));
   ctx.assert(callHook.getCall(1).calledWithExactly('getAllAccounts:post', {
     docs: Array(2).fill({
       toObject
@@ -131,7 +135,7 @@ test.serial('Get all accounts', async ctx =>
     pagingCounter: 1,
     totalDocs: 2,
     totalPages: 1
-  }));
+  }, {}));
   ctx.assert(callHook.calledTwice);
 });
 
@@ -142,6 +146,7 @@ test.serial('Create an account', async ctx =>
     username: accountA.username,
     password: accountA.password,
     totpEnabled: accountA.totpEnabled,
+    disabled: accountA.disabled,
     roles: accountA.roles,
     pluginData: accountA.pluginData
   };
@@ -165,25 +170,25 @@ test.serial('Create an account', async ctx =>
     });
 
   //Create the account
-  const account = await createAccount(input);
+  const account = await createAccount(input, {});
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
   //@ts-expect-error Sinon types are outdated
   ctx.assert(create.calledOnceWithExactly(input));
   ctx.assert(save.calledOnceWithExactly());
-  ctx.assert(callHook.getCall(0).calledWithExactly('createAccount:pre', input));
+  ctx.assert(callHook.getCall(0).calledWithExactly('createAccount:pre', input, {}));
   ctx.assert(callHook.getCall(1).calledWithExactly('createAccount:post', {
     id: accountA.id,
     save
-  } as any));
+  } as any, {}));
   ctx.assert(callHook.calledTwice);
 });
 
 /*test.serial('Start/stop impersonating an account', async ctx =>
 {
   //TODO: implement test
-  impersonateAccount();
+  impersonateAccount({});
 });*/
 
 test.serial('Get an account', async ctx =>
@@ -192,6 +197,7 @@ test.serial('Get an account', async ctx =>
   const output = {
     username: accountA.username,
     totpEnabled: accountA.totpEnabled,
+    disabled: accountA.disabled,
     roles: accountA.roles,
     pluginData: accountA.pluginData
   };
@@ -210,23 +216,24 @@ test.serial('Get an account', async ctx =>
     });
 
   //Get the account
-  const account = await getAccount(accountA.id);
+  const account = await getAccount(accountA.id, {});
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
   ctx.assert(findById.calledOnceWithExactly(accountA.id, {
     username: 1,
     totpEnabled: 1,
+    disabled: 1,
     roles: 1,
     pluginData: 1
   }));
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
-  ctx.assert(callHook.getCall(0).calledWithExactly('getAccount:pre', accountA.id));
+  ctx.assert(callHook.getCall(0).calledWithExactly('getAccount:pre', accountA.id, {}));
   ctx.assert(callHook.getCall(1).calledWithExactly('getAccount:post', {
     id: accountA.id,
     toObject
-  } as any));
+  } as any, {}));
   ctx.assert(callHook.calledTwice);
 });
 
@@ -237,6 +244,7 @@ test.serial('Update an account', async ctx =>
     username: accountB.username,
     password: accountB.password,
     totpEnabled: accountB.totpEnabled,
+    disabled: accountB.disabled,
     roles: accountB.roles,
     pluginData: accountB.pluginData
   };
@@ -259,7 +267,7 @@ test.serial('Update an account', async ctx =>
     });
 
   //Update the account
-  const account = await updateAccount(accountA.id, input);
+  const account = await updateAccount(accountA.id, input, {});
 
   //Ensure the result is expected
   ctx.deepEqual(account, output);
@@ -272,16 +280,21 @@ test.serial('Update an account', async ctx =>
   }));
   ctx.assert(toObject.alwaysCalledWithExactly());
   ctx.assert(toObject.calledOnce);
-  ctx.assert(callHook.getCall(0).calledWithExactly('updateAccount:pre', accountA.id, input));
+  ctx.assert(callHook.getCall(0).calledWithExactly('updateAccount:pre', accountA.id, input, {}));
   ctx.assert(callHook.getCall(1).calledWithExactly('updateAccount:post', {
     id: accountA.id,
     toObject
-  } as any));
+  } as any, {}));
   ctx.assert(callHook.calledTwice);
 });
 
 test.serial('Delete an account', async ctx =>
 {
+  //Test data
+  const input = {
+    totp: accountA.totp
+  };
+
   //Stub the callHook method
   const callHook = sandbox.stub(hooks, 'callHook').resolves();
 
@@ -292,13 +305,13 @@ test.serial('Delete an account', async ctx =>
     });
   
   //Delete the account
-  await deleteAccount(accountA.id);
+  await deleteAccount(accountA.id, input, {});
 
   //Ensure the result is expected
   ctx.assert(findByIdAndDelete.calledOnceWithExactly(accountA.id));
-  ctx.assert(callHook.getCall(0).calledWithExactly('deleteAccount:pre', accountA.id));
+  ctx.assert(callHook.getCall(0).calledWithExactly('deleteAccount:pre', accountA.id, input, {}));
   ctx.assert(callHook.getCall(1).calledWithExactly('deleteAccount:post', {
     id: accountA.id
-  } as any));
+  } as any, {}));
   ctx.assert(callHook.calledTwice);
 });

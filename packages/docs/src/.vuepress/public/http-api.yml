@@ -479,6 +479,12 @@ paths:
             schema:
               type: object
               properties:
+                totp:
+                  description: >
+                    TOTP (Required if TOTP is enabled and changing the password or
+                    disabling TOTP)
+                  type: string
+                  pattern: ^[0-9]{6}$
                 username:
                   $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
                     hema/properties/username"
@@ -517,6 +523,17 @@ paths:
       tags:
         - accounts
       summary: Delete an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totp:
+                  description: TOTP (Required if TOTP is enabled)
+                  type: string
+                  pattern: ^[0-9]{6}$
       responses:
         "204":
           $ref: "#/paths/~1jobs~1%7Bid%7D/patch/responses/204"
@@ -1644,6 +1661,40 @@ paths:
                     type: string
                     pattern: ^[A-Za-z0-9-_]{64}$
                     format: password
+        "400":
+          $ref: "#/paths/~1jobs~1all/get/responses/400"
+        "401":
+          $ref: "#/paths/~1jobs~1all/get/responses/401"
+        "500":
+          $ref: "#/paths/~1jobs~1all/get/responses/500"
+  "/relays/{id}/role":
+    parameters:
+      - name: id
+        description: Relay ID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: object-id
+          pattern: ^[A-Fa-f0-9]{24}$
+    post:
+      operationId: rollRelayKey
+      tags:
+        - relays
+      summary: Roll (change) a relay's key
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - key
+                properties:
+                  key:
+                    $ref: "#/paths/~1relays~1create/post/responses/200/content/application~1json/sc\
+                      hema/properties/key"
         "400":
           $ref: "#/paths/~1jobs~1all/get/responses/400"
         "401":

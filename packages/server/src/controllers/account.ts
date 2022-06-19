@@ -6,16 +6,18 @@
 import generateQuery from '@/server/lib/search';
 import log from '@/server/lib/log';
 import {Account, IAccount} from '@/server/models/account';
-import {Filter, WithID, WithPagination} from '@/server/lib/types';
+import {Filter, OperationContext, WithID, WithPagination} from '@/server/lib/types';
 import {hooks} from '@/server/lib/hooks';
 
 /**
  * Get all accounts
+ * @param filter Query filter
+ * @param ctx Koa context
  */
-export const getAllAccounts = async (filter: Filter): Promise<WithPagination<'accounts', WithID<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>>[]>> =>
+export const getAllAccounts = async (filter: Filter, ctx: OperationContext): Promise<WithPagination<'accounts', WithID<Pick<IAccount, 'username' | 'totpEnabled' | 'disabled' | 'roles' | 'pluginData'>>[]>> =>
 {
   //Invoke hook
-  await hooks.callHook('getAllAccounts:pre', filter);
+  await hooks.callHook('getAllAccounts:pre', filter, ctx);
 
   //Generate the query
   const query = filter.query != null ? generateQuery<IAccount>(filter.query, [
@@ -29,6 +31,7 @@ export const getAllAccounts = async (filter: Filter): Promise<WithPagination<'ac
       id: 1,
       username: 1,
       totpEnabled: 1,
+      disabled: 1,
       roles: 1,
       pluginData: 1
     },
@@ -36,7 +39,7 @@ export const getAllAccounts = async (filter: Filter): Promise<WithPagination<'ac
   });
 
   //Invoke hook
-  await hooks.callHook('getAllAccounts:post', result);
+  await hooks.callHook('getAllAccounts:post', result, ctx);
 
   //Log
   log.debug('Got all accounts.');
@@ -50,17 +53,19 @@ export const getAllAccounts = async (filter: Filter): Promise<WithPagination<'ac
 
 /**
  * Create an account
+ * @param filter Query filter
+ * @param ctx Koa context
  */
-export const createAccount = async (create: Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>): Promise<WithID<Pick<IAccount, 'totpSecret'>>> =>
+export const createAccount = async (data: Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'disabled' | 'roles' | 'pluginData'>, ctx: OperationContext): Promise<WithID<Pick<IAccount, 'totpSecret'>>> =>
 {
-  const data = create as IAccount;
-  if (create.totpEnabled)
+  //Add TOTP secret
+  if (data.totpEnabled)
   {
-    data.totpSecret = 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR';
+    (data as IAccount).totpSecret = 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR';
   }
 
   //Invoke hook
-  await hooks.callHook('createAccount:pre', create);
+  await hooks.callHook('createAccount:pre', data, ctx);
 
   //Create the account
   const account = await Account.create(data);
@@ -69,47 +74,53 @@ export const createAccount = async (create: Pick<IAccount, 'username' | 'passwor
   await account.save();
 
   //Invoke hook
-  await hooks.callHook('createAccount:post', account);
+  await hooks.callHook('createAccount:post', account, ctx);
 
   //Log
   log.debug(`Created account ${account.id}.`);
 
   return {
     id: account.id,
-    totpSecret: create.totpEnabled ? 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR' : undefined //TODO: add data
+    totpSecret: data.totpEnabled ? 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR' : undefined //TODO: add data
   };
 };
 
 /**
  * Start/stop impersonating an account
+ * @param filter Query filter
+ * @param ctx Koa context
  */
-/*export const impersonateAccount = async () =>
+/*export const impersonateAccount = async (ctx: OperationContext) =>
 {
   //Invoke hook
   //TODO: add hook arguments
-  await hooks.callHook('impersonateAccount:pre');
+  await hooks.callHook('impersonateAccount:pre', ctx);
 
   //TODO: implement business logic
 
   //Invoke hook
   //TODO: add hook arguments
-  await hooks.callHook('impersonateAccount:post');
+  await hooks.callHook('impersonateAccount:post', ctx);
 
   //TODO: log
 };*/
 
 /**
  * Get an account
+ * @param id Account ID
+ * @param filter Query filter
+ * @param ctx Koa context
  */
-export const getAccount = async (id: string): Promise<Pick<IAccount, 'username' | 'totpEnabled' | 'roles' | 'pluginData'>> =>
+export const getAccount = async (id: string, ctx: OperationContext): Promise<Pick<IAccount, 'username' | 'totpEnabled' | 'disabled' | 'roles' | 'pluginData'>> =>
 {
   //Invoke hook
-  await hooks.callHook('getAccount:pre', id);
+  await hooks.callHook('getAccount:pre', id, ctx);
 
   //Get the account
   const account = await Account.findById(id, {
     username: 1,
     totpEnabled: 1,
+    disabled: 1,
     roles: 1,
     pluginData: 1
   });
@@ -121,7 +132,7 @@ export const getAccount = async (id: string): Promise<Pick<IAccount, 'username' 
   }
 
   //Invoke hook
-  await hooks.callHook('getAccount:post', account);
+  await hooks.callHook('getAccount:post', account, ctx);
 
   //Log
   log.debug(`Got account ${account.id}.`);
@@ -131,19 +142,22 @@ export const getAccount = async (id: string): Promise<Pick<IAccount, 'username' 
 
 /**
  * Update an account
+ * @param id Account ID
+ * @param filter Query filter
+ * @param ctx Koa context
  */
-export const updateAccount = async (id: string, update: Partial<Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>>): Promise<Pick<IAccount, 'totpSecret'>> =>
+export const updateAccount = async (id: string, data: Partial<Pick<IAccount, 'totp' | 'username' | 'password' | 'totpEnabled' | 'disabled' | 'roles' | 'pluginData'>>, ctx: OperationContext): Promise<Pick<IAccount, 'totpSecret'>> =>
 {
-  const data = update as IAccount;
-  if (update.totpEnabled != null)
+  //Add TOTP secret
+  if (data.totpEnabled != null)
   {
-    data.totpSecret = update.totpEnabled ? 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR' : undefined;
+    (data as IAccount).totpSecret = data.totpEnabled ? 'GPQMMPERPHKDUHBHUPJAILWXXVWQENOTNOTIAHHGEMRPTCQQYASR': undefined;
   }
 
   //Invoke hook
-  await hooks.callHook('updateAccount:pre', id, data);
+  await hooks.callHook('updateAccount:pre', id, data, ctx);
 
-  //Get the account
+  //Update the account
   const account = await Account.findByIdAndUpdate(id, data, {
     new: true,
     overwrite: true,
@@ -159,7 +173,7 @@ export const updateAccount = async (id: string, update: Partial<Pick<IAccount, '
   }
 
   //Invoke hook
-  await hooks.callHook('updateAccount:post', account);
+  await hooks.callHook('updateAccount:post', account, ctx);
 
   //Log
   log.debug(`Updated account ${account.id}.`);
@@ -169,11 +183,14 @@ export const updateAccount = async (id: string, update: Partial<Pick<IAccount, '
 
 /**
  * Delete an account
+ * @param id Account ID
+ * @param filter Query filter
+ * @param ctx Koa context
  */
-export const deleteAccount = async (id: string) =>
+export const deleteAccount = async (id: string, data: Pick<IAccount, 'totp'>, ctx: OperationContext) =>
 {
   //Invoke hook
-  await hooks.callHook('deleteAccount:pre', id);
+  await hooks.callHook('deleteAccount:pre', id, data, ctx);
 
   //Get the account
   const account = await Account.findByIdAndDelete(id);
@@ -185,7 +202,7 @@ export const deleteAccount = async (id: string) =>
   }
 
   //Invoke hook
-  await hooks.callHook('deleteAccount:post', account);
+  await hooks.callHook('deleteAccount:post', account, ctx);
 
   //Log
   log.debug(`Deleted account ${account.id}.`);

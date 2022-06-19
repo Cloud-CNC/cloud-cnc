@@ -3,7 +3,7 @@
  */
 
 //Import
-import {Filter} from '@/server/lib/types';
+import {Filter, OperationContext} from '@/server/lib/types';
 import {PaginateResult} from 'mongoose';
 import {createHooks} from 'hookable';
 
@@ -17,62 +17,62 @@ export interface Hooks
   /**
    * Ran before `getAllAccounts`
    */
-  'getAllAccounts:pre': (filter: Filter) => void | Promise<void>;
+  'getAllAccounts:pre': (filter: Filter, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran after `getAllAccounts`
    */
-  'getAllAccounts:post': (accounts: PaginateResult<IAccountDocument>) => void | Promise<void>;
+  'getAllAccounts:post': (accounts: PaginateResult<IAccountDocument>, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran before `createAccount`
    */
-  'createAccount:pre': (create: Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>) => void | Promise<void>;
+  'createAccount:pre': (data: Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'disabled' | 'roles' | 'pluginData'>, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran after `createAccount`
    */
-  'createAccount:post': (account: IAccountDocument) => void | Promise<void>;
+  'createAccount:post': (account: IAccountDocument, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran before `impersonateAccount`
    */
-  'impersonateAccount:pre': () => void | Promise<void>;
+  'impersonateAccount:pre': (ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran after `impersonateAccount`
    */
-  'impersonateAccount:post': () => void | Promise<void>;
+  'impersonateAccount:post': (ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran before `getAccount`
    */
-  'getAccount:pre': (id: string) => void | Promise<void>;
+  'getAccount:pre': (id: string, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran after `getAccount`
    */
-  'getAccount:post': (account: IAccountDocument) => void | Promise<void>;
+  'getAccount:post': (account: IAccountDocument, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran before `updateAccount`
    */
-  'updateAccount:pre': (id: string, update: Partial<Pick<IAccount, 'username' | 'password' | 'totpEnabled' | 'roles' | 'pluginData'>>) => void | Promise<void>;
+  'updateAccount:pre': (id: string, data: Partial<Pick<IAccount, 'totp' | 'username' | 'password' | 'totpEnabled' | 'disabled' | 'roles' | 'pluginData'>>, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran after `updateAccount`
    */
-  'updateAccount:post': (account: IAccountDocument) => void | Promise<void>;
+  'updateAccount:post': (account: IAccountDocument, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran before `deleteAccount`
    */
-  'deleteAccount:pre': (id: string) => void | Promise<void>;
+  'deleteAccount:pre': (id: string, data: Pick<IAccount, 'totp'>, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran after `deleteAccount`
    */
-  'deleteAccount:post': (account: IAccountDocument) => void | Promise<void>;
+  'deleteAccount:post': (account: IAccountDocument, ctx: OperationContext) => void | Promise<void>;
 }
 
 //Create the hookable instance

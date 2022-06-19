@@ -28,6 +28,10 @@ totpSecret:
   type: string
   pattern: ^[A-Z2-7]{52}$
 
+disabled:
+  description: Whether or not the account is disabled
+  type: boolean
+
 roles:
   description: Account role IDs
   x-searchable: true
@@ -70,6 +74,7 @@ all:
                       - id
                       - username
                       - totpEnabled
+                      - disabled
                       - roles
                     properties:
                       id:
@@ -78,6 +83,8 @@ all:
                         $ref: '#/username'
                       totpEnabled:
                         $ref: '#/totpEnabled'
+                      disabled:
+                        $ref: '#/disabled'
                       roles:
                         $ref: '#/roles'
                       pluginData:
@@ -110,6 +117,7 @@ create:
               - username
               - password
               - totpEnabled
+              - disabled
               - roles
             properties:
               username:
@@ -118,6 +126,8 @@ create:
                 $ref: '#/password'
               totpEnabled:
                 $ref: '#/totpEnabled'
+              disabled:
+                $ref: '#/disabled'
               roles:
                 $ref: '#/roles'
               pluginData:
@@ -210,12 +220,15 @@ id:
               required:
                 - username
                 - totpEnabled
+                - disabled
                 - roles
               properties:
                 username:
                   $ref: '#/username'
                 totpEnabled:
                   $ref: '#/totpEnabled'
+                disabled:
+                  $ref: '#/disabled'
                 roles:
                   $ref: '#/roles'
                 pluginData:
@@ -240,12 +253,19 @@ id:
           schema:
             type: object
             properties:
+              totp:
+                description: |
+                  TOTP (Required if TOTP is enabled and changing the password or disabling TOTP)
+                type: string
+                pattern: ^[0-9]{6}$
               username:
                 $ref: '#/username'
               password:
                 $ref: '#/password'
               totpEnabled:
                 $ref: '#/totpEnabled'
+              disabled:
+                $ref: '#/disabled'
               roles:
                 $ref: '#/roles'
               pluginData:
@@ -274,6 +294,17 @@ id:
     tags:
       - accounts
     summary: Delete an account
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              totp:
+                description: TOTP (Required if TOTP is enabled)
+                type: string
+                pattern: ^[0-9]{6}$
     responses:
       '204':
         $ref: '../responses.yml#/empty-success'

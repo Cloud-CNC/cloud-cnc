@@ -30,9 +30,9 @@ router
 <%- h.multiline(operation.description, 3) %>
    */
   .<%- operation.method %>('<%- operation.path %>', checkPermission('<%- operation.permission %>'), <% if (requestSchema != null || operation.pathParameters.length > 0 || operation.queryParameters.length > 0) { %>safe(<% if (requestSchema != null) { %>Joi.object({
-<% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ',')) { -%>
+<% if (requestSchema != null) { for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ',')) { -%>
     <%- subSchema.key %>: <%- h.joiType(subSchema) %><%- subSchema.required ? '.required()' : '.optional()' %><%- separator %>
-<% } -%>
+<% }} -%>
   })<% } else { %>undefined<% } %>, <% if (operation.pathParameters.length > 0) { %>Joi.object({
 <% for (const [parameter, separator] of h.list(operation.pathParameters, ',')) { -%>
     <%- parameter.name %>: <%- h.joiType(parameter.schema) %><%- parameter.required ? '.required()' : '.optional()' %><%- separator %>
@@ -46,7 +46,9 @@ router
 <% switch (operation.type) { case 'all': -%>
 <% responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema.subSchemas.find(subSchema => subSchema.key == h.changeCase.lower(h.inflection.pluralize(name))) : null; -%>
     //Get all <%- h.changeCase.no(h.inflection.pluralize(name)) %>
-    <% if (responseSchema != null) { %>const res = <% } %>await <%- operation.name %>(ctx.safe.query);
+    <% if (responseSchema != null) { %>const res = <% } %>await <%- operation.name %>(ctx.safe.query, {
+      koa: ctx
+    });
 
 <% if (responseSchema != null) { -%>
     //Return the <%- h.changeCase.no(h.inflection.pluralize(name)) %>
@@ -56,7 +58,9 @@ router
     ctx.response.body = null;
 <% } break; case 'create': -%>
     //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-    <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(ctx.safe.body);
+    <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% if (requestSchema != null) { %>ctx.safe.body, <% } %>{
+      koa: ctx
+    });
 
 <% if (responseSchema != null) { -%>
     //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
@@ -68,7 +72,9 @@ router
     try
     {
       //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-      <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.pathParameters, ',')) { %>ctx.safe.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>);
+      <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(ctx.safe.params.id<% if (requestSchema != null) { %>, ctx.safe.body<% } %>, {
+        koa: ctx
+      });
 
 <% if (responseSchema != null) { -%>
       //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
@@ -96,7 +102,9 @@ router
     try
     {
       //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-      <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.pathParameters, ',')) { %>ctx.safe.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>, ctx.safe.body);
+      <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(ctx.safe.params.id<% if (requestSchema != null) { %>, ctx.safe.body<% } %>, {
+        koa: ctx
+      });
 
 <% if (responseSchema != null) { -%>
       //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>
@@ -124,7 +132,9 @@ router
     try
     {
       //Delete the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-      <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(<% for (const [parameter, parameterSeparator] of h.list(operation.pathParameters, ',')) { %>ctx.safe.params.<%- parameter.name %>!<%- parameterSeparator %><% } %>);
+      <% if (responseSchema != null) { %>const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = <% } %>await <%- operation.name %>(ctx.safe.params.id<% if (requestSchema != null) { %>, ctx.safe.body<% } %>, {
+        koa: ctx
+      });
 
 <% if (responseSchema != null) { -%>
       //Return the <%- h.changeCase.no(h.inflection.singularize(name)) %>

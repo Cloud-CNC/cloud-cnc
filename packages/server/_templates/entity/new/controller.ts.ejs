@@ -9,7 +9,7 @@ to: src/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 import generateQuery from '@/server/lib/search';
 import log from '@/server/lib/log';
 import {<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>} from '@/server/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-import {Filter, WithID, WithPagination} from '@/server/lib/types';
+import {Filter, OperationContext, WithID, WithPagination} from '@/server/lib/types';
 import {hooks} from '@/server/lib/hooks';
 
 <% for (const [operation, operationSeparator] of h.list(entity.operations, '\r\n')) { -%>
@@ -17,13 +17,18 @@ import {hooks} from '@/server/lib/hooks';
 <% let responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema : null; -%>
 /**
 <%- h.multiline(operation.description, 1) %>
+<% if (['get', 'update', 'delete'].includes(operation.type)) { -%>
+ * @param id <%- h.changeCase.sentence(h.inflection.singularize(name)) %> ID
+<% } -%>
+ * @param filter Query filter
+ * @param ctx Koa context
  */
 <% switch (operation.type) { case 'all': -%>
 <% responseSchema = (operation.responseSchema != null && operation.responseSchema.type == 'object' && operation.responseSchema.subSchemas.length > 0) ? operation.responseSchema.subSchemas.find(subSchema => subSchema.key == h.changeCase.lower(h.inflection.pluralize(name))) : null; -%>
-export const <%- operation.name %> = async (filter: Filter)<% if (responseSchema != null) { %>: Promise<WithPagination<'<%- h.changeCase.camel(h.inflection.pluralize(name)) %>', WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchema.subSchemas.filter(subSchema => subSchema.key != 'id'), ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>[]>><% } %> =>
+export const <%- operation.name %> = async (filter: Filter, ctx: OperationContext)<% if (responseSchema != null) { %>: Promise<WithPagination<'<%- h.changeCase.camel(h.inflection.pluralize(name)) %>', WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchema.subSchemas.filter(subSchema => subSchema.key != 'id'), ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>[]>><% } %> =>
 {
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:pre', filter);
+  await hooks.callHook('<%- operation.name %>:pre', filter, ctx);
 
   //Generate the query
   const query = filter.query != null ? generateQuery<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>(filter.query, [
@@ -44,7 +49,7 @@ export const <%- operation.name %> = async (filter: Filter)<% if (responseSchema
   });
 
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:post', result);
+  await hooks.callHook('<%- operation.name %>:post', result, ctx);
 
   //Log
   log.debug('Got all <%- h.changeCase.no(h.inflection.pluralize(name)) %>.');
@@ -57,19 +62,19 @@ export const <%- operation.name %> = async (filter: Filter)<% if (responseSchema
 <% } -%>
 };
 <% break; case 'create': -%>
-export const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% if (requestSchema != null) { for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% }} %>>)<% if (responseSchema != null) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas.filter(subSchema => subSchema.key != 'id'), ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>><% } %> =>
+export const <%- operation.name %> = async (<% if (requestSchema != null) { %>data: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>><% } %>, ctx: OperationContext)<% if (responseSchema != null) { %>: Promise<WithID<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas.filter(subSchema => subSchema.key != 'id'), ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>><% } %> =>
 {
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:pre', create);
+  await hooks.callHook('<%- operation.name %>:pre'<% if (requestSchema != null) { %>, data<% } %>, ctx);
 
   //Create the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.create(create);
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.create(data);
 
   //Save the <%- h.changeCase.no(h.inflection.singularize(name)) %>
   await <%- h.changeCase.camel(h.inflection.singularize(name)) %>.save();
 
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>);
+  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>, ctx);
 
   //Log
   log.debug(`Created <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
@@ -82,10 +87,10 @@ export const <%- operation.name %> = async (create: Pick<I<%- h.changeCase.pasca
 <% } -%>
 };
 <% break; case 'get': -%>
-export const <%- operation.name %> = async (id: string)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
+export const <%- operation.name %> = async (id: string<% if (requestSchema != null) { %>, data: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>><% } %>, ctx: OperationContext)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
 {
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:pre', id);
+  await hooks.callHook('<%- operation.name %>:pre', id<% if (requestSchema != null) { %>, data<% } %>, ctx);
 
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
   const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findById(id<% if (responseSchema != null) { %>, {
@@ -101,7 +106,7 @@ export const <%- operation.name %> = async (id: string)<% if (responseSchema != 
   }
 
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>);
+  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>, ctx);
 
   //Log
   log.debug(`Got <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
@@ -110,13 +115,13 @@ export const <%- operation.name %> = async (id: string)<% if (responseSchema != 
 <% } -%>
 };
 <% break; case 'update': -%>
-export const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>>)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
+export const <%- operation.name %> = async (id: string<% if (requestSchema != null) { %>, data: Partial<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %>, ctx: OperationContext)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
 {
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:pre', id, update);
+  await hooks.callHook('<%- operation.name %>:pre', id<% if (requestSchema != null) { %>, data<% } %>, ctx);
 
   //Update the <%- h.changeCase.no(h.inflection.singularize(name)) %>
-  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndUpdate(id, update<% if (responseSchema != null) { %>, {
+  const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndUpdate(id<% if (requestSchema != null) { %>, data<% } if (responseSchema != null) { %>, {
     new: true,
     overwrite: true,
     projection: {
@@ -133,7 +138,7 @@ export const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%
   }
 
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>);
+  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>, ctx);
 
   //Log
   log.debug(`Updated <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
@@ -142,10 +147,10 @@ export const <%- operation.name %> = async (id: string, update: Partial<Pick<I<%
 <% } -%>
 };
 <% break; case 'delete': -%>
-export const <%- operation.name %> = async (id: string)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
+export const <%- operation.name %> = async (id: string<% if (requestSchema != null) { %>, data: Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(requestSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>><% } %>, ctx: OperationContext)<% if (responseSchema != null) { %>: Promise<Pick<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, <% for (const [subSchema, separator] of h.list(responseSchema.subSchemas, ' | ')) { -%>'<%- subSchema.key %>'<%- separator %><% } %>>><% } %> =>
 {
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:pre', id);
+  await hooks.callHook('<%- operation.name %>:pre', id<% if (requestSchema != null) { %>, data<% } %>, ctx);
 
   //Get the <%- h.changeCase.no(h.inflection.singularize(name)) %>
   const <%- h.changeCase.camel(h.inflection.singularize(name)) %> = await <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>.findByIdAndDelete(id<% if (responseSchema != null) { %>, {
@@ -163,7 +168,7 @@ export const <%- operation.name %> = async (id: string)<% if (responseSchema != 
   }
 
   //Invoke hook
-  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>);
+  await hooks.callHook('<%- operation.name %>:post', <%- h.changeCase.camel(h.inflection.singularize(name)) %>, ctx);
 
   //Log
   log.debug(`Deleted <%- h.changeCase.no(h.inflection.singularize(name)) %> ${<%- h.changeCase.camel(h.inflection.singularize(name)) %>.id}.`);
@@ -172,17 +177,17 @@ export const <%- operation.name %> = async (id: string)<% if (responseSchema != 
 <% } -%>
 };
 <% break; default: -%>
-export const <%- operation.name %> = async () =>
+export const <%- operation.name %> = async (ctx: OperationContext) =>
 {
   //Invoke hook
   //TODO: add hook arguments
-  await hooks.callHook('<%- operation.name %>:pre');
+  await hooks.callHook('<%- operation.name %>:pre', ctx);
 
   //TODO: implement business logic
 
   //Invoke hook
   //TODO: add hook arguments
-  await hooks.callHook('<%- operation.name %>:post');
+  await hooks.callHook('<%- operation.name %>:post', ctx);
 
   //TODO: log
 };

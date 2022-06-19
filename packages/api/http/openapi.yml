@@ -134,6 +134,8 @@ paths:
     $ref: './routes/relays.yml#/all'
   /relays/create:
     $ref: './routes/relays.yml#/create'
+  /relays/{id}/role:
+    $ref: './routes/relays.yml#/roll'
   /relays/{id}:
     $ref: './routes/relays.yml#/id'
 
