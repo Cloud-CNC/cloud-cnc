@@ -1,25 +1,40 @@
-  
 {
-  "extends": [
-    "../../.eslintrc.json",
-		"plugin:@intlify/vue-i18n/recommended",
-		"plugin:vue/vue3-recommended"
-  ],
+	"extends": "../../.eslintrc.json",
 	"parserOptions": {
 		"extraFileExtensions": [
-			"vue"
-		],
-		"parser": "@typescript-eslint/parser"
+			".vue",
+			".yml"
+		]
 	},
+	"overrides": [
+		{
+			"files": "*.vue",
+			"extends": [
+				"plugin:vue/vue3-recommended",
+				"plugin:@intlify/vue-i18n/recommended"
+			],
+			"parser": "vue-eslint-parser",
+			"parserOptions": {
+				"parser": "@typescript-eslint/parser",
+				"ecmaVersion": "latest",
+				"project": [
+					"tsconfig.json"
+				],
+				"sourceType": "module"
+			},
+			"rules": {
+				"vue/max-attributes-per-line": "off",
+				"vue/multi-word-component-names": "off"
+			}
+		}
+	],
 	"rules": {
-    "redos/no-vulnerable": "warn",
-		"vue/max-attributes-per-line": "off",
-		"vue/multi-word-component-names": "off"
+		"redos/no-vulnerable": "warn"
 	},
 	"settings": {
 		"vue-i18n": {
-      "localeDir": "src/locales/**/*.yml",
-      "messageSyntaxVersion": "^9.0.0"
+			"localeDir": "src/locales/**/*.yml",
+			"messageSyntaxVersion": "^9.0.0"
 		}
 	}
 }

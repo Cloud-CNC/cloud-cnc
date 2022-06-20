@@ -9,7 +9,8 @@
     "bundle": "npm run bundle:http && npm run bundle:websocket",
     "bundle:http": "ts-node scripts/bundle --input http/openapi.yml --output ../docs/src/.vuepress/public/http-api.yml",
     "bundle:websocket": "ts-node scripts/bundle --input websocket/asyncapi.yml --output ../docs/src/.vuepress/public/websocket-api.yml",
-    "lint": "npm run lint:http && npm run lint:websocket",
+    "lint": "npm run lint:eslint && npm run lint:http && npm run lint:websocket",
+    "lint:eslint": "eslint .",
     "lint:http": "spectral lint http/openapi.yml --ruleset=http/.spectral.yml --fail-severity=info",
     "lint:websocket": "spectral lint websocket/asyncapi.yml --ruleset=websocket/.spectral.yml --fail-severity=info"
   },

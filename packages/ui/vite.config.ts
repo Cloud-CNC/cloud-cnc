@@ -18,6 +18,7 @@ import Yaml from '@rollup/plugin-yaml';
 import {InklineResolver} from 'unplugin-vue-components/resolvers';
 import {VitePWA} from 'vite-plugin-pwa';
 import {defineConfig} from 'vite';
+import {join} from 'path';
 
 //Export
 export default defineConfig({
@@ -59,5 +60,11 @@ export default defineConfig({
       }
     }),
     Yaml()
-  ]
+  ],
+  test: {
+    include: [
+      join(__dirname, 'src', '{components,layouts,pages}', '**', '*.spec.ts')
+    ],
+    testTimeout: 15000
+  }
 });

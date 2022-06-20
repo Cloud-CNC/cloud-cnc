@@ -13,7 +13,8 @@
     "require": "./dist/index.cjs"
   },
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@types/koa": "^2.13.4",

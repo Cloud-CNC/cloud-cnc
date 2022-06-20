@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "lerna run test",
-    "lint": "eslint .",
+    "lint": "lerna run lint",
     "postinstall": "lerna bootstrap"
   },
   "devDependencies": {

@@ -7,10 +7,16 @@
   "license": "MIT",
   "scripts": {
     "generate:declaration": "ts-node scripts/generate-declaration.ts",
+    "lint": "eslint .",
     "test": "ava src/**/*.spec.ts"
   },
   "dependencies": {
     "chevrotain": "^10.1.2"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182",
+    "ava": "^4.3.0",
+    "lodash": "^4.17.21"
   },
   "homepage": "https://cloud-cnc.github.io",
   "repository": {
@@ -20,10 +26,5 @@
   },
   "bugs": {
     "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
-  },
-  "devDependencies": {
-    "@types/lodash": "^4.14.182",
-    "ava": "^4.3.0",
-    "lodash": "^4.17.21"
   }
 }

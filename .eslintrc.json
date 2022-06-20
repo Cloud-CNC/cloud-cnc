@@ -1,4 +1,3 @@
-  
 {
   "env": {
     "browser": true,
@@ -15,8 +14,7 @@
 		"ecmaVersion": "latest",
     "project": [
 			"tsconfig.json",
-			"packages/*/tsconfig.json",
-			"packages/*/tsconfig.*.json"
+			"packages/*/tsconfig.json"
 		],
 		"sourceType": "module"
 	},
@@ -39,6 +37,7 @@
 		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/no-this-alias": "off",
 		"@typescript-eslint/no-unnecessary-condition": "off",
+		"@typescript-eslint/non-nullable-type-assertion-style": "off",
 		"arrow-parens": [
 			"warn",
 			"as-needed"
