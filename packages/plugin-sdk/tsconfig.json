@@ -5,8 +5,8 @@
     "target": "ESNext",
 
     /* Modules */
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "baseUrl": ".",
 
     /* Emit */

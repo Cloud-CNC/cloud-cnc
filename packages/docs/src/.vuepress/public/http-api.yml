@@ -284,6 +284,7 @@ paths:
                         - id
                         - username
                         - totpEnabled
+                        - disabled
                         - roles
                       properties:
                         id:
@@ -295,6 +296,9 @@ paths:
                         totpEnabled:
                           $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
                             hema/properties/totpEnabled"
+                        disabled:
+                          $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                            hema/properties/disabled"
                         roles:
                           $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
                             hema/properties/roles"
@@ -330,6 +334,7 @@ paths:
                 - username
                 - password
                 - totpEnabled
+                - disabled
                 - roles
               properties:
                 username:
@@ -344,6 +349,9 @@ paths:
                   pattern: ^[ -~]{12,256}$
                 totpEnabled:
                   description: Whether or not TOTP is enabled
+                  type: boolean
+                disabled:
+                  description: Whether or not the account is disabled
                   type: boolean
                 roles:
                   description: Account role IDs
@@ -446,6 +454,7 @@ paths:
                 required:
                   - username
                   - totpEnabled
+                  - disabled
                   - roles
                 properties:
                   username:
@@ -454,6 +463,9 @@ paths:
                   totpEnabled:
                     $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
                       hema/properties/totpEnabled"
+                  disabled:
+                    $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                      hema/properties/disabled"
                   roles:
                     $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
                       hema/properties/roles"
@@ -494,6 +506,9 @@ paths:
                 totpEnabled:
                   $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
                     hema/properties/totpEnabled"
+                disabled:
+                  $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
+                    hema/properties/disabled"
                 roles:
                   $ref: "#/paths/~1accounts~1create/post/requestBody/content/application~1json/sc\
                     hema/properties/roles"

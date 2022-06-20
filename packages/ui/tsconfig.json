@@ -7,14 +7,28 @@
     /* Modules */
     "module": "ESNext",
     "moduleResolution": "Node",
+    "types": [
+      "vite-plugin-pages/client",
+      "vite-plugin-vue-layouts/client"
+    ],
     "baseUrl": ".",
 
     /* Emit */
-    "declaration": true
+    "sourceMap": true,
+
+    /* Language and Environment */
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "jsx": "preserve"
   },
   "include": [
     "**/*.vue",
     "**/*.ts",
     "**/*.d.ts"
+  ],
+  "exclude": [
+    "dist/*"
   ]
 }

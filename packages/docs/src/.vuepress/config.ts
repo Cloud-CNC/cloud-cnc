@@ -31,7 +31,7 @@ export default defineUserConfig({
       'meta',
       {
         name: 'theme-color',
-        content: '#191919'
+        content: '#2196f3'
       }
     ],
     [

@@ -6,8 +6,8 @@
 	},
   "extends": [
     "eslint:recommended",
-		"plugin:@typescript-eslint/strict",
     "plugin:@typescript-eslint/recommended",
+		"plugin:@typescript-eslint/strict",
 		"plugin:security-node/recommended"
   ],
 	"parser": "@typescript-eslint/parser",

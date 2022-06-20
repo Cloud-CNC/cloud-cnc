@@ -5,9 +5,9 @@
     "target": "ESNext",
 
     /* Modules */
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "baseUrl": ".",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "baseUrl": "."
   },
   "include": [
     "**/*.ts",

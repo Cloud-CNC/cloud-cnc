@@ -1,0 +1,25 @@
+  
+{
+  "extends": [
+    "../../.eslintrc.json",
+		"plugin:@intlify/vue-i18n/recommended",
+		"plugin:vue/vue3-recommended"
+  ],
+	"parserOptions": {
+		"extraFileExtensions": [
+			"vue"
+		],
+		"parser": "@typescript-eslint/parser"
+	},
+	"rules": {
+    "redos/no-vulnerable": "warn",
+		"vue/max-attributes-per-line": "off",
+		"vue/multi-word-component-names": "off"
+	},
+	"settings": {
+		"vue-i18n": {
+      "localeDir": "src/locales/**/*.yml",
+      "messageSyntaxVersion": "^9.0.0"
+		}
+	}
+}

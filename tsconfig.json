@@ -23,6 +23,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
 
     /* Type Checking */
     "strict": true,
@@ -38,6 +39,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
+
+    /* Language and Environment */
+    "useDefineForClassFields": true,
 
     /* Completeness */
     "skipLibCheck": true
