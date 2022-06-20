@@ -6,7 +6,7 @@
   "author": "Cloud CNC contributors",
   "license": "MIT",
   "scripts": {
-    "test": "playwright test"
+    "test:disabled": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.22.2"

@@ -5,4 +5,16 @@
   --color--primary--h: 207deg;
   --color--primary--s: 90%;
   --color--primary--l: 54%;
+
+  --border-top-left-radius: 0.5rem;
+  --border-top-right-radius: 0.5rem;
+  --border-bottom-right-radius: 0.5rem;
+  --border-bottom-left-radius: 0.5rem;
+  --border-radius: 0.5rem;
+}
+
+.navbar,
+.sidebar {
+  ----border-style: none;
+  ----border-radius: 0;
 }

@@ -29,6 +29,7 @@
 		}
 	],
 	"rules": {
+		"no-undef": "off",
 		"redos/no-vulnerable": "warn"
 	},
 	"settings": {

@@ -17,17 +17,32 @@ import Vue from '@vitejs/plugin-vue';
 import Yaml from '@rollup/plugin-yaml';
 import {InklineResolver} from 'unplugin-vue-components/resolvers';
 import {VitePWA} from 'vite-plugin-pwa';
+import {branch, long, remoteUrl} from 'git-rev-sync';
 import {defineConfig} from 'vite';
 import {join} from 'path';
+import {version} from './package.json';
 
 //Export
 export default defineConfig({
+  define: {
+    'import.meta.env.GIT_BRANCH': JSON.stringify(branch()),
+    'import.meta.env.GIT_COMMIT': JSON.stringify(long()),
+    'import.meta.env.GIT_REMOTE': JSON.stringify(remoteUrl()),
+    'import.meta.env.VERSION': JSON.stringify(version)
+  },
   plugins: [
     Paths(),
     Vue(),
     Pages(),
     Layouts(),
-    AutoImport(),
+    AutoImport({
+      imports: [
+        'vue',
+        'vue-router',
+        '@vueuse/core',
+        '@vueuse/head'
+      ]
+    }),
     Components({
       resolvers: [
         IconsResolver({
@@ -36,7 +51,9 @@ export default defineConfig({
         InklineResolver()
       ]
     }),
-    Icons(),
+    Icons({
+      scale: 1.4
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
