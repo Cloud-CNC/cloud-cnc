@@ -10,7 +10,7 @@
     "dev": "vite",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:unit": "vitest"
+    "test": "vitest"
   },
   "devDependencies": {
     "@iconify-json/ph": "^1.1.1",

@@ -1,0 +1,23 @@
+{
+  "name": "e2e",
+  "private": true,
+  "version": "0.0.1-alpha.0",
+  "description": "End 2 end tests",
+  "author": "Cloud CNC contributors",
+  "license": "MIT",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.22.2"
+  },
+  "homepage": "https://cloud-cnc.github.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/e2e"
+  },
+  "bugs": {
+    "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
+  }
+}
