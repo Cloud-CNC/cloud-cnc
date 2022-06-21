@@ -48,7 +48,7 @@ const render = async (options: Options, watch: boolean, callback: (pages: PageOp
   app.renderer.render = async function render(this: Renderer, project, outputDirectory)
   {
     //Ensure the theme is loaded
-    //@ts-expect-error
+    //@ts-expect-error The method is private
     if (!this.prepareTheme())
     {
       return;

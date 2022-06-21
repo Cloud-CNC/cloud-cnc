@@ -58,7 +58,9 @@ export const generateLink = (remote: string, _: string, commit: string) =>
       break;
 
     default:
-      throw new Error(`Unknown Git host ${parsed.pathname}!`);
+      parsed.pathname += `/commit/${commit}`;
+      console.warn(`Unknown Git host ${parsed.pathname}!`);
+      break;
   }
 
   return parsed.toString();

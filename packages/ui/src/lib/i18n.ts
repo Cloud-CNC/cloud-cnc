@@ -1,11 +1,12 @@
 /**
- * @fileoverview Locales
+ * @fileoverview Internationalization helper
  */
 
 //Imports
+import {createI18n, I18nOptions} from 'vue-i18n';
 const rawMessages = import.meta.globEager('../locales/**/*.{yml,yaml}');
 
-//Format
+//Format messages
 const messages = Object.fromEntries(Object.entries(rawMessages).map(([key, value]) =>
 {
   //Parse the file path
@@ -25,5 +26,14 @@ const messages = Object.fromEntries(Object.entries(rawMessages).map(([key, value
   return [name, content];
 }));
 
+//Setup internationalization
+const i18n = createI18n({
+  locale: 'en',
+  fallbackLocale: 'en',
+  globalInjection: true,
+  legacy: false,
+  messages
+} as I18nOptions);
+
 //Export
-export default messages;
+export default i18n;

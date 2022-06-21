@@ -1,9 +1,14 @@
 <template>
-  <router-view />
+  <v-app>
+    <router-view />
+  </v-app>
 </template>
 
 <style>
-:root, body, #app {
+:root,
+body,
+#app {
+  overflow: auto;
   height: 100%;
   width: 100%;
 }

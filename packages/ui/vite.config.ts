@@ -8,15 +8,13 @@
 //Imports
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import Icons from 'unplugin-icons/vite';
-import IconsResolver from 'unplugin-icons/resolver';
 import Layouts from 'vite-plugin-vue-layouts';
 import Pages from 'vite-plugin-pages';
 import Paths from 'vite-tsconfig-paths';
 import Vue from '@vitejs/plugin-vue';
 import Yaml from '@rollup/plugin-yaml';
-import {InklineResolver} from 'unplugin-vue-components/resolvers';
 import {VitePWA} from 'vite-plugin-pwa';
+import {Vuetify3Resolver} from 'unplugin-vue-components/resolvers';
 import {branch, long, remoteUrl} from 'git-rev-sync';
 import {defineConfig} from 'vite';
 import {join} from 'path';
@@ -37,22 +35,18 @@ export default defineConfig({
     Layouts(),
     AutoImport({
       imports: [
-        'vue',
-        'vue-router',
         '@vueuse/core',
-        '@vueuse/head'
+        '@vueuse/head',
+        'pinia',
+        'vue',
+        'vue-i18n',
+        'vue-router'
       ]
     }),
     Components({
       resolvers: [
-        IconsResolver({
-          prefix: ''
-        }),
-        InklineResolver()
+        Vuetify3Resolver()
       ]
-    }),
-    Icons({
-      scale: 1.4
     }),
     VitePWA({
       registerType: 'autoUpdate',

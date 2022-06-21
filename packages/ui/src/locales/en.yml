@@ -1,4 +1,32 @@
+meta:
+  name: English
+
+actions:
+  close: Close
+
 components:
+  about:
+    title: About
+    items:
+      version:
+        key: Version
+        value: V{version}
+      commit:
+        key: Commit
+        value: "{commit}{'@'}{branch}"
+      documentation:
+        key: Docs
+        value: https://cloud-cnc.github.io
+      licenses: Open source licenses
+    actions:
+      copy: Copy debug information
   sidebar:
-    version: Cloud CNC V{version}
-    git: Commit {commit}{'@'}{branch}
+    title: Cloud CNC
+    about: About
+
+routes:
+  home:
+    name: Home
+  licenses:
+    title: Open Source Licenses
+    

@@ -23,6 +23,14 @@
 				"sourceType": "module"
 			},
 			"rules": {
+				"@intlify/vue-i18n/no-raw-text": [
+					"warn",
+					{
+						"ignoreNodes": [
+							"v-icon"
+						]
+					}
+				],
 				"vue/max-attributes-per-line": "off",
 				"vue/multi-word-component-names": "off"
 			}

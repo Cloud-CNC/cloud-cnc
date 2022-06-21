@@ -1,6 +1,13 @@
+<route lang="yaml">
+name: home
+meta:
+  public: false
+  sidebar:
+    hidden: false
+    icon: Home
+</route>
+
 <template>
-  <i-button color="primary">
-    {{ $t('test') }}
-  </i-button>
-  <ph-robot-thin />
+  <v-btn>{{ $t('meta.name') }}</v-btn>
+  <v-icon>Activity</v-icon>
 </template>
