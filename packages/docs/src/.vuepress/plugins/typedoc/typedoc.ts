@@ -58,7 +58,7 @@ const render = async (options: Options, watch: boolean, callback: (pages: PageOp
     const renderEvent = new RendererEvent(RendererEvent.BEGIN, outputDirectory, project);
 
     //Get URL mappings
-    const mappings = this.theme!.getUrls(project);
+    const mappings = this.theme?.getUrls(project) ?? [];
     renderEvent.urls = mappings;
 
     //Reset pages
@@ -71,12 +71,12 @@ const render = async (options: Options, watch: boolean, callback: (pages: PageOp
       const pageEvent = renderEvent.createPageEvent(mapping);
 
       //Render the page
-      const content = this.theme!.render(pageEvent);
+      const content = this.theme?.render(pageEvent);
 
       //Add the page
       pages.push({
         content,
-        path: formatPath(options.output!.prefix!, mapping.url)
+        path: formatPath(options.prefix, mapping.url)
       });
     }
 
@@ -86,8 +86,8 @@ const render = async (options: Options, watch: boolean, callback: (pages: PageOp
 
   //Bootstrap the app
   app.bootstrap({
-    ...options.input,
-    prefix: options.output!.prefix
+    ...options.typedoc,
+    prefix: options.prefix
   } as Record<string, any>);
 
   /**
@@ -101,7 +101,7 @@ const render = async (options: Options, watch: boolean, callback: (pages: PageOp
 
     //Get sidebar information
     let sidebar: SidebarInformation | undefined;
-    if (options.output!.sidebar)
+    if (options.sidebar != null)
     {
       //Cast the theme
       const theme = app.renderer.theme as VuepressTheme;
@@ -113,7 +113,7 @@ const render = async (options: Options, watch: boolean, callback: (pages: PageOp
       sidebar = theme.getSidebar(navigation);
 
       //Format root item title
-      if (options.output!.sidebar.text == null)
+      if (options.sidebar.text == null)
       {
         //Capitalize the first letter
         if (sidebar.text.length > 0)
@@ -123,7 +123,7 @@ const render = async (options: Options, watch: boolean, callback: (pages: PageOp
       }
       else
       {
-        sidebar.text = options.output!.sidebar.text;
+        sidebar.text = options.sidebar.text;
       }
     }
 

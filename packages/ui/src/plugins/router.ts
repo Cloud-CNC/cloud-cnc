@@ -1,5 +1,5 @@
 /**
- * @fileoverview Router helper
+ * @fileoverview Router plugin
  */
 
 //Imports

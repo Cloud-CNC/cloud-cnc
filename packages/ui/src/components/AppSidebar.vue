@@ -45,12 +45,12 @@ const open = computed({
 
 <template>
   <v-navigation-drawer v-model="open" app temporary>
-    <v-list class="fill-height" nav>
+    <v-list class="fill-height" nav density="compact">
       <!-- Logo -->
       <v-list-item>
         <v-container>
           <v-row align="center" class="brand" justify="space-around">
-            <img alt="Cloud CNC logo" height="48" src="@/ui/assets/logo.webp">
+            <img alt="Cloud CNC logo" height="64" src="@/ui/assets/logo.webp">
             <h1>{{ $t('components.sidebar.title') }}</h1>
           </v-row>
         </v-container>
@@ -73,7 +73,7 @@ const open = computed({
 
 <style scoped>
 .about {
-  bottom: 0;
+  bottom: 8px;
   left: 0;
   position: absolute;
   width: 100%;

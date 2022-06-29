@@ -3,12 +3,12 @@
  */
 
 //Imports
-import {Composer, VueMessageType} from 'vue-i18n';
+import {Composer} from 'vue-i18n';
 import {MenuItemData, MenuItemGroupData, MenuItemLinkData, RouteMetadata} from './types';
 import {RouteRecordNormalized} from 'vue-router';
 
 //Vue i18n instance type
-type VueI18n = Composer<unknown, unknown, unknown, VueMessageType>;
+type VueI18n = Composer<unknown, unknown, unknown>;
 
 /**
  * Translate the route into a menu item link

@@ -11,7 +11,6 @@
   },
   "devDependencies": {
     "@asyncapi/react-component": "^1.0.0-next.38",
-    "@types/lodash": "^4.14.182",
     "@types/swagger-ui": "^3.52.0",
     "@vuepress/core": "^2.0.0-beta.47",
     "@vuepress/markdown": "^2.0.0-beta.47",
@@ -21,7 +20,6 @@
     "@vuepress/plugin-theme-data": "^2.0.0-beta.47",
     "@vuepress/theme-default": "^2.0.0-beta.47",
     "@vuepress/utils": "^2.0.0-beta.47",
-    "lodash": "^4.17.21",
     "swagger-ui": "^4.12.0",
     "typedoc": "^0.22.17",
     "typedoc-plugin-markdown": "^3.12.1",

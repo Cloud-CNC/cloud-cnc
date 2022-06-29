@@ -120,7 +120,7 @@ const generateProps = (href?: string, to?: string) =>
 
         <!-- Close -->
         <v-btn prepend-icon="XCircle" color="error" @click="visible = false">
-          {{ $t('actions.close') }}
+          {{ $t('components.about.actions.close') }}
         </v-btn>
       </v-card-actions>
     </v-card>

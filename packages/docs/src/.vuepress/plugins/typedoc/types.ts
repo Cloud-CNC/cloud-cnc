@@ -17,46 +17,40 @@ export type SidebarInformation = SidebarItem & SidebarGroup;
 export interface Options
 {
   /**
-   * TypeDoc input options
+   * TypeDoc options
    */
-  input: Partial<TypeDocOptions> & {
+  typedoc: Partial<TypeDocOptions> & {
     [k: string]: any
   };
 
   /**
-   * VuePress output options
+   * Path prefix (eg: `/api/`)
+   * @default `/api/`
    */
-  output?: {
+  prefix: string;
+
+  /**
+   * Sidebar item-injection options
+   */
+  sidebar: {
     /**
-     * Path prefix (eg: `/api/`)
-     * @default `/api/`
+     * Whether or not to automatically add pages to the sidebar (Requires the default theme or a
+     * descendent of it)
      */
-    prefix?: string;
+    show: boolean;
 
     /**
-     * Sidebar item-injection options
+     * Top-most item text
+     * @default TypeDoc generated one
      */
-    sidebar?: {
-      /**
-       * Whether or not to automatically add pages to the sidebar (Requires the default theme or a
-       * descendent of it)
-       * @default `true`
-       */
-      show?: boolean;
+    text?: string;
 
-      /**
-       * Top-most item text
-       * @default TypeDoc generated one
-       */
-      text?: string;
-
-      /**
-       * Path to inject the top-most item at relative to the theme's `sidebar` property
-       * 
-       * **Note: use numbers for indexing arrays and strings for indexing objects**
-       * @default Root-level
-       */
-      path?: (number | string)[];
-    }
+    /**
+     * Path to inject the top-most item at relative to the theme's `sidebar` property
+     * 
+     * **Note: use numbers for indexing arrays and strings for indexing objects**
+     * @default Root-level
+     */
+    path?: (number | string)[];
   };
 }

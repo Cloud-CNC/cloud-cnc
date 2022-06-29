@@ -1,5 +1,5 @@
 /**
- * @fileoverview Internationalization helper
+ * @fileoverview Internationalization (i18n) plugin
  */
 
 //Imports
@@ -28,10 +28,11 @@ const messages = Object.fromEntries(Object.entries(rawMessages).map(([key, value
 
 //Setup internationalization
 const i18n = createI18n({
-  locale: 'en',
   fallbackLocale: 'en',
+  fallbackWarn: false,
   globalInjection: true,
   legacy: false,
+  locale: 'en',
   messages
 } as I18nOptions);
 

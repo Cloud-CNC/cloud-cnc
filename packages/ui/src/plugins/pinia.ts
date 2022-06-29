@@ -1,5 +1,5 @@
 /**
- * @fileoverview Pinia helper
+ * @fileoverview Pinia plugin
  */
 
 //Export

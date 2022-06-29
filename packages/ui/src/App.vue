@@ -1,6 +1,12 @@
 <template>
   <v-app>
-    <router-view />
+    <suspense>
+      <template #fallback>
+        <v-progress-circular color="primary" indeterminate />
+      </template>
+
+      <router-view />
+    </suspense>
   </v-app>
 </template>
 

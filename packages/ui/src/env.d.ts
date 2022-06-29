@@ -18,7 +18,7 @@ interface ImportMetaEnv {
   readonly GIT_REMOTE: string;
 
   /**
-   * Current application version
+   * Application version
    */
   readonly VERSION: string
 }

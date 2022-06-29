@@ -24,8 +24,8 @@ const props = defineProps<{
   <!-- Link -->
   <v-list-item v-else :to="props.item.path">
     <v-list-item-avatar start>
-      <v-icon>{{ props.item.icon}}</v-icon>
+      <v-icon>{{ props.item.icon }}</v-icon>
     </v-list-item-avatar>
-    <v-list-item-title>{{ props.item.title}}</v-list-item-title>
+    <v-list-item-title>{{ props.item.title }}</v-list-item-title>
   </v-list-item>
 </template>

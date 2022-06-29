@@ -1,8 +1,9 @@
 meta:
   name: English
 
-actions:
-  close: Close
+plugins:
+  veevalidate:
+    invalid: '{field} is invalid!'
 
 components:
   about:
@@ -20,13 +21,28 @@ components:
       licenses: Open source licenses
     actions:
       copy: Copy debug information
+      close: Close
   sidebar:
     title: Cloud CNC
     about: About
 
 routes:
+  unknown:
+    name: '404'
+    title: '404'
+    subtitle: Page not found!
+    home: Take me home
+  auth:
+    title: Log In
+    form:
+      username: Username
+      password: Password
+      totp: MFA Code
+      submit: Login
+      or: Or
   home:
     name: Home
   licenses:
+    name: Licenses
     title: Open Source Licenses
-    
+    raw: View raw licenses

@@ -1,18 +1,11 @@
 <script setup lang="ts">
 //Refs
-const aboutVisible = ref(false);
 const sidebarOpen = ref(false);
 </script>
 
 <template>
-  <!-- About dialog -->
-  <AboutDialog v-model="aboutVisible" />
-
-  <!-- Sidebar -->
-  <AppSidebar v-model="sidebarOpen" @open-about="aboutVisible = true" />
-
   <!-- Header -->
-  <AppHeader @open-sidebar="sidebarOpen = true" />
+  <AppHeader collapse :show-nav-button="false" :show-route-title="false" @open-sidebar="sidebarOpen = true" />
 
   <!-- Content -->
   <v-main>

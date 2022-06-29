@@ -1,11 +1,12 @@
 /**
- * @fileoverview Vuetify config
+ * @fileoverview Vuetify plugin
  */
 
 //Imports
 import 'vuetify/styles';
 import Icon from '@/ui/components/Icon.vue';
 import i18n from './i18n';
+//@ts-expect-error Vuetify types are incomplete
 import {createVueI18nAdapter} from 'vuetify/locale/adapters/vue-i18n';
 import {createVuetify, ThemeDefinition} from 'vuetify';
 

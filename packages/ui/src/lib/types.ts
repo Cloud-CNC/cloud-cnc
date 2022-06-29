@@ -63,9 +63,8 @@ export type MenuItemData = MenuItemLinkData | MenuItemGroupData;
  * Standardized route metadata
  * 
  * *Note: the route name is used for the menu item ID.*
- * @param T Whether or not the route is hidden in the sidebar
  */
-export interface RouteMetadata<T = boolean>
+export interface RouteMetadata
 {
   /**
    * Whether or not the route is publicly-accessible (ie: without authentication)
@@ -75,11 +74,11 @@ export interface RouteMetadata<T = boolean>
   /**
    * Sidebar metadata
    */
-  sidebar: T extends true ? {
+  sidebar?: {
     /**
      * Whether or not the route should be displayed in the sidebar
      */
-    hidden: T;
+    hidden: boolean;
 
     /**
      * Icon name (PascalCase; eg: `LampDesk`)
@@ -92,5 +91,5 @@ export interface RouteMetadata<T = boolean>
      * Group ID
      */
     group?: string;
-  } : undefined;
+  };
 }
