@@ -3,10 +3,10 @@
  */
 
 //Imports
-import Joi from 'joi';
-import joigoose from '@/server/lib/joigoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import {Document, PaginateModel, Schema, model as createModel} from 'mongoose';
+import mongoose from 'mongoose';
+import joigoose from '~/server/lib/joigoose';
+import Joi from 'joi';
 
 //Account interface
 export interface IAccount
@@ -55,7 +55,7 @@ export interface IAccount
 }
 
 //Account document
-export type IAccountDocument = Document<unknown, any, IAccount>;
+export type IAccountDocument = IAccount & mongoose.Document<unknown, any, IAccount>;
 
 //Account Joi schema
 export const AccountJoiSchema = Joi.object({
@@ -92,7 +92,7 @@ export const AccountJoiSchema = Joi.object({
 });
 
 //Account Mongoose schema
-export const AccountMongooseSchema = new Schema(joigoose.convert(AccountJoiSchema) as any);
+export const AccountMongooseSchema = new mongoose.Schema(joigoose.convert(AccountJoiSchema) as any);
 AccountMongooseSchema.set('toObject', {
   virtuals: true,
   versionKey: false,
@@ -111,4 +111,4 @@ AccountMongooseSchema.set('toObject', {
 AccountMongooseSchema.plugin(mongoosePaginate);
 
 //Account model
-export const Account = createModel<IAccount, PaginateModel<IAccount>>('accounts', AccountMongooseSchema);
+export const Account = mongoose.model<IAccount, mongoose.PaginateModel<IAccount>>('accounts', AccountMongooseSchema);

@@ -3,7 +3,7 @@
  */
 
 //Imports
-import {connect as mongooseConnect, disconnect as mongooseDisconnect} from 'mongoose';
+import mongoose from 'mongoose';
 
 /**
  * Connect to MongoDB
@@ -13,14 +13,14 @@ import {connect as mongooseConnect, disconnect as mongooseDisconnect} from 'mong
 export const connect = async (url: string) =>
 {
   //Actually connect
-  const mongoose = await mongooseConnect(url, {
+  const instance = await mongoose.connect(url, {
     ignoreUndefined: false
   });
 
-  return mongoose;
+  return instance;
 };
 
 /**
  * Disconnect from MongoDB
  */
-export const disconnect = async () => await mongooseDisconnect();
+export const disconnect = async () => await mongoose.disconnect();

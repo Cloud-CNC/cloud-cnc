@@ -4,7 +4,7 @@
 
 //Imports
 import {Lexer, createToken, tokenMatcher} from 'chevrotain';
-import {last} from 'lodash';
+import {last} from 'lodash-es';
 
 //Patterns
 const WhitespacePattern = /\s+/;

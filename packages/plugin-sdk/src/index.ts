@@ -3,58 +3,23 @@
  */
 
 //Imports
-import {PluginLoadHandler, PluginSdkContext, PluginVersionChecker} from './types';
-import {parse} from 'semver';
-import {version as rawSdkVersion} from '../package.json';
+import {ApiServerContext, PluginConfig} from './types';
+import {diff} from 'semver';
+import {version as sdkVersion} from '../package.json';
 
 /**
- * Plugin SDK
+ * Define an API-server plugin
+ * @param config Plugin config
+ * @returns Plugin (Should be exported via `export default` or `module.exports`)
  */
-class PluginSDK
+export const defineApiServerPlugin = (config: Partial<PluginConfig<ApiServerContext>>) => async (hostVersion: string, ctx: ApiServerContext) =>
 {
-  /**
-   * Plugin version checker
-   */
-  public versionChecker?: PluginVersionChecker;
-
-  /**
-   * Plugin load handler
-   */
-  public loadHandler?: PluginLoadHandler;
-
-  /**
-   * Internal entry point
-   * 
-   * **NOTE: if you're a plugin developer, DO NOT USE THIS METHOD!**
-   * @internal
-   * @param rawHostVersion Host Cloud CNC version
-   * @param ctx Internal plugin SDK context
-   */
-  public async _internalEntryPoint(rawHostVersion: string, ctx: PluginSdkContext)
+  //Check the SDK version is compatible with the host version
+  if (diff(hostVersion, sdkVersion) != 'major')
   {
-    //Parse the versions
-    const hostVersion = parse(rawHostVersion);
-    const sdkVersion = parse(rawSdkVersion);
-
-    //Check the SDK version is compatible with the host version
-    if (hostVersion == null || sdkVersion == null || hostVersion.major != sdkVersion.major)
-    {
-      throw new Error('Unsupported plugin SDK version! (Please contact the plugin author)');
-    }
-
-    //Check the plugin version is compatible with the host version
-    if (this.versionChecker != null && !(await this.versionChecker(hostVersion)))
-    {
-      throw new Error('Unsupported plugin version! (Please contact the plugin author)');
-    }
-
-    //Invoke the load handler
-    if (this.loadHandler != null)
-    {
-      await this.loadHandler(ctx);
-    }
+    throw new Error('Unsupported plugin SDK version! (Please contact the plugin author)');
   }
-}
 
-//Export
-export default PluginSDK;
+  //Invoke the load handler
+  await config.onLoad?.(ctx);
+};

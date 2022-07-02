@@ -3,7 +3,7 @@
  */
 
 //Imports
-import {IAccount} from '@/server/models/account';
+import {IAccount} from '~/server/models/account';
 
 /**
  * Session type

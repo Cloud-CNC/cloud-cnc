@@ -3,11 +3,11 @@
  */
 
 //Imports
-import generateQuery from '@/server/lib/search';
-import log from '@/server/lib/log';
-import {Account, IAccount} from '@/server/models/account';
-import {Filter, OperationContext, WithID, WithPagination} from '@/server/lib/types';
-import {hooks} from '@/server/lib/hooks';
+import generateQuery from '~/server/lib/search';
+import log from '~/server/lib/log';
+import {Account, IAccount} from '~/server/models/account';
+import {Filter, OperationContext, WithID, WithPagination} from '~/server/lib/types';
+import {hooks} from '~/server/lib/hooks';
 
 /**
  * Get all accounts

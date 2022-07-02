@@ -4,14 +4,14 @@
 
 //Imports
 import Joi from 'joi';
-import log from '@/server/lib/log';
-import {IAccount} from '@/server/models/account';
-import {connect, disconnect} from '@/server/lib/mongoose';
-import {createAccount} from '@/server/controllers/account';
-import {format as formatTotpSecret, url as generateOtpauthUrl} from '@/server/lib/totp';
-import {generate as generatePassword} from '@/server/lib/password';
-import {generate as generateUsername} from '@/server/lib/username';
-import {mongoUrl} from '@/server/lib/config';
+import log from '~/server/lib/log';
+import {IAccount} from '~/server/models/account';
+import {connect, disconnect} from '~/server/lib/mongoose';
+import {createAccount} from '~/server/controllers/account';
+import {format as formatTotpSecret, url as generateOtpauthUrl} from '~/server/lib/totp';
+import {generate as generatePassword} from '~/server/lib/password';
+import {generate as generateUsername} from '~/server/lib/username';
+import {mongoUrl} from '~/server/lib/config';
 import {program} from 'commander';
 import {toString as renderQRCode} from 'qrcode';
 
@@ -65,10 +65,11 @@ program
     //Create the root account
     const account = await createAccount({
       ...options,
+      disabled: false,
       roles: [
         'admin'
       ]
-    });
+    }, {});
 
     //Disconnect from Mongo
     await disconnect();

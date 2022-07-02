@@ -1,3 +1,16 @@
 {
-  "extends": "../../tsconfig.json"
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ESNext",
+
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "baseUrl": "."
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.d.ts"
+  ]
 }

@@ -7,9 +7,9 @@ to: src/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 
 //Imports
 import Joi from 'joi';
-import joigoose from '@/server/lib/joigoose';
+import joigoose from '~/server/lib/joigoose';
+import mongoose from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
-import {Document, PaginateModel, Schema, model as createModel} from 'mongoose';
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> interface
 export interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>
@@ -24,7 +24,7 @@ export interface I<%- h.changeCase.pascal(h.inflection.singularize(name), false)
 }
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> document
-export type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document = Document<unknown, any, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
+export type I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Document = I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %> & mongoose.Document<unknown, any, I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>;
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> Joi schema
 export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>JoiSchema = Joi.object({
@@ -34,7 +34,7 @@ export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Jo
 });
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> Mongoose schema
-export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema = new Schema(joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>JoiSchema) as any);
+export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema = new mongoose.Schema(joigoose.convert(<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>JoiSchema) as any);
 <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema.set('toObject', {
   virtuals: true,
   versionKey: false,
@@ -53,4 +53,4 @@ export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>Mo
 <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema.plugin(mongoosePaginate);
 
 //<%- h.changeCase.sentence(h.inflection.singularize(name)) %> model
-export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = createModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, PaginateModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema);
+export const <%- h.changeCase.pascal(h.inflection.singularize(name), false) %> = mongoose.model<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>, mongoose.PaginateModel<I<%- h.changeCase.pascal(h.inflection.singularize(name), false) %>>>('<%- h.changeCase.camel(h.inflection.pluralize(name), false) %>', <%- h.changeCase.pascal(h.inflection.singularize(name), false) %>MongooseSchema);

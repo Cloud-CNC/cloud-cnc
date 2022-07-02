@@ -4,7 +4,7 @@
 
 //Imports
 import {authenticator} from 'otplib';
-import {chunk} from 'lodash';
+import {chunk} from 'lodash-es';
 
 /**
  * Format a TOTP secret

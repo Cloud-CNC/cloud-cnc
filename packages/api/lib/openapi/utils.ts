@@ -10,7 +10,7 @@ import {OpenAPIV3} from 'openapi-types';
 import {OperationSchema, OperationSchemaType} from './types';
 import {check as rawCheckRegex} from 'recheck';
 import {inspect} from 'util';
-import {memoize} from 'lodash';
+import {memoize} from 'lodash-es';
 
 //Memoize ReDoS checker
 const checkRegex = memoize(rawCheckRegex);

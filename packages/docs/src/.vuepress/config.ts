@@ -119,7 +119,7 @@ export default defineUserConfig({
       maxSuggestions: 7
     }),
     typedocPlugin({
-      input: {
+      typedoc: {
         entryPointStrategy: 'expand',
         entryPoints: [
           join(pluginSdkDir, 'src'),
@@ -132,17 +132,16 @@ export default defineUserConfig({
         sort: ['source-order'],
         tsconfig: join(pluginSdkDir, 'tsconfig.json')
       },
-      output: {
-        prefix: '/docs/api-server/api/hooks',
-        sidebar: {
-          text: 'API',
-          path: [
-            '/docs/',
-            2,
-            'children',
-            0
-          ]
-        }
+      prefix: '/docs/api-server/api/hooks',
+      sidebar: {
+        show: true,
+        text: 'API',
+        path: [
+          '/docs/',
+          2,
+          'children',
+          0
+        ]
       }
     })
   ]

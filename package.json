@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "author": "Cloud CNC contributors",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "test": "lerna run test",
     "lint": "lerna run lint",

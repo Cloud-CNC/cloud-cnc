@@ -3,11 +3,11 @@
  */
 
 //Imports
-import app from  '@/server/routes/index';
+import app from  '~/server/routes/index';
 import request from 'supertest';
 import test from 'ava';
 import {accountA, accountB} from '!/fixtures/account';
-import {Account} from '@/server/models/account';
+import {Account} from '~/server/models/account';
 import {start, stop, reset} from '!/lib/mongo';
 
 //Ephemeral MongoDB

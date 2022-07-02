@@ -3,14 +3,14 @@
  */
 
 //Imports
-// import plugin from '@/server/lib/plugin';
-// import socket from '@/server/socket';
-import app from '@/server/routes/index';
-import createServer from '@/server/lib/server';
-import log from '@/server/lib/log';
+// import plugin from '~/server/lib/plugin';
+// import socket from '~/server/socket';
+import app from '~/server/routes/index';
+import createServer from '~/server/lib/server';
+import log from '~/server/lib/log';
 import {program} from 'commander';
-import {connect} from '@/server/lib/mongoose';
-import {mode, http, mongoUrl} from '@/server/lib/config';
+import {connect} from '~/server/lib/mongoose';
+import {mode, http, mongoUrl} from '~/server/lib/config';
 
 //Register the command
 program

@@ -5,8 +5,9 @@
   "description": "Human-centric search language",
   "author": "Cloud CNC contributors",
   "license": "MIT",
+  "type": "module",
   "scripts": {
-    "generate:declaration": "ts-node scripts/generate-declaration.ts",
+    "generate:declaration": "node --experimental-specifier-resolution=node --loader=../../lib/loader.js scripts/generate-declaration.ts",
     "lint": "eslint .",
     "test": "ava src/**/*.spec.ts"
   },
@@ -14,9 +15,9 @@
     "chevrotain": "^10.1.2"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.182",
+    "@types/lodash-es": "^4.17.6",
     "ava": "^4.3.0",
-    "lodash": "^4.17.21"
+    "lodash-es": "^4.17.21"
   },
   "homepage": "https://cloud-cnc.github.io",
   "repository": {

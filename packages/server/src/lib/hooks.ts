@@ -3,12 +3,12 @@
  */
 
 //Import
-import {Filter, OperationContext} from '@/server/lib/types';
-import {PaginateResult} from 'mongoose';
+import mongoose from 'mongoose';
+import {Filter, OperationContext} from '~/server/lib/types';
 import {createHooks} from 'hookable';
 
 //Models
-import {IAccount, IAccountDocument} from '@/server/models/account';
+import {IAccount, IAccountDocument} from '~/server/models/account';
 
 //Hooks
 export interface Hooks
@@ -22,7 +22,7 @@ export interface Hooks
   /**
    * Ran after `getAllAccounts`
    */
-  'getAllAccounts:post': (accounts: PaginateResult<IAccountDocument>, ctx: OperationContext) => void | Promise<void>;
+  'getAllAccounts:post': (accounts: mongoose.PaginateResult<IAccountDocument>, ctx: OperationContext) => void | Promise<void>;
 
   /**
    * Ran before `createAccount`

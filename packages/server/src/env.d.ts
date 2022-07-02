@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/**
- * @fileoverview TypeScript type augmentations
- */
 
 //Imports
 import {ExtendableContext} from 'koa';

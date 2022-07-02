@@ -5,7 +5,7 @@
 //Imports
 import {Next} from 'koa';
 import {ObjectSchema} from 'joi';
-import {RouterContext} from '@/server/lib/types';
+import {RouterContext} from '~/server/lib/types';
 import {sanitize} from 'mongodb-sanitize';
 
 /**

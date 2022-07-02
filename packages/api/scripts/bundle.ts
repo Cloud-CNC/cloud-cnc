@@ -7,8 +7,8 @@
 //Imports
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import {program} from 'commander';
+import {readPackageUpSync} from 'read-pkg-up';
 import {stringify} from 'yaml';
-import {version} from '../package.json';
 import {writeFile} from 'fs/promises';
 
 /**
@@ -27,10 +27,18 @@ interface Options
   output: string;
 }
 
+//Read the package
+const pkg = readPackageUpSync();
+
+if (pkg == null)
+{
+  throw new Error('Failed to read nearest package.json!');
+}
+
 //Create the root command
 const command = program
   .name('server')
-  .version(version)
+  .version(pkg.packageJson.version)
   .description('YAML bundler')
   .requiredOption('-i, --input <file>', 'input file')
   .requiredOption('-o, --output <file>', 'output file')

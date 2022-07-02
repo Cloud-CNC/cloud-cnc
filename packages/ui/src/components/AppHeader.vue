@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //Imports
-import {useLocaleStore, useThemeStore} from '@/ui/stores/user';
+import {useLocaleStore, useThemeStore} from '~/ui/stores/user';
 
 //Events
 const emit = defineEmits<(e: 'openSidebar') => void>();

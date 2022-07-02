@@ -6,11 +6,11 @@ to: src/routes/<%- h.changeCase.param(h.inflection.singularize(name)) %>.spec.ts
  */
 
 //Imports
-import app from  '@/server/routes/index';
+import app from  '~/server/routes/index';
 import request from 'supertest';
 import test from 'ava';
 import {<%- h.changeCase.camel(h.inflection.singularize(name)) %>A, <%- h.changeCase.camel(h.inflection.singularize(name)) %>B} from '!/fixtures/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
-import {<%- h.changeCase.pascal(h.inflection.singularize(name)) %>} from '@/server/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+import {<%- h.changeCase.pascal(h.inflection.singularize(name)) %>} from '~/server/models/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 import {start, stop, reset} from '!/lib/mongo';
 
 //Ephemeral MongoDB

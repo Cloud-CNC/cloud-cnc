@@ -5,17 +5,18 @@
   "description": "API specifications",
   "author": "Cloud CNC contributors",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "bundle": "npm run bundle:http && npm run bundle:websocket",
-    "bundle:http": "ts-node scripts/bundle --input http/openapi.yml --output ../docs/src/.vuepress/public/http-api.yml",
-    "bundle:websocket": "ts-node scripts/bundle --input websocket/asyncapi.yml --output ../docs/src/.vuepress/public/websocket-api.yml",
+    "bundle:http": "ts-node --esm scripts/bundle --input http/openapi.yml --output ../docs/src/.vuepress/public/http-api.yml",
+    "bundle:websocket": "ts-node --esm scripts/bundle --input websocket/asyncapi.yml --output ../docs/src/.vuepress/public/websocket-api.yml",
     "lint": "npm run lint:eslint && npm run lint:http && npm run lint:websocket",
     "lint:eslint": "eslint .",
     "lint:http": "spectral lint http/openapi.yml --ruleset=http/.spectral.yml --fail-severity=info",
     "lint:websocket": "spectral lint websocket/asyncapi.yml --ruleset=websocket/.spectral.yml --fail-severity=info"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "openapi-types": "^11.0.0",
     "recheck": "^4.4.0",
     "swagger-parser": "^10.0.3"
@@ -23,8 +24,9 @@
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0.9",
     "@stoplight/spectral-cli": "^6.3.0",
-    "@types/lodash": "^4.14.182",
+    "@types/lodash-es": "^4.17.6",
     "commander": "^9.3.0",
+    "read-pkg-up": "^9.1.0",
     "yaml": "^2.1.1"
   },
   "homepage": "https://cloud-cnc.github.io",

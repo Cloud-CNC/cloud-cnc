@@ -4,6 +4,10 @@
   "description": "Cloud CNC plugin SDK",
   "author": "Cloud CNC contributors",
   "license": "MIT",
+  "keywords": [
+    "cloud-cnc",
+    "plugin-sdk"
+  ],
   "type": "module",
   "module": "dist/index.js",
   "main": "dist/index.cjs",

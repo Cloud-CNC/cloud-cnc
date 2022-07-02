@@ -8,7 +8,7 @@
 import lexer from './lexer';
 import parser from './parser';
 import test from 'ava';
-import {get} from 'lodash';
+import {get} from 'lodash-es';
 
 //Tests
 test('Parse AND', ctx =>

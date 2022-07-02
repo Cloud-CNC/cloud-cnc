@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //Imports
-import {BlackHole} from '@/ui/composables/wormhole';
+import {BlackHole} from '~/ui/composables/wormhole';
 
 //Props
 const props = defineProps<{

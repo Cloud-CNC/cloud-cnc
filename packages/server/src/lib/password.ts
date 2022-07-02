@@ -3,21 +3,21 @@
  */
 
 //Imports
-import {hash as hashConfig} from '@/server/lib/config';
-import {cpus} from 'os';
-import {Options as ArgonOptions, argon2id, hash as argonHash, verify as argonVerify} from 'argon2';
+import argon from 'argon2';
 import {GenerateOptions as GeneratePasswordOptions, generate as generatePassword} from 'generate-password';
+import {cpus} from 'os';
+import {hash as hashConfig} from '~/server/lib/config';
 
 //Argon2ID options (See https://github.com/ranisalt/node-argon2/wiki/Options)
 const argonOptions = {
-  type: argon2id,
+  type: argon.argon2id,
   hashLength: 64,
   saltLength: 32,
   memoryCost: hashConfig.memory,
   timeCost: hashConfig.iterations,
   parallelism: cpus().length,
   raw: false
-} as ArgonOptions & {raw: false};
+} as argon.Options & {raw: false};
 
 //Password generation options
 const passwordOptions = {
@@ -41,7 +41,7 @@ const generate = () => generatePassword(passwordOptions);
  * @param input Input
  * @returns Hash
  */
-const hash = async (input: string) => await (await argonHash(input, argonOptions));
+const hash = async (input: string) => await (await argon.hash(input, argonOptions));
 
 /**
  * Verify the plain text against the hashed text
@@ -49,7 +49,7 @@ const hash = async (input: string) => await (await argonHash(input, argonOptions
  * @param plain Plain text
  * @returns Whether or not the plain and hashed text match
  */
-const verify = async (hashed: string, plain: string) => await argonVerify(hashed, plain, argonOptions);
+const verify = async (hashed: string, plain: string) => await argon.verify(hashed, plain, argonOptions);
 
 //Export
 export

@@ -3,8 +3,8 @@
  */
 
 //Imports
-// import Session from '@/server/lib/session';
-// import {Role} from '@/server/models/role';
+// import Session from '~/server/lib/session';
+// import {Role} from '~/server/models/role';
 import {Context, Next} from 'koa';
 
 /**

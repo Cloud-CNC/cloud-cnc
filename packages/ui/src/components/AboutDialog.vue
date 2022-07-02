@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //Imports
-import {generateLink} from '@/ui/lib/git';
+import {generateLink} from '~/ui/lib/git';
 
 //Events
 const emit = defineEmits<(e: 'update:modelValue', value: boolean) => void>();

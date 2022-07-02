@@ -13,7 +13,7 @@ import {readFile} from 'fs/promises';
  * @param root Monorepo root directory
  * @returns Licenses
  */
-export const aggregate = async (root: string) =>
+const aggregate = async (root: string) =>
 {
   //Get all Lerna packages
   const lernaPackages = await getPackages(root);
@@ -50,7 +50,7 @@ export const aggregate = async (root: string) =>
       else
       {
         //Strip the version
-        name = key.replace(/@[^@/]+$/, '');
+        name = key.replace(/@[^~/]+$/, '');
       }
 
       //Get the package URL
@@ -119,3 +119,6 @@ export const aggregate = async (root: string) =>
 
   return licenses;
 };
+
+//Export
+export default aggregate;

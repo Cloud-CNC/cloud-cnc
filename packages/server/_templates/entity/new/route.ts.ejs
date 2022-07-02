@@ -8,15 +8,15 @@ to: src/routes/<%- h.changeCase.param(h.inflection.singularize(name)) %>.ts
 //Imports
 import Joi from 'joi';
 import Router from '@koa/router';
-import checkPermission from '@/server/middleware/permission';
+import checkPermission from '~/server/middleware/permission';
 <% if (entity.operations.find(operation => ['all', 'create', 'update'].includes(operation.type))) { -%>
-import safe from '@/server/middleware/safe';
+import safe from '~/server/middleware/safe';
 <% } -%>
 import {
 <% for (const [operation, separator] of h.list(entity.operations, ',')) { -%>
   <%- operation.name %><%- separator %>
 <% } -%>
-} from '@/server/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
+} from '~/server/controllers/<%- h.changeCase.param(h.inflection.singularize(name)) %>';
 
 //Router setup
 const router = new Router();

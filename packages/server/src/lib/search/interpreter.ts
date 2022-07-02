@@ -4,11 +4,11 @@
 
 //Imports
 import generateNgrams from './ngrams';
-import parser from '@/search/parser';
-import {And, Or} from '@/search/tokens';
-import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParanthesisExpressionCstChildren} from '@/search/cst';
-import {FilterQuery} from 'mongoose';
-import {escapeRegExp} from 'lodash';
+import mongoose from 'mongoose';
+import parser from '~/search/parser';
+import {And, Or} from '~/search/tokens';
+import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParanthesisExpressionCstChildren} from '~/search/cst';
+import {escapeRegExp} from 'lodash-es';
 import {tokenMatcher} from 'chevrotain';
 
 /**
@@ -25,7 +25,7 @@ interface SearchInterpreterParam
 /**
  * Search query interpreter
  */
-class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements ICstNodeVisitor<SearchInterpreterParam, FilterQuery<any>>
+class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements ICstNodeVisitor<SearchInterpreterParam, mongoose.FilterQuery<any>>
 {
   constructor()
   {
@@ -36,7 +36,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     this.validateVisitor();
   }
 
-  expression(children: ExpressionCstChildren, param?: SearchInterpreterParam): FilterQuery<any>
+  expression(children: ExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     if (children.doubleOperandBooleanExpression != null)
     {
@@ -54,10 +54,10 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     }
   }
 
-  doubleOperandBooleanExpression(children: DoubleOperandBooleanExpressionCstChildren, param?: SearchInterpreterParam): FilterQuery<any>
+  doubleOperandBooleanExpression(children: DoubleOperandBooleanExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Recurse the left-hand side
-    let query = this.visit(children.lhs, param) as FilterQuery<any>;
+    let query = this.visit(children.lhs, param) as mongoose.FilterQuery<any>;
 
     if (children.operator != null && children.rhs != null)
     {
@@ -92,7 +92,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     return query;
   }
 
-  notExpression(children: NotExpressionCstChildren, param?: SearchInterpreterParam): FilterQuery<any>
+  notExpression(children: NotExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Recurse the expression
     const expressionResult = this.visit(children.expression, param);
@@ -104,7 +104,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     };
   }
 
-  atomicExpression(children: AtomicExpressionCstChildren, param?: SearchInterpreterParam): FilterQuery<any>
+  atomicExpression(children: AtomicExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     if (children.fuzzySearchExpression != null)
     {
@@ -127,13 +127,13 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     }
   }
 
-  paranthesisExpression(children: ParanthesisExpressionCstChildren, param?: SearchInterpreterParam): FilterQuery<any>
+  paranthesisExpression(children: ParanthesisExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Recurse
     return this.visit(children.expression, param);
   }
 
-  fuzzySearchExpression(children: FuzzySearchExpressionCstChildren, param: SearchInterpreterParam): FilterQuery<any>
+  fuzzySearchExpression(children: FuzzySearchExpressionCstChildren, param: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Get the raw query
     const raw = children.string[0]!.image;
@@ -152,7 +152,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
         // eslint-disable-next-line security-node/non-literal-reg-expr
         [field]: new RegExp(escapeRegExp(ngram))
       }))
-    } as FilterQuery<any>);
+    } as mongoose.FilterQuery<any>);
 
     if (param.fields.length == 1)
     {
@@ -166,7 +166,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     }
   }
 
-  literalSearchExpression(children: LiteralSearchExpressionCstChildren, param: SearchInterpreterParam): FilterQuery<any>
+  literalSearchExpression(children: LiteralSearchExpressionCstChildren, param: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Get the raw query
     const raw = children.string[0]!.image;

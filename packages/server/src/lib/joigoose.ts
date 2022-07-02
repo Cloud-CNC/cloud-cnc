@@ -4,10 +4,10 @@
 
 //Imports
 import createJoigoose from 'joigoose';
-import Mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 //Create the joigoose instance
-const joigoose = createJoigoose(Mongoose);
+const joigoose = createJoigoose(mongoose);
 
 //Export
 export default joigoose;

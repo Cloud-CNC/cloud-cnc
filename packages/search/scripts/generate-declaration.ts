@@ -5,9 +5,10 @@
  */
 
 //Imports
-import parser from '../src/parser';
+import parser from '~/search/parser';
+import {dirname, resolve} from 'path';
+import {fileURLToPath} from 'url';
 import {generateCstDts} from 'chevrotain';
-import {resolve} from 'path';
 import {writeFile} from 'fs/promises';
 
 const main = async () =>
@@ -18,8 +19,11 @@ const main = async () =>
   //Generate the TypeScript declaration
   const declaration = generateCstDts(productions);
 
+  //Get the directory name
+  const dir = dirname(fileURLToPath(import.meta.url));
+
   //Resolve the output path
-  const output = resolve(__dirname, '..', 'src', 'cst.ts');
+  const output = resolve(dir, '..', 'src', 'cst.ts');
 
   //Write the declaration to the output path
   await writeFile(output, declaration);

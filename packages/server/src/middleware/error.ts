@@ -4,7 +4,7 @@
 
 //Imports
 import {Next} from 'koa';
-import {RouterContext} from '@/server/lib/types';
+import {RouterContext} from '~/server/lib/types';
 
 /**
  * Error handling middleware

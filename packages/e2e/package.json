@@ -5,6 +5,7 @@
   "description": "End 2 end tests",
   "author": "Cloud CNC contributors",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "test:disabled": "playwright test"
   },

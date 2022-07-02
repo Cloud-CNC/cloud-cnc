@@ -5,6 +5,7 @@
   "description": "Command relay",
   "author": "Cloud CNC contributors",
   "license": "MIT",
+  "type": "module",
   "scripts": {},
   "homepage": "https://cloud-cnc.github.io",
   "repository": {

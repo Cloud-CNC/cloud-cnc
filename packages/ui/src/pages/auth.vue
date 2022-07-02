@@ -84,7 +84,7 @@ const onSubmit = handleSubmit(values =>
     </v-card>
   </v-row>
 
-  <plugin-portal name="auth:additional-methods">
+  <!-- <plugin-portal name="auth:additional-methods">
     <v-btn block color="black" prepend-icon="Github">
       GitHub
     </v-btn>
@@ -94,7 +94,7 @@ const onSubmit = handleSubmit(values =>
     <v-btn block color="orange" prepend-icon="Gitlab">
       GitLab
     </v-btn>
-  </plugin-portal>
+  </plugin-portal> -->
 </template>
 
 <style scoped>

@@ -3,33 +3,16 @@
  */
 
 //Imports
-import * as config from '@/server/lib/config';
+import * as config from '~/server/lib/config';
 import Koa from 'koa';
 import {Hookable} from 'hookable';
-import {Hooks} from '@/server/lib/hooks';
+import {Hooks as ApiHooks} from '~/server/lib/hooks';
 import {Logger} from 'pino';
-import {SemVer} from 'semver';
 
 /**
- * Plugin version checker callback
- * @param version Host Cloud CNC version
+ * API server context
  */
-export type PluginVersionChecker = (version: SemVer) => boolean | Promise<boolean>;
-
-/**
- * Base app config
- */
-export type ConfigType = typeof config;
-
-/**
- * Entrypoint hookable instance type
- */
-export type HookType = Hookable<Hooks>;
-
-/**
- * Plugin SDK context
- */
-export interface PluginSdkContext
+export interface ApiServerContext
 {
   /**
    * Koa app
@@ -39,12 +22,12 @@ export interface PluginSdkContext
   /**
    * Base app config
    */
-  config: ConfigType;
+  config: typeof config;
 
   /**
    * Hooks
    */
-  hooks: HookType;
+  hooks: Hookable<ApiHooks>;
 
   /**
    * Pino logger
@@ -53,7 +36,33 @@ export interface PluginSdkContext
 }
 
 /**
- * Plugin load handler
+ * Unified plugin contexts
+ */
+export type PluginContexts = ApiServerContext;
+
+/**
+ * Unified plugin configuration
+ */
+export interface PluginConfig<T>
+{
+  /**
+   * Plugin name
+   * @default Package name
+   */
+  name: string;
+
+  /**
+   * Plugin loaded handler
+   * @param ctx Plugin context
+   */
+  onLoad: (ctx: T) => void | Promise<void>;
+}
+
+/**
+ * Unified plugin
+ * 
+ * *Note: if you're a plugin developer, you probably shouldn't use this!*
+ * @param hostVersion Host Cloud CNC version
  * @param ctx Plugin context
  */
-export type PluginLoadHandler = (ctx: PluginSdkContext) => void | Promise<void>;
+export type Plugin = (hostVersion: string, ctx: PluginContexts) => Promise<void>;

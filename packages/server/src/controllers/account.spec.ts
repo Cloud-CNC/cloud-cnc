@@ -4,9 +4,9 @@
 
 //Imports
 import {accountA, accountB} from '!/fixtures/account';
-import {Account} from '@/server/models/account';
+import {Account} from '~/server/models/account';
 import {createSandbox} from 'sinon';
-import {hooks} from '@/server/lib/hooks';
+import {hooks} from '~/server/lib/hooks';
 import {
   getAllAccounts,
   createAccount,

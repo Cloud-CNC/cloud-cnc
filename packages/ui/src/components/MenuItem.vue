@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //Imports
-import {MenuItemData} from '@/ui/lib/types';
+import {MenuItemData} from '~/ui/lib/types';
 
 //Props
 const props = defineProps<{

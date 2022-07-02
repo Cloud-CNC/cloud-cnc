@@ -3,9 +3,9 @@
  */
 
 //Imports
+import mongoose from 'mongoose';
 import {MongoMemoryServer} from 'mongodb-memory-server';
-import {connect as mongooseConnect, disconnect as mongooseDisconnect} from '@/server/lib/mongoose';
-import {connection} from 'mongoose';
+import {connect as mongooseConnect, disconnect as mongooseDisconnect} from '~/server/lib/mongoose';
 
 //MongoDB server used for all tests
 const server = new MongoMemoryServer();
@@ -43,7 +43,7 @@ export const stop = async () =>
 export const reset = async () =>
 {
   //Drop all collections
-  for (const collection of Object.values(connection.collections))
+  for (const collection of Object.values(mongoose.connection.collections))
   {
     await collection.drop();
   }

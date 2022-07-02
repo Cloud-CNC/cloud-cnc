@@ -3,9 +3,9 @@
  */
 
 //Imports
+import aggregate from './aggregator';
 import {Options} from './types';
 import {Plugin} from 'vite';
-import {aggregate} from './aggregator';
 import {join} from 'path';
 
 /**

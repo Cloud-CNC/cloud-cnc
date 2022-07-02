@@ -3,12 +3,15 @@
     /* Modules */
     "resolveJsonModule": true,
     "paths": {
-      "@/api/*": ["../api/lib/*"],
-      "@/plugin-sdk/*": ["../plugin-sdk/src/*"],
-      "@/relay/*": ["../relay/src/*"],
-      "@/search/*": ["../search/src/*"],
-      "@/server/*": ["../server/src/*"],
-      "@/ui/*": ["../ui/src/*"],
+      "~/api/*": ["../api/lib/*"],
+      "~/docs/*": ["../docs/src/*"],
+      "~/e2e/*": ["../e2e/src/*"],
+      "~/plugin-host/*": ["../plugin-host/src/*"],
+      "~/plugin-sdk/*": ["../plugin-sdk/src/*"],
+      "~/relay/*": ["../relay/src/*"],
+      "~/search/*": ["../search/src/*"],
+      "~/server/*": ["../server/src/*"],
+      "~/ui/*": ["../ui/src/*"],
       "!/*": ["./test/*"]
     },
 

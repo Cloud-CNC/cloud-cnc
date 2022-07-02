@@ -3,7 +3,7 @@
  */
 
 //Imports
-import log from '@/server/lib/log';
+import log from '~/server/lib/log';
 import pino from 'koa-pino-logger';
 import {Middleware} from 'koa';
 

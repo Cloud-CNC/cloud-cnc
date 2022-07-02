@@ -4,39 +4,39 @@
 
 //Imports
 import compose from 'koa-compose';
-import {contentSecurityPolicy, expectCt, frameguard, hsts, ieNoOpen, noSniff, permittedCrossDomainPolicies, referrerPolicy, xssFilter} from 'koa-helmet';
-import {http} from '@/server/lib/config';
+import helmet from 'koa-helmet';
+import {http} from '~/server/lib/config';
 
 //Middleware
 const middlewares = [
-  contentSecurityPolicy({
+  helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ['\'self\'']
     }
   }),
-  referrerPolicy({
+  helmet.referrerPolicy({
     policy: 'no-referrer'
   }),
-  noSniff(),
-  ieNoOpen(),
-  frameguard({
+  helmet.noSniff(),
+  helmet.ieNoOpen(),
+  helmet.frameguard({
     action: 'deny'
   }),
-  permittedCrossDomainPolicies({
+  helmet.permittedCrossDomainPolicies({
     permittedPolicies: 'none'
   }),
-  xssFilter()
+  helmet.xssFilter()
 ];
 
 //TLS-only middleware
 if (http.tls)
 {
   middlewares.push(
-    expectCt({
+    helmet.expectCt({
       enforce: true,
       maxAge: 86400
     }),
-    hsts({
+    helmet.hsts({
       includeSubDomains: false,
       maxAge: 15552000
     })

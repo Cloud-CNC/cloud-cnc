@@ -4,10 +4,10 @@
 
 //Imports
 import Koa from 'koa';
-import middleware from '@/server/middleware';
+import middleware from '~/server/middleware';
 
 //Routes
-import account from '@/server/routes/account';
+import account from '~/server/routes/account';
 
 //Koa setup
 const app = new Koa();

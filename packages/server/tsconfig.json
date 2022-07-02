@@ -5,7 +5,7 @@
     "target": "ESNext",
 
     /* Modules */
-    "module": "CommonJS",
+    "module": "ESNext",
     "moduleResolution": "Node",
     "baseUrl": "."
   },

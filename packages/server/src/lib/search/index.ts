@@ -3,10 +3,10 @@
  */
 
 //Imports
-import {FilterQuery} from 'mongoose';
-import parser from '@/search/parser';
-import lexer from '@/search/lexer';
 import interpreter from './interpreter';
+import lexer from '~/search/lexer';
+import mongoose from 'mongoose';
+import parser from '~/search/parser';
 
 /**
  * Generate a Mongoose query from the raw search against the specified field names
@@ -14,7 +14,7 @@ import interpreter from './interpreter';
  * @param fields Fields to search against
  * @returns Mongoose query
  */
-const generateQuery = <T>(raw: string, fields: (keyof T)[]): FilterQuery<T> =>
+const generateQuery = <T>(raw: string, fields: (keyof T)[]): mongoose.FilterQuery<T> =>
 {
   //Tokenize the input
   const lexerResult = lexer.tokenize(raw);

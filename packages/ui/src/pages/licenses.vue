@@ -8,7 +8,7 @@ meta:
 
 <script setup lang="ts">
 //Imports
-import getLicenses from '@/ui/lib/licenses';
+import getLicenses from '~/ui/lib/licenses';
 
 //Get licenses
 const licenses = await getLicenses();

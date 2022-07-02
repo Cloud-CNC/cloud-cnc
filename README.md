@@ -5,6 +5,7 @@ Main monorepo
 * [API specifications](packages/api)
 * [Documentation](packages/docs)
 * [End 2 end tests](packages/e2e)
+* [Plugin host](packages/plugin-host)
 * [Plugin SDK](packages/plugin-sdk)
 * [Command relay](packages/relay)
 * [API server](packages/server)
