@@ -1,7 +1,8 @@
-import type { CstNode, ICstVisitor, IToken } from "chevrotain";
+import type {CstNode, ICstVisitor, IToken} from 'chevrotain';
 
-export interface ExpressionCstNode extends CstNode {
-  name: "expression";
+export interface ExpressionCstNode extends CstNode
+{
+  name: 'expression';
   children: ExpressionCstChildren;
 }
 
@@ -10,8 +11,9 @@ export type ExpressionCstChildren = {
   notExpression?: NotExpressionCstNode[];
 };
 
-export interface DoubleOperandBooleanExpressionCstNode extends CstNode {
-  name: "doubleOperandBooleanExpression";
+export interface DoubleOperandBooleanExpressionCstNode extends CstNode
+{
+  name: 'doubleOperandBooleanExpression';
   children: DoubleOperandBooleanExpressionCstChildren;
 }
 
@@ -21,8 +23,9 @@ export type DoubleOperandBooleanExpressionCstChildren = {
   rhs?: ExpressionCstNode[];
 };
 
-export interface NotExpressionCstNode extends CstNode {
-  name: "notExpression";
+export interface NotExpressionCstNode extends CstNode
+{
+  name: 'notExpression';
   children: NotExpressionCstChildren;
 }
 
@@ -31,8 +34,9 @@ export type NotExpressionCstChildren = {
   expression: ExpressionCstNode[];
 };
 
-export interface AtomicExpressionCstNode extends CstNode {
-  name: "atomicExpression";
+export interface AtomicExpressionCstNode extends CstNode
+{
+  name: 'atomicExpression';
   children: AtomicExpressionCstChildren;
 }
 
@@ -42,8 +46,9 @@ export type AtomicExpressionCstChildren = {
   literalSearchExpression?: LiteralSearchExpressionCstNode[];
 };
 
-export interface ParanthesisExpressionCstNode extends CstNode {
-  name: "paranthesisExpression";
+export interface ParanthesisExpressionCstNode extends CstNode
+{
+  name: 'paranthesisExpression';
   children: ParanthesisExpressionCstChildren;
 }
 
@@ -53,8 +58,9 @@ export type ParanthesisExpressionCstChildren = {
   ClosingParanthesis: IToken[];
 };
 
-export interface FuzzySearchExpressionCstNode extends CstNode {
-  name: "fuzzySearchExpression";
+export interface FuzzySearchExpressionCstNode extends CstNode
+{
+  name: 'fuzzySearchExpression';
   children: FuzzySearchExpressionCstChildren;
 }
 
@@ -62,8 +68,9 @@ export type FuzzySearchExpressionCstChildren = {
   string: IToken[];
 };
 
-export interface LiteralSearchExpressionCstNode extends CstNode {
-  name: "literalSearchExpression";
+export interface LiteralSearchExpressionCstNode extends CstNode
+{
+  name: 'literalSearchExpression';
   children: LiteralSearchExpressionCstChildren;
 }
 
@@ -72,7 +79,8 @@ export type LiteralSearchExpressionCstChildren = {
   string: IToken[];
 };
 
-export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
+export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT>
+{
   expression(children: ExpressionCstChildren, param?: IN): OUT;
   doubleOperandBooleanExpression(children: DoubleOperandBooleanExpressionCstChildren, param?: IN): OUT;
   notExpression(children: NotExpressionCstChildren, param?: IN): OUT;
