@@ -7,6 +7,7 @@ import typedocPlugin from './plugins/typedoc/index';
 import {defaultTheme} from '@vuepress/theme-default';
 import {defineUserConfig} from 'vuepress';
 import {join} from 'path';
+import {mdEnhancePlugin} from 'vuepress-plugin-md-enhance';
 import {registerComponentsPlugin} from '@vuepress/plugin-register-components';
 import {searchPlugin} from '@vuepress/plugin-search';
 
@@ -117,6 +118,12 @@ export default defineUserConfig({
         }
       ],
       maxSuggestions: 7
+    }),
+    mdEnhancePlugin({
+      chart: true,
+      codetabs: true,
+      mermaid: true,
+      tabs: true
     }),
     typedocPlugin({
       typedoc: {

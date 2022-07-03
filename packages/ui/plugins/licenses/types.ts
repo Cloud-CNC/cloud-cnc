@@ -12,6 +12,12 @@ export interface Options
    * @default `licenses.txt`
    */
   path: string;
+
+  /**
+   * Root path
+   * @default Current working directory
+   */
+  root: string;
 }
 
 /**

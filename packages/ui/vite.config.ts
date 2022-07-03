@@ -17,68 +17,85 @@ import Vue from '@vitejs/plugin-vue';
 import Yaml from '@rollup/plugin-yaml';
 import {VitePWA} from 'vite-plugin-pwa';
 import {Vuetify3Resolver} from 'unplugin-vue-components/resolvers';
-import {defineConfig} from 'vite';
-import {join} from 'path';
+import {defineConfig, UserConfig} from 'vite';
+import {dirname, join} from 'path';
+import {fileURLToPath} from 'url';
+import {load} from 'lib/plugins';
 
 //Export
-export default defineConfig({
-  plugins: [
-    License(),
-    Meta(),
-    Paths(),
-    Vue(),
-    Pages(),
-    Layouts(),
-    AutoImport({
-      imports: [
-        '@vueuse/core',
-        '@vueuse/head',
-        'pinia',
-        'vee-validate',
-        'vue',
-        'vue-i18n',
-        'vue-router',
-        {
-          '~/ui/composables/wormhole': [
-            'useBlackHole',
-            'useWhiteHole'
-          ]
-        }
-      ]
-    }),
-    Components({
-      resolvers: [
-        Vuetify3Resolver()
-      ]
-    }),
-    VitePWA({
-      registerType: 'autoUpdate',
-      manifest: {
-        name: 'Cloud CNC',
-        short_name: 'Cloud CNC',
-        description: 'Scalable CNC machine orchestration',
-        theme_color: '#2196f3',
-        background_color: '#191919',
-        icons: [
+export default defineConfig(async env =>
+{
+  //Get the directory name
+  const dir = dirname(fileURLToPath(import.meta.url));
+
+  //Define the initial config
+  let config = {
+    root: join(dir, '.merged'),
+    plugins: [
+      License({
+        root: join(dir, '..', '..')
+      }),
+      Meta(),
+      Paths(),
+      Vue(),
+      Pages(),
+      Layouts(),
+      AutoImport({
+        imports: [
+          '@vueuse/core',
+          '@vueuse/head',
+          'pinia',
+          'vee-validate',
+          'vue',
+          'vue-i18n',
+          'vue-router',
           {
-            src: '/android-chrome-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/android-chrome-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            '~/ui/composables/wormhole': [
+              'useBlackHole',
+              'useWhiteHole'
+            ]
           }
         ]
-      }
-    }),
-    Yaml()
-  ],
-  test: {
-    include: [
-      join(__dirname, 'src', '{components,layouts,pages}', '**', '*.spec.ts')
+      }),
+      Components({
+        resolvers: [
+          Vuetify3Resolver()
+        ]
+      }),
+      VitePWA({
+        registerType: 'autoUpdate',
+        manifest: {
+          name: 'Cloud CNC',
+          short_name: 'Cloud CNC',
+          description: 'Scalable CNC machine orchestration',
+          theme_color: '#2196f3',
+          background_color: '#191919',
+          icons: [
+            {
+              src: '/android-chrome-192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: '/android-chrome-512x512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            }
+          ]
+        }
+      }),
+      Yaml()
     ],
-    testTimeout: 15000
-  }
+    test: {
+      include: [
+        join(dir, 'src', '{components,layouts,pages}', '**', '*.spec.ts')
+      ],
+      testTimeout: 15000
+    }
+  } as UserConfig;
+
+  //Load plugins
+  config = await load(config, env);
+
+  return config;
 });

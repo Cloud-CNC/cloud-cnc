@@ -6,7 +6,6 @@
 import aggregate from './aggregator';
 import {Options} from './types';
 import {Plugin} from 'vite';
-import {join} from 'path';
 
 /**
  * Vite licenses plugin factory
@@ -14,7 +13,8 @@ import {join} from 'path';
  * @returns Plugin instance
  */
 const plugin = (options: Partial<Options> = {
-  path: 'licenses.txt'
+  path: 'licenses.txt',
+  root: process.cwd()
 }) => ({
   name: 'licenses',
   apply: 'build',
@@ -25,11 +25,8 @@ const plugin = (options: Partial<Options> = {
   }),
   async buildStart()
   {
-    //Compute the monorepo root
-    const root = join(__dirname, '..', '..', '..', '..');
-
     //Aggregate all licenses
-    const licenses = await aggregate(root);
+    const licenses = await aggregate(options.root!);
 
     //Format all licenses
     const raw = licenses.map(license =>

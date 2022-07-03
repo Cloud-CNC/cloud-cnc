@@ -1,0 +1,26 @@
+{
+  "name": "plugin-loader",
+  "private": true,
+  "version": "0.0.1-alpha.0",
+  "description": "Plugin loader",
+  "author": "Cloud CNC contributors",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {},
+  "homepage": "https://cloud-cnc.github.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cloud-CNC/cloud-cnc.git",
+    "directory": "packages/plugin-loader"
+  },
+  "bugs": {
+    "url": "https://github.com/Cloud-CNC/cloud-cnc/issues"
+  },
+  "dependencies": {
+    "read-pkg": "^7.1.0",
+    "semver": "^7.3.7"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.3.10"
+  }
+}

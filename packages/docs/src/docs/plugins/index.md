@@ -14,11 +14,10 @@ minimal effort.
 In order to aid in discovering Cloud CNC plugins among the vast number of unrelated libraries on NPM,
 plugins MUST do several things in order to be discovered and loaded:
 * The package [`name`](https://docs.npmjs.com/cli/v8/configuring-npm/package-json#name) property
-MUST start with `@cloud-cnc/plugin-` (For 1st party plugins), `cloud-cnc-plugin-` (For unscoped 3rd
-party plugins), or `@[scope name]/cloud-cnc-plugin-` (For scoped 3rd party plugins). Note that
-`@cloud-cnc/plugin-sdk` is the sole exception and is not a plugin! The following examples are all
-valid plugin names: `@cloud-cnc/plugin-example`, `cloud-cnc-plugin-example`, and
-`@example/cloud-cnc-plugin-example`.
+MUST start with `@cloud-cnc/plugin-` (For 1st party plugins) or `cloud-cnc-plugin-` (For scoped and
+unscoped 3rd party plugins). Note that `@cloud-cnc/plugin-sdk` is the sole exception and is not a
+plugin! The following examples are all valid plugin names: `@cloud-cnc/plugin-example`,
+`cloud-cnc-plugin-example`, and `@example/cloud-cnc-plugin-example`.
 * The package [`keywords`](https://docs.npmjs.com/cli/v8/configuring-npm/package-json#keywords)
 property MUST contain `cloud-cnc-plugin` (additional values MAY be present).
 * The package [`exports`](https://nodejs.org/api/packages.html#subpath-exports) property MAY
@@ -37,7 +36,7 @@ NOT be present):
   however Cloud CNC itself is not published to NPM, thus using peer dependencies for this would not
   work).
 
-The following is a non-normative example:
+### Example
 ```json
 {
   "name": "cloud-cnc-plugin-example",
@@ -62,8 +61,43 @@ description, license, and repository)! Use the
 metadata afterwards, instead.
 :::
 
+## Recursion
+Plugins are recursively loaded. A plugin's own dependencies will be checked to see if any match the
+above metadata specification, and if they do, they will be loaded just like top-level plugins. Note
+that to reduce the likelihood of loading unintended plugins, if a dependency does not match the
+above metadata specification, none of its own dependencies will be checked.
+
+### Example
+```mermaid
+flowchart TB
+  root([Cloud CNC instance])
+  pluginA[cloud-cnc-plugin-a]
+  pluginB[cloud-cnc-plugin-b]
+  pluginC[cloud-cnc-plugin-c]
+  pluginD[cloud-cnc-plugin-d]
+  notPluginA[not-a-plugin-a]
+  notPluginB[not-a-plugin-b]
+  notPluginC[not-a-plugin-c]
+
+  classDef default fill:#2196f3,stroke:none;
+  classDef loaded fill:#388e3c;
+  classDef notLoaded fill:#e53935;
+
+  class pluginA,pluginB,pluginC loaded
+  class notPluginA,notPluginB,notPluginC,pluginD notLoaded
+  
+  root --- pluginA
+  root --x notPluginA
+  root --- pluginB
+  root --x notPluginC
+  pluginB --- pluginC
+  pluginB --x notPluginB
+  notPluginC --- pluginD
+```
+*Note how `cloud-cnc-plugin-d`, while valid, isn't loaded because its parent isn't a plugin.*
+
 ## 1st vs 3rd Party
 1st party plugins refer to plugins hosted in the
-[Cloud CNC GitHub organization](https://github.com/cloud-cnc) and published under the `cloud-cnc`
-[NPM scope](https://docs.npmjs.com/cli/v8/using-npm/scope). 3rd party plugins refer to all plugins
+[Cloud CNC GitHub organization](https://github.com/cloud-cnc) and published under the [`cloud-cnc`
+NPM organization](https://npmjs.com/org/cloud-cnc). 3rd party plugins refer to all plugins
 that do not meet every requirement for 1st party plugins.

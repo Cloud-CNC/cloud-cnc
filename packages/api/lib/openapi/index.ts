@@ -3,11 +3,12 @@
  */
 
 //Imports
+import translateSchema from './utils';
 import {Entity, EntityOperation, OperationParameter, OperationSchema} from './types';
 import {OpenAPIV3} from 'openapi-types';
 import {default as SwaggerParser} from 'swagger-parser';
-import translateSchema from './utils';
-import {resolve} from 'path';
+import {dirname, resolve} from 'path';
+import {fileURLToPath} from 'url';
 
 /**
  * Get entities from the OpenAPI schema
@@ -18,8 +19,11 @@ const getEntities = async () =>
   //Initialize the parser
   const parser = new SwaggerParser();
 
+  //Get the directory name
+  const dir = dirname(fileURLToPath(import.meta.url));
+
   //Load, parse, and validate the OpenAPI specification
-  const api = await parser.validate(resolve(__dirname, '..', '..', 'http', 'openapi.yml')) as OpenAPIV3.Document;
+  const api = await parser.validate(resolve(dir, '..', '..', 'http', 'openapi.yml')) as OpenAPIV3.Document;
 
   //Initialize entities
   const entities = Object.values(api.tags ?? []).map(tag =>

@@ -6,7 +6,7 @@
       "~/api/*": ["../api/lib/*"],
       "~/docs/*": ["../docs/src/*"],
       "~/e2e/*": ["../e2e/src/*"],
-      "~/plugin-host/*": ["../plugin-host/src/*"],
+      "~/plugin-loader/*": ["../plugin-loader/src/*"],
       "~/plugin-sdk/*": ["../plugin-sdk/src/*"],
       "~/relay/*": ["../relay/src/*"],
       "~/search/*": ["../search/src/*"],

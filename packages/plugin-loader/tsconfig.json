@@ -7,10 +7,7 @@
     /* Modules */
     "module": "ESNext",
     "moduleResolution": "Node",
-    "baseUrl": ".",
-
-    /* Emit */
-    "declaration": true
+    "baseUrl": "."
   },
   "include": [
     "**/*.ts",

@@ -50,7 +50,7 @@ const aggregate = async (root: string) =>
       else
       {
         //Strip the version
-        name = key.replace(/@[^~/]+$/, '');
+        name = key.replace(/@[^@~/]+$/, '');
       }
 
       //Get the package URL
