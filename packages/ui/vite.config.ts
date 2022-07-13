@@ -30,7 +30,7 @@ export default defineConfig(async env =>
 
   //Define the initial config
   let config = {
-    // root: join(dir, '.merged'),
+    root: join(dir, '.merged'),
     plugins: [
       License({
         root: join(dir, '..', '..')

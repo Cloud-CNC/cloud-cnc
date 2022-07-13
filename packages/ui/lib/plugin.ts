@@ -4,9 +4,10 @@
 
 //Imports
 import loadPlugins from '../../plugin-loader/src/index';
+import watch from 'node-watch';
 import {ConfigEnv, UserConfig} from 'vite';
 import {UiContext, UiResult} from '~/plugin-sdk/types';
-import {copy, emptyDir, ensureDir} from 'fs-extra';
+import {CopyOptions, copy, emptyDir, ensureDir} from 'fs-extra';
 import {join} from 'path';
 
 //Files to copy
@@ -18,6 +19,34 @@ const COPY_PATHS = [
 
 //Get extra plugin packages
 const extras = process.env.EXTRA_PLUGINS != null ? JSON.parse(process.env.EXTRA_PLUGINS) : [];
+
+/**
+ * Copy from src to dest, repeating each time src is changed
+ * 
+ * *Note: this function will overwrite destination!*
+ * @param src Source path
+ * @param dest Destination path
+ * @param options Additional copy options
+ */
+const copyWatch = async (src: string, dest: string, options?: CopyOptions) =>
+{
+  //Forcible enable overwrite
+  options = {
+    ...options,
+    overwrite: true
+  };
+
+  //Copy once
+  await copy(src, dest, options);
+
+  //Watch
+  const watcher = watch(src, {
+    recursive: true
+  });
+
+  //Re-copy as needed
+  watcher.on('change', async () => await copy(src, dest, options));
+};
 
 /**
  * Load plugins
@@ -38,7 +67,7 @@ export const load = async (root: string, config: UserConfig, env: ConfigEnv) =>
   //Copy the original source code
   for (const path of COPY_PATHS)
   {
-    await copy(path, join(merged, path));
+    await copyWatch(path, join(merged, path));
   }
 
   //Load plugins
@@ -59,9 +88,7 @@ export const load = async (root: string, config: UserConfig, env: ConfigEnv) =>
       //Copy the plugin source code
       for (const [src, dest] of Object.entries(result.merge))
       {
-        await copy(src, join(merged, dest), {
-          overwrite: true
-        });
+        await copyWatch(src, join(merged, dest));
       }
     }
   }
