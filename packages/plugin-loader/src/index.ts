@@ -3,13 +3,13 @@
  */
 
 //Imports
+import semver from 'semver';
 import {PackageCloudCnc} from './types';
 import {Plugin} from '~/plugin-sdk/types';
 import {access} from 'fs/promises';
 import {constants} from 'fs';
 import {join} from 'path';
 import {readPackage} from 'read-pkg';
-import {satisfies} from 'semver';
 
 /**
  * Logging callback
@@ -42,13 +42,12 @@ interface LogCallbacks
  * @param T Plugin context
  * @param U Plugin result
  * @param root Root directory
- * @param version Host Cloud CNC version
  * @param extras Extra plugin package names
  * @param suffix Plugin import suffix
  * @param ctx Plugin context
  * @param log Logging callbacks
  */
-const loadPlugins = async <T, U>(root: string, version: string, extras: string[], suffix: string, ctx: T, log?: LogCallbacks): Promise<U[]> =>
+const loadPlugins = async <T, U>(root: string, extras: string[], suffix: string, ctx: T, log?: LogCallbacks): Promise<U[]> =>
 {
   //Read the root package
   const rootPkg = await readPackage({
@@ -130,10 +129,10 @@ const loadPlugins = async <T, U>(root: string, version: string, extras: string[]
     //Filter by the host Cloud CNC version
     if (
       typeof cloudCnc != 'object' ||
-      !satisfies(version, cloudCnc.version)
+      !semver.satisfies(rootPkg.version, cloudCnc.version)
     )
     {
-      log?.warn(`Incompatible plugin ${dependencyName}! (${cloudCnc.version} is not satisfied by ${version})`);
+      log?.warn(`Incompatible plugin ${dependencyName}! (${cloudCnc.version} is not satisfied by ${rootPkg.version})`);
       continue;
     }
 
@@ -141,7 +140,7 @@ const loadPlugins = async <T, U>(root: string, version: string, extras: string[]
     pkgNames.push(dependencyName);
 
     //Recur on sub-dependencies
-    await loadPlugins(dependencyDir, version, [], suffix, ctx, log);
+    await loadPlugins(dependencyDir, [], suffix, ctx, log);
   }
 
   //Load plugins
@@ -155,7 +154,7 @@ const loadPlugins = async <T, U>(root: string, version: string, extras: string[]
     const plugin = await import(importName) as Plugin<T, U>;
 
     //Load the plugin
-    const result = await plugin(version, ctx);
+    const result = await plugin(rootPkg.version, ctx);
 
     //Add the result
     results.push(result);

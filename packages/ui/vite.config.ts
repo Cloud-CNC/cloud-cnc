@@ -20,7 +20,7 @@ import {Vuetify3Resolver} from 'unplugin-vue-components/resolvers';
 import {defineConfig, UserConfig} from 'vite';
 import {dirname, join} from 'path';
 import {fileURLToPath} from 'url';
-import {load} from 'lib/plugins';
+import {load} from './lib/plugin';
 
 //Export
 export default defineConfig(async env =>
@@ -30,13 +30,17 @@ export default defineConfig(async env =>
 
   //Define the initial config
   let config = {
-    root: join(dir, '.merged'),
+    // root: join(dir, '.merged'),
     plugins: [
       License({
         root: join(dir, '..', '..')
       }),
       Meta(),
-      Paths(),
+      Paths({
+        projects: [
+          join(dir, 'tsconfig.json')
+        ]
+      }),
       Vue(),
       Pages(),
       Layouts(),
@@ -95,7 +99,7 @@ export default defineConfig(async env =>
   } as UserConfig;
 
   //Load plugins
-  config = await load(config, env);
+  config = await load(dir, config, env);
 
   return config;
 });

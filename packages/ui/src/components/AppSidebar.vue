@@ -1,5 +1,6 @@
 <script setup lang="ts">
 //Imports
+import logo from '~/ui/assets/logo.webp';
 import {translateRoutes} from '~/ui/lib/menu-items';
 
 //Events
@@ -50,7 +51,7 @@ const open = computed({
       <v-list-item>
         <v-container>
           <v-row align="center" class="brand" justify="space-around">
-            <img alt="Cloud CNC logo" height="64" src="~/ui/assets/logo.webp">
+            <img alt="Cloud CNC logo" height="64" :src="logo">
             <h1>{{ $t('components.sidebar.title') }}</h1>
           </v-row>
         </v-container>

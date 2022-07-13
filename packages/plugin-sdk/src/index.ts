@@ -3,11 +3,11 @@
  */
 
 //Imports
-import {version as sdkVersion} from '../package.json';
-import {fileURLToPath} from 'url';
-import {dirname} from 'path';
-import {diff} from 'semver';
+import semver from 'semver';
 import {ApiServerContext, ApiServerConfig, ApiServerResult, UiContext, UiConfig, UiResult} from './types';
+import {dirname} from 'path';
+import {fileURLToPath} from 'url';
+import {version as sdkVersion} from '../package.json';
 
 /**
  * Define an API-server plugin
@@ -17,7 +17,7 @@ import {ApiServerContext, ApiServerConfig, ApiServerResult, UiContext, UiConfig,
 export const defineApiServerPlugin = (config: Partial<ApiServerConfig>) => async (hostVersion: string, ctx: ApiServerContext): Promise<ApiServerResult> =>
 {
   //Check the SDK version is compatible with the host version
-  if (diff(hostVersion, sdkVersion) != 'major')
+  if (semver.diff(hostVersion, sdkVersion) != 'major')
   {
     throw new Error('Unsupported plugin SDK version! (Please contact the plugin author)');
   }
@@ -38,7 +38,7 @@ export const defineApiServerPlugin = (config: Partial<ApiServerConfig>) => async
 export const defineUiPlugin = (config: Partial<UiConfig>) => async (hostVersion: string, ctx: UiContext): Promise<UiResult> =>
 {
   //Check the SDK version is compatible with the host version
-  if (diff(hostVersion, sdkVersion) != 'major')
+  if (semver.diff(hostVersion, sdkVersion) != 'major')
   {
     throw new Error('Unsupported plugin SDK version! (Please contact the plugin author)');
   }

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Vite licenses plugin
+ * @fileoverview Vite metadata plugin
  */
 
 //Imports

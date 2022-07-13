@@ -3,13 +3,11 @@
  */
 
 //Imports
-import loadPlugins from '~/plugin-loader/index';
+import loadPlugins from '../../plugin-loader/src/index';
 import {ConfigEnv, UserConfig} from 'vite';
 import {UiContext, UiResult} from '~/plugin-sdk/types';
 import {copy, emptyDir, ensureDir} from 'fs-extra';
-import {dirname, join} from 'path';
-import {fileURLToPath} from 'url';
-import {readPackage} from 'read-pkg';
+import {join} from 'path';
 
 //Files to copy
 const COPY_PATHS = [
@@ -19,19 +17,17 @@ const COPY_PATHS = [
 ];
 
 //Get extra plugin packages
-const extras = JSON.parse(process.env.EXTRA_PLUGINS ?? '[]');
+const extras = process.env.EXTRA_PLUGINS != null ? JSON.parse(process.env.EXTRA_PLUGINS) : [];
 
 /**
  * Load plugins
+ * @param root Root directory
  * @param config Vite config
  * @param env Vite config environment
  * @returns Modified Vite config
  */
-export const load = async (config: UserConfig, env: ConfigEnv) =>
+export const load = async (root: string, config: UserConfig, env: ConfigEnv) =>
 {
-  //Compute the root directory
-  const root = dirname(fileURLToPath(import.meta.url));
-
   //Compute the merged directory
   const merged = join(root, '.merged');
 
@@ -45,18 +41,8 @@ export const load = async (config: UserConfig, env: ConfigEnv) =>
     await copy(path, join(merged, path));
   }
 
-  //Read the package
-  const pkg = await readPackage({
-    cwd: root
-  });
-
-  if (pkg == null)
-  {
-    throw new Error(`Failed to read package.json for directory ${root}!`);
-  }
-
   //Load plugins
-  const results = await loadPlugins<UiContext, UiResult>(root, pkg.version, extras, 'ui', {
+  const results = await loadPlugins<UiContext, UiResult>(root, extras, 'ui', {
     config,
     env
   }, {
