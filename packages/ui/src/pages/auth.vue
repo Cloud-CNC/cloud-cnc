@@ -77,31 +77,15 @@ const onSubmit = handleSubmit(values =>
 
         <!-- Additional methods -->
         <plugin-target
-          name="auth:additional-methods" class="additional-methods"
+          name="additional-methods" class="additional-methods"
           @wormhole-content="hasContent => hasAdditionalMethods = hasContent"
         />
       </v-card-text>
     </v-card>
   </v-row>
-
-  <!-- <plugin-portal name="auth:additional-methods">
-    <v-btn block color="black" prepend-icon="Github">
-      GitHub
-    </v-btn>
-  </plugin-portal>
-
-  <plugin-portal name="auth:additional-methods">
-    <v-btn block color="orange" prepend-icon="Gitlab">
-      GitLab
-    </v-btn>
-  </plugin-portal> -->
 </template>
 
 <style scoped>
-.additional-methods > *:not(:last-child) {
-  margin-bottom: 12px;
-}
-
 .form {
   min-width: 300px;
   width: 40vw;
@@ -124,5 +108,11 @@ const onSubmit = handleSubmit(values =>
 
 .split-divider::after {
   margin-left: 8px;
+}
+</style>
+
+<style>
+.additional-methods>*:not(:last-child) {
+  margin-bottom: 12px;
 }
 </style>

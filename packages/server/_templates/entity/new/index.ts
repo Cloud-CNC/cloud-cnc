@@ -5,7 +5,7 @@
  */
 
 //Imports
-import getEntities from '../../../../api/lib/openapi/index';
+import getEntities from '../../../../api/lib/openapi';
 import {OperationSchema, OperationSchemaType, OperationType} from '../../../../api/lib/openapi/types';
 import {isEqual, omit, orderBy, uniqWith} from 'lodash-es';
 import {pluralize} from 'inflection';

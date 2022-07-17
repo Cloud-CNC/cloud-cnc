@@ -93,7 +93,7 @@ const loadPlugins = async <T, U>(root: string, extras: string[], suffix: string,
     {
       await access(dependencyDir, constants.R_OK);
     }
-    catch (_)
+    catch
     {
       continue;
     }

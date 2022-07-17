@@ -5,9 +5,29 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Run the documentation",
+      "presentation": {
+        "group": "Documentation",
+        "order": 200
+      },
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/docs",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "dev"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "outputCapture": "std"
+    },
+    {
       "name": "Run search tests",
       "presentation": {
-        "group": "Search"
+        "group": "Search",
+        "order": 700
       },
       "type": "node",
       "request": "launch",
@@ -26,7 +46,7 @@
       "name": "Bootstrap the server",
       "presentation": {
         "group": "Server",
-        "order": 1
+        "order": 800
       },
       "type": "node",
       "request": "launch",
@@ -47,7 +67,7 @@
       "name": "Run the server",
       "presentation": {
         "group": "Server",
-        "order": 2
+        "order": 801
       },
       "type": "node",
       "request": "launch",
@@ -68,7 +88,7 @@
       "name": "Run server tests",
       "presentation": {
         "group": "Server",
-        "order": 3
+        "order": 802
       },
       "type": "node",
       "request": "launch",
@@ -87,7 +107,7 @@
       "name": "Run the UI server",
       "presentation": {
         "group": "UI",
-        "order": 3
+        "order": 900
       },
       "type": "node",
       "request": "launch",

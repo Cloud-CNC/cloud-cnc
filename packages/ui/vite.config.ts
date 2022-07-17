@@ -9,18 +9,19 @@
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import Layouts from 'vite-plugin-vue-layouts';
-import License from './plugins/licenses/index';
-import Meta from './plugins/meta';
+import Licenses from './plugins/licenses';
+import Metadata from './plugins/metadata';
 import Pages from 'vite-plugin-pages';
 import Paths from 'vite-tsconfig-paths';
+import Portals from './plugins/portals';
 import Vue from '@vitejs/plugin-vue';
 import Yaml from '@rollup/plugin-yaml';
+import loadPlugins from './lib/plugin';
 import {VitePWA} from 'vite-plugin-pwa';
 import {Vuetify3Resolver} from 'unplugin-vue-components/resolvers';
 import {defineConfig, UserConfig} from 'vite';
 import {dirname, join} from 'path';
 import {fileURLToPath} from 'url';
-import {load} from './lib/plugin';
 
 //Export
 export default defineConfig(async env =>
@@ -32,10 +33,10 @@ export default defineConfig(async env =>
   let config = {
     root: join(dir, '.merged'),
     plugins: [
-      License({
+      Licenses({
         root: join(dir, '..', '..')
       }),
-      Meta(),
+      Metadata(),
       Paths({
         projects: [
           join(dir, 'tsconfig.json')
@@ -44,6 +45,7 @@ export default defineConfig(async env =>
       Vue(),
       Pages(),
       Layouts(),
+      Portals(),
       AutoImport({
         imports: [
           '@vueuse/core',
@@ -99,7 +101,7 @@ export default defineConfig(async env =>
   } as UserConfig;
 
   //Load plugins
-  config = await load(dir, config, env);
+  config = await loadPlugins(dir, config, env);
 
   return config;
 });

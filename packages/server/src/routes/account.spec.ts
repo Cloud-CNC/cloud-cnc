@@ -3,7 +3,7 @@
  */
 
 //Imports
-import app from  '~/server/routes/index';
+import app from  '~/server/routes';
 import request from 'supertest';
 import test from 'ava';
 import {accountA, accountB} from '!/fixtures/account';

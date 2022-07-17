@@ -16,14 +16,10 @@ const licenses = await getLicenses();
 
 <template>
   <v-card class="d-flex flex-column fill-height">
-    <v-card-header>
-      <v-card-header-text>
-        <!-- Title -->
-        <v-card-title>
-          {{ $t('routes.licenses.title') }}
-        </v-card-title>
-      </v-card-header-text>
-    </v-card-header>
+    <!-- Title -->
+    <v-card-title>
+      {{ $t('routes.licenses.title') }}
+    </v-card-title>
 
     <!-- Licenses -->
     <v-card-text class="licenses-container overflow-auto ma-4">
@@ -32,7 +28,10 @@ const licenses = await getLicenses();
 
     <!-- Actions -->
     <v-card-actions>
-      <v-btn block color="info" href="/licenses.txt" prepend-icon="FileText" rel="noopener noreferrer" target="_blank" tag="a" variant="outlined">
+      <v-btn
+        block color="info" href="/licenses.txt" prepend-icon="FileText" rel="noopener noreferrer" target="_blank"
+        tag="a" variant="outlined"
+      >
         {{ $t('routes.licenses.raw') }}
       </v-btn>
     </v-card-actions>

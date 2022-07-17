@@ -1,0 +1,11 @@
+.plugin-portals {
+  display: none;
+}
+
+:root,
+body,
+#app {
+  overflow: auto;
+  height: 100%;
+  width: 100%;
+}

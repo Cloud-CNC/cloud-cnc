@@ -52,6 +52,7 @@ export const defineUiPlugin = (config: Partial<UiConfig>) => async (hostVersion:
   return {
     name: config.name,
     dir,
-    merge: config.merge
+    merge: config.merge,
+    portals: config.portals
   };
 };

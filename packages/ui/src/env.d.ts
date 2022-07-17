@@ -1,14 +1,23 @@
-/// <reference types="vite/client" />
-/// <reference types="vitest" />
+/**
+ * @fileoverview Ambient types
+ * 
+ * *Note: importing anything at the top level will break types!*
+ */
 
+//Augmentations
 declare module '*.vue' {
+  //Imports
   import type {DefineComponent} from 'vue';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
+
   const component: DefineComponent<{}, {}, any>;
+
+  //Export
   export default component;
 }
 
 declare module '*.yml' {
   const content: unknown;
+
+  //Export
   export default content;
 }

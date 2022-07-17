@@ -3,7 +3,7 @@
  */
 
 //Import
-import typedocPlugin from './plugins/typedoc/index';
+import typedocPlugin from './plugins/typedoc';
 import {defaultTheme} from '@vuepress/theme-default';
 import {defineUserConfig} from 'vuepress';
 import {join} from 'path';
@@ -98,7 +98,13 @@ export default defineUserConfig({
         {
           text: 'Plugins',
           link: '/docs/plugins/',
-          children: []
+          children: [
+            {
+              text: 'Specification',
+              link: '/docs/plugins/specification'
+            },
+            '' //Injected by TypeDoc plugin
+          ]
         }
       ]
     }
@@ -139,7 +145,7 @@ export default defineUserConfig({
         sort: ['source-order'],
         tsconfig: join(pluginSdkDir, 'tsconfig.json')
       },
-      prefix: '/docs/api-server/api/hooks',
+      prefix: '/docs/plugins/api',
       sidebar: {
         show: true,
         text: 'API',
@@ -147,7 +153,7 @@ export default defineUserConfig({
           '/docs/',
           2,
           'children',
-          0
+          1
         ]
       }
     })

@@ -4,10 +4,10 @@
 
 //Imports
 import {createI18n, I18nOptions} from 'vue-i18n';
-const rawMessages = import.meta.globEager('../locales/**/*.{yml,yaml}');
+const rawMessages = Object.entries(import.meta.globEager('../locales/**/*.{yml,yaml}'));
 
 //Format messages
-const messages = Object.fromEntries(Object.entries(rawMessages).map(([key, value]) =>
+const messages = Object.fromEntries(rawMessages.map(([key, value]) =>
 {
   //Parse the file path
   const parsed = /([^./]+)(?:\.[^.]+)+$/.exec(key);

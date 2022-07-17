@@ -63,7 +63,7 @@ export const formatPath = (prefix: string, raw: string) =>
   const parsed = new URL(raw, URL_SCHEME);
 
   //Strip extensions
-  parsed.pathname = parsed.pathname.replace(/([^.]+)\..+$/, '$1');
+  parsed.pathname = parsed.pathname.replace(/(.+)\.[^.]+$/, '$1');
 
   //Strip README and index
   parsed.pathname = parsed.pathname.replace(/README|index/, '');
@@ -81,7 +81,7 @@ export const formatPath = (prefix: string, raw: string) =>
   }
 
   //Stringify
-  let url = parsed.toString();
+  let url = parsed.toString().toLowerCase();
 
   //Strip the scheme
   url = url.replace(URL_SCHEME, '');

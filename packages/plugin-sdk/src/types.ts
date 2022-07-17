@@ -115,6 +115,14 @@ export interface UiConfig extends CommonConfig<UiContext>
    * * Values: destination merge path (Relative to the merged directory)
    */
   merge?: Record<string, string>;
+
+  /**
+   * Portal entries (Used to patch target components so they load plugin components)
+   * 
+   * * Keys: plugin portal component path (Relative to the merged directory)
+   * * Values: plugin target component path (Relative to the merged directory)
+   */
+  portals?: Record<string, string>;
 }
 
 /**
@@ -134,4 +142,12 @@ export interface UiResult extends CommonResult
    * * Values: destination merge path (Relative to the merged directory)
    */
   merge?: Record<string, string>;
+
+  /**
+   * Portal entries (Used to patch target components so they load plugin components)
+   * 
+   * * Keys: plugin portal component path (Relative to the merged directory)
+   * * Values: plugin target component path (Relative to the merged directory)
+   */
+  portals?: Record<string, string>;
 }

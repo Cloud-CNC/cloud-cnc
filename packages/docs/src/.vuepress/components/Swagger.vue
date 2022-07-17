@@ -32,14 +32,14 @@ onMounted(() =>
 </script>
 
 <template>
-  <shadow-root class="container">
+  <shadow-root class="swagger-container">
     <shadow-style>{{ SwaggerCSS }}</shadow-style>
     <div ref="element"></div>
   </shadow-root>
 </template>
 
 <style>
-.container {
+.swagger-container {
   background-color: white;
 }
 </style>

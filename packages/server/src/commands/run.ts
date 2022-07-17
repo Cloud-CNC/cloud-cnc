@@ -5,7 +5,7 @@
 //Imports
 // import plugin from '~/server/lib/plugin';
 // import socket from '~/server/socket';
-import app from '~/server/routes/index';
+import app from '~/server/routes';
 import createServer from '~/server/lib/server';
 import log from '~/server/lib/log';
 import {program} from 'commander';

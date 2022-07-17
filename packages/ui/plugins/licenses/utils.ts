@@ -1,5 +1,5 @@
 /**
- * @fileoverview License aggregator helper
+ * @fileoverview Utilities
  */
 
 //Imports
@@ -13,7 +13,7 @@ import {readFile} from 'fs/promises';
  * @param root Monorepo root directory
  * @returns Licenses
  */
-const aggregate = async (root: string) =>
+export const aggregate = async (root: string) =>
 {
   //Get all Lerna packages
   const lernaPackages = await getPackages(root);
@@ -119,6 +119,3 @@ const aggregate = async (root: string) =>
 
   return licenses;
 };
-
-//Export
-export default aggregate;
