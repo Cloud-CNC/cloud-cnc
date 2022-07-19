@@ -40,8 +40,22 @@ routes:
       totp: MFA Code
       submit: Login
       or: Or
-  home:
-    name: Home
+  dashboard:
+    name: Dashboard
+  map:
+    name: Map
+  accounts:
+    name: Accounts
+  roles:
+    name: Roles
+  files:
+    name: Files
+  jobs:
+    name: Jobs
+  relays:
+    name: Relays
+  machines:
+    name: Machines
   licenses:
     name: Licenses
     title: Open Source Licenses

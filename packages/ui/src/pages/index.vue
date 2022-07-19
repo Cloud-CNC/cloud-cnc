@@ -1,10 +1,10 @@
 <route lang="yaml">
-name: home
+name: dashboard
 meta:
   public: false
   sidebar:
     hidden: false
-    icon: Home
+    icon: LayoutDashboard
 </route>
 
 <template>

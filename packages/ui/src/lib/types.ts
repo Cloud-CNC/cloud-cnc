@@ -28,12 +28,21 @@ export interface IMenuItemData
  */
 export interface MenuItemLinkData extends IMenuItemData
 {
-  type: 'item';
+  type: 'link';
+
+/**
+ * Item icon name (PascalCase; eg: `LampDesk`)
+ * 
+ * @see https://lucide.dev
+ */
+  icon?: string;
 
   /**
-   * Item icon name (PascalCase; eg: `LampDesk`)
-   */
-  icon: string;
+  * Item sorting index (Lower sorting indexes appear higher in the sidebar)
+  * 
+  * @default `0`
+  */
+  sort?: number;
 
   /**
    * Item path
@@ -51,13 +60,8 @@ export interface MenuItemGroupData extends IMenuItemData
   /**
    * Child items
    */
-  children: MenuItemData[];
+  children: MenuItemLinkData[];
 }
-
-/**
- * Menu item data
- */
-export type MenuItemData = MenuItemLinkData | MenuItemGroupData;
 
 /**
  * Standardized route metadata
@@ -86,6 +90,13 @@ export interface RouteMetadata
      * @see https://lucide.dev
      */
     icon?: string;
+
+    /**
+     * Sorting index (Lower sorting indexes appear higher in the sidebar)
+     * 
+     * @default `0`
+     */
+    sort?: number;
 
     /**
      * Group ID

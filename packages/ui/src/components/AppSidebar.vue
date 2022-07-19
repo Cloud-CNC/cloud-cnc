@@ -58,9 +58,7 @@ const open = computed({
       </v-list-item>
 
       <!-- Route items -->
-      <div v-for="item in items" :key="item.id">
-        <MenuItem :item="item" />
-      </div>
+      <MenuItem v-for="item in items" :key="item.id" :item="item" />
 
       <!-- About -->
       <v-list-item class="about">
