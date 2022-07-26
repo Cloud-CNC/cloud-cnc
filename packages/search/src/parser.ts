@@ -3,18 +3,50 @@
  */
 
 //Imports
+import {ClosingParanthesis, DoubleOperandBooleanOperator, Not, OpeningParanthesis, Quote, String, getAllTokens, NonSkippedWhitespace} from './tokens';
 import {CstParser} from 'chevrotain';
-import {allTokens, ClosingParanthesis, DoubleOperandBooleanOperator, Not, OpeningParanthesis, Quote, String} from './tokens';
 
 /**
  * Search query parser
  */
 class SearchParser extends CstParser
 {
-  constructor()
+  /**
+   * Whether or not to skip whitespace
+   */
+  private skipWhitespace: boolean;
+
+  /**
+   * Consumes a whitespace if appropriate
+   * @param index Consume index
+   * @param label Whitespace label
+   */
+  private consumeWhitespace(index = 0, label?: string)
   {
+    //Consume the whitespace
+    if (!this.skipWhitespace)
+    {
+      this.consume(index, NonSkippedWhitespace, {
+        LABEL: label
+      });
+    }
+  }
+
+  /**
+   * Search query parser constructor
+   * @param skipWhitespace Whether or not to skip whitespace
+   * @returns Parser
+   */
+  constructor(skipWhitespace: boolean)
+  {
+    //Get all tokens
+    const allTokens = getAllTokens(skipWhitespace);
+
     //Instantiate the parent
     super(allTokens);
+
+    //Store state
+    this.skipWhitespace = skipWhitespace;
 
     //Check the grammar
     this.performSelfAnalysis();
@@ -39,10 +71,12 @@ class SearchParser extends CstParser
     });
     this.MANY(() =>
     {
+      this.consumeWhitespace(1, 'beforeOperator');
       this.CONSUME(DoubleOperandBooleanOperator, {
         LABEL: 'operator'
       });
-      this.SUBRULE2(this.expression, {
+      this.consumeWhitespace(2, 'afterOperator');
+      this.SUBRULE(this.expression, {
         LABEL: 'rhs'
       });
     });
@@ -50,7 +84,10 @@ class SearchParser extends CstParser
 
   private notExpression = this.RULE('notExpression', () =>
   {
-    this.CONSUME(Not);
+    this.CONSUME(Not, {
+      LABEL: 'not'
+    });
+    this.consumeWhitespace(0, 'whitespace');
     this.AT_LEAST_ONE(() =>
     {
       this.SUBRULE(this.expression, {
@@ -76,9 +113,13 @@ class SearchParser extends CstParser
 
   private paranthesisExpression = this.RULE('paranthesisExpression', () =>
   {
-    this.CONSUME(OpeningParanthesis);
+    this.CONSUME(OpeningParanthesis, {
+      LABEL: 'openingParanthesis'
+    });
     this.SUBRULE(this.expression);
-    this.CONSUME(ClosingParanthesis);
+    this.CONSUME(ClosingParanthesis, {
+      LABEL: 'closingParanthesis'
+    });
   });
 
   private fuzzySearchExpression = this.RULE('fuzzySearchExpression', () =>
@@ -90,16 +131,17 @@ class SearchParser extends CstParser
 
   private literalSearchExpression = this.RULE('literalSearchExpression', () =>
   {
-    this.CONSUME1(Quote);
+    this.CONSUME1(Quote, {
+      LABEL: 'openingQuote'
+    });
     this.CONSUME2(String, {
       LABEL: 'string'
     });
-    this.CONSUME3(Quote);
+    this.CONSUME3(Quote, {
+      LABEL: 'closingQuote'
+    });
   });
 }
 
-//Create the parser
-const parser = new SearchParser();
-
 //Export
-export default parser;
+export default SearchParser;

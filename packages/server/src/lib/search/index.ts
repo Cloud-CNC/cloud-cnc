@@ -3,10 +3,14 @@
  */
 
 //Imports
+import SearchParser from '~/search/parser';
+import createLexer from '~/search/lexer';
 import interpreter from './interpreter';
-import lexer from '~/search/lexer';
 import mongoose from 'mongoose';
-import parser from '~/search/parser';
+
+//Create the lexer and parser
+const lexer = createLexer(true);
+const parser = new SearchParser(true);
 
 /**
  * Generate a Mongoose query from the raw search against the specified field names
@@ -23,7 +27,7 @@ const generateQuery = <T>(raw: string, fields: (keyof T)[]): mongoose.FilterQuer
   {
     //Generate the error message
     const message = lexerResult.errors.map(error => `${error.message} (Line ${error.line}, column ${error.column})`).join('\r\n');
-    
+
     throw new Error(message);
   }
 
@@ -34,8 +38,8 @@ const generateQuery = <T>(raw: string, fields: (keyof T)[]): mongoose.FilterQuer
   if (parser.errors.length > 0)
   {
     //Generate the error message
-    const message = parser.errors.map(error => `${error.message} (Line ${error.token.startLine}, column ${error.token.startColumn})`).join('\r\n');
-    
+    const message = parser.errors.map(error => `${error.name}: ${error.message} (Line ${error.token.startLine}, column ${error.token.startColumn})`).join('\r\n');
+
     throw new Error(message);
   }
 

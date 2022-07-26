@@ -26,7 +26,12 @@ const ClosingStringPatterns = [
 const ClosingStringPattern = new RegExp(`^(${ClosingStringPatterns.map(pattern => pattern.source).join('|')})`);
 
 //Tokens
-export const Whitespace = createToken({
+export const NonSkippedWhitespace = createToken({
+  name: 'Whitespace',
+  pattern: WhitespacePattern,
+});
+
+export const SkippedWhitespace = createToken({
   name: 'Whitespace',
   pattern: WhitespacePattern,
   group: Lexer.SKIPPED
@@ -115,10 +120,14 @@ export const String = createToken({
   line_breaks: true
 });
 
-//Aggregate tokens (Order matters!)
-export const allTokens = [
-  //Skip
-  Whitespace,
+/**
+ * Get all tokens
+ * @param skipWhitespace Whether or not to skip whitespace
+ * @returns All tokens
+ */
+export const getAllTokens = (skipWhitespace: boolean) => [
+  //Whitespace
+  skipWhitespace ? SkippedWhitespace : NonSkippedWhitespace,
 
   //Keywords
   DoubleOperandBooleanOperator,

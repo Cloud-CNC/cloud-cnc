@@ -75,7 +75,8 @@ export default defineUserConfig({
           text: 'Guides',
           link: '/guides/',
           children: [
-            '/guides/quick-start/'
+            '/guides/quick-start',
+            '/guides/search',
           ]
         }
       ],

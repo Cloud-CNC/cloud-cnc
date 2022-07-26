@@ -12,5 +12,6 @@ export default {
     '--experimental-specifier-resolution=node',
     '--loader=../../lib/loader.js'
   ],
+  snapshotDir: 'snapshots',
   timeout: '30s'
 };

@@ -4,7 +4,7 @@ heroImage: /logo.webp
 tagline: Scalable CNC machine orchestration
 actions:
   - text: Quick Start →
-    link: /guides/quick-start/
+    link: /guides/quick-start
 features:
   - title: Multi-Machine Support
     details: Manage many, geographically-distributed machines from a single place

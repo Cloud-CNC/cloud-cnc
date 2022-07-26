@@ -1,14 +1,15 @@
 /**
  * @fileoverview Chevrotain parser unit tests
- * 
- * Tip: use a JSON path finder like https://site24x7.com/tools/jsonpath-finder-validator.html
  */
 
 //Imports
-import lexer from './lexer';
-import parser from './parser';
+import SearchParser from './parser';
+import createLexer from './lexer';
 import test from 'ava';
-import {get} from 'lodash-es';
+
+//Create the lexer and parser
+const lexer = createLexer(true);
+const parser = new SearchParser(true);
 
 //Tests
 test('Parse AND', ctx =>
@@ -21,11 +22,8 @@ test('Parse AND', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 0);
-  ctx.is(cst.name, 'expression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'abc');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.operator[0].tokenType.name'), 'And');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.rhs[0].children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'def');
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });
 
 test('Parse OR', ctx =>
@@ -38,11 +36,8 @@ test('Parse OR', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 0);
-  ctx.is(cst.name, 'expression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'abc');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.operator[0].tokenType.name'), 'Or');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.rhs[0].children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'def');
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });
 
 test('Parse NOT', ctx =>
@@ -55,10 +50,8 @@ test('Parse NOT', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 0);
-  ctx.is(cst.name, 'expression');
-  ctx.is(get(cst, 'children.notExpression[0].children.Not[0].tokenType.name'), 'Not');
-  ctx.is(get(cst, 'children.notExpression[0].children.expression[0].children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'abc');
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });
 
 test('Parse parantheses', ctx =>
@@ -71,14 +64,8 @@ test('Parse parantheses', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 0);
-  ctx.is(cst.name, 'expression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.paranthesisExpression[0].name'), 'paranthesisExpression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.paranthesisExpression[0].children.expression[0].children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'abc');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.paranthesisExpression[0].children.expression[0].children.doubleOperandBooleanExpression[0].children.operator[0].tokenType.name'), 'And');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.paranthesisExpression[0].children.expression[0].children.doubleOperandBooleanExpression[0].children.rhs[0].children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'def');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.operator[0].tokenType.name'), 'Or');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.rhs[0].children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'ghi');
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });
 
 test('Parse single quoted literal string', ctx =>
@@ -91,10 +78,8 @@ test('Parse single quoted literal string', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 0);
-  ctx.is(cst.name, 'expression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].name'), 'literalSearchExpression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].children.string[0].image'), 'much OR literally');
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });
 
 test('Parse double quoted literal string', ctx =>
@@ -107,10 +92,8 @@ test('Parse double quoted literal string', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 0);
-  ctx.is(cst.name, 'expression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].name'), 'literalSearchExpression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.literalSearchExpression[0].children.string[0].image'), 'much OR literally');
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });
 
 test('Parse non-literal string', ctx =>
@@ -123,10 +106,8 @@ test('Parse non-literal string', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 0);
-  ctx.is(cst.name, 'expression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].name'), 'fuzzySearchExpression');
-  ctx.is(get(cst, 'children.doubleOperandBooleanExpression[0].children.lhs[0].children.fuzzySearchExpression[0].children.string[0].image'), 'not so literally');
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });
 
 test('Reject invalid input', ctx =>
@@ -139,7 +120,6 @@ test('Reject invalid input', ctx =>
   const cst = parser.expression();
 
   //Ensure the result is expected
-  ctx.is(parser.errors.length, 1);
-  ctx.is(parser.errors[0]!.name, 'NoViableAltException');
-  ctx.deepEqual(cst, undefined);
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
 });

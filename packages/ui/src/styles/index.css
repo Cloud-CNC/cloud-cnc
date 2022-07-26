@@ -9,3 +9,7 @@ body,
   height: 100%;
   width: 100%;
 }
+
+::selection {
+  background-color: #304fff;
+}

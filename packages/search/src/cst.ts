@@ -19,7 +19,9 @@ export interface DoubleOperandBooleanExpressionCstNode extends CstNode
 
 export type DoubleOperandBooleanExpressionCstChildren = {
   lhs: AtomicExpressionCstNode[];
+  beforeOperator?: IToken[];
   operator?: IToken[];
+  afterOperator?: IToken[];
   rhs?: ExpressionCstNode[];
 };
 
@@ -30,7 +32,8 @@ export interface NotExpressionCstNode extends CstNode
 }
 
 export type NotExpressionCstChildren = {
-  Not: IToken[];
+  not: IToken[];
+  whitespace: IToken[];
   expression: ExpressionCstNode[];
 };
 
@@ -53,9 +56,9 @@ export interface ParanthesisExpressionCstNode extends CstNode
 }
 
 export type ParanthesisExpressionCstChildren = {
-  OpeningParanthesis: IToken[];
+  openingParanthesis: IToken[];
   expression: ExpressionCstNode[];
-  ClosingParanthesis: IToken[];
+  closingParanthesis: IToken[];
 };
 
 export interface FuzzySearchExpressionCstNode extends CstNode
@@ -75,8 +78,9 @@ export interface LiteralSearchExpressionCstNode extends CstNode
 }
 
 export type LiteralSearchExpressionCstChildren = {
-  Quote: (IToken)[];
+  openingQuote: IToken[];
   string: IToken[];
+  closingQuote: IToken[];
 };
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT>

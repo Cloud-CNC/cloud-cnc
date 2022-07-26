@@ -4,10 +4,20 @@
 
 //Imports
 import {Lexer} from 'chevrotain';
-import {allTokens} from './tokens';
+import {getAllTokens} from './tokens';
 
-//Create the lexer
-const lexer = new Lexer(allTokens);
+/**
+ * Create the lexer
+ * @param skipWhitespace Whether or not to skip whitespace
+ * @returns Lexer
+ */
+const createLexer = (skipWhitespace: boolean) =>
+{
+  //Get all tokens
+  const allTokens = getAllTokens(skipWhitespace);
+
+  return new Lexer(allTokens);
+};
 
 //Export
-export default lexer;
+export default createLexer;

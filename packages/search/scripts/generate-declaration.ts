@@ -5,7 +5,7 @@
  */
 
 //Imports
-import parser from '~/search/parser';
+import SearchParser from '~/search/parser';
 import {dirname, resolve} from 'path';
 import {fileURLToPath} from 'url';
 import {generateCstDts} from 'chevrotain';
@@ -14,7 +14,7 @@ import {writeFile} from 'fs/promises';
 const main = async () =>
 {
   //Get the token productions
-  const productions = parser.getGAstProductions();
+  const productions = new SearchParser(false).getGAstProductions();
 
   //Generate the TypeScript declaration
   const declaration = generateCstDts(productions);

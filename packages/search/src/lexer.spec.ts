@@ -3,10 +3,11 @@
  */
 
 //Imports
-import lexer from './lexer';
+import createLexer from './lexer';
 import test from 'ava';
-import {tokenMatcher} from 'chevrotain';
-import {And, ClosingParanthesis, Not, OpeningParanthesis, Or, Quote, String} from './tokens';
+
+//Create the lexer
+const lexer = createLexer(true);
 
 //Tests
 test('Tokenize AND', ctx =>
@@ -15,10 +16,7 @@ test('Tokenize AND', ctx =>
   const result = lexer.tokenize('AND');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, And));
+  ctx.snapshot(result);
 });
 
 test('Tokenize OR', ctx =>
@@ -27,10 +25,7 @@ test('Tokenize OR', ctx =>
   const result = lexer.tokenize('OR');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, Or));
+  ctx.snapshot(result);
 });
 
 test('Tokenize NOT', ctx =>
@@ -39,10 +34,7 @@ test('Tokenize NOT', ctx =>
   const result = lexer.tokenize('NOT');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, Not));
+  ctx.snapshot(result);
 });
 
 test('Tokenize opening paranthesis', ctx =>
@@ -51,10 +43,7 @@ test('Tokenize opening paranthesis', ctx =>
   const result = lexer.tokenize('(');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, OpeningParanthesis));
+  ctx.snapshot(result);
 });
 
 test('Tokenize closing paranthesis', ctx =>
@@ -63,10 +52,7 @@ test('Tokenize closing paranthesis', ctx =>
   const result = lexer.tokenize(')');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, ClosingParanthesis));
+  ctx.snapshot(result);
 });
 
 test('Tokenize single quote', ctx =>
@@ -75,10 +61,7 @@ test('Tokenize single quote', ctx =>
   const result = lexer.tokenize('\'');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, Quote));
+  ctx.snapshot(result);
 });
 
 test('Tokenize double quote', ctx =>
@@ -87,10 +70,7 @@ test('Tokenize double quote', ctx =>
   const result = lexer.tokenize('"');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, Quote));
+  ctx.snapshot(result);
 });
 
 test('Tokenize literal string', ctx =>
@@ -99,13 +79,7 @@ test('Tokenize literal string', ctx =>
   const result = lexer.tokenize('"much OR literally"');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 3);
-  ctx.assert(tokenMatcher(result.tokens[0]!, Quote));
-  ctx.assert(tokenMatcher(result.tokens[1]!, String));
-  ctx.assert(tokenMatcher(result.tokens[2]!, Quote));
-  ctx.is(result.tokens[1]!.image, 'much OR literally');
+  ctx.snapshot(result);
 });
 
 test('Tokenize non-literal string', ctx =>
@@ -114,9 +88,5 @@ test('Tokenize non-literal string', ctx =>
   const result = lexer.tokenize('not so literally');
 
   //Ensure the result is expected
-  ctx.is(result.errors.length, 0);
-  ctx.deepEqual(result.groups, {});
-  ctx.is(result.tokens.length, 1);
-  ctx.assert(tokenMatcher(result.tokens[0]!, String));
-  ctx.is(result.tokens[0]!.image, 'not so literally');
+  ctx.snapshot(result);
 });

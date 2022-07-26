@@ -22,6 +22,10 @@ components:
     actions:
       copy: Copy debug information
       close: Close
+  search:
+    query: Search query
+    invalid: Invalid search query
+    position: Column {column}
   sidebar:
     title: Cloud CNC
     about: About

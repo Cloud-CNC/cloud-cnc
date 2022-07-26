@@ -4,9 +4,9 @@ CNC's human-centric search language.
 
 ## Features
 * Ngram-based fuzzy-searching by default
+* Literal searching: `"literal query"` (Inspired by Google-search)
 * Boolean operators: `AND`, `OR`, and `NOT` (Inspired by SQL)
-* Literal matching: `"literal query"` or `'literal query'` (Inspired by Google-search)
-* Paranthesis prioritization: `(a AND b) OR c` (Inspired by mathematical order-of-operations)
+* Parentheses-based order-of-operations: `(a AND b) OR c` (Inspired by math)
 
 ## Development
 

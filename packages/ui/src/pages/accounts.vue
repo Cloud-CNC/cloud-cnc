@@ -9,5 +9,5 @@ meta:
 </route>
 
 <template>
-  accounts
+  <Entities title="Accounts" icon="Users" :entities="[]" />
 </template>

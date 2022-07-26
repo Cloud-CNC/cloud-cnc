@@ -71,7 +71,7 @@ const node = computed(() =>
   return h('div', null, content);
 });
 
-//Watchers
+//Effects
 watchEffect(() =>
 {
   //Emit the wormhole content status

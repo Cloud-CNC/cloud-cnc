@@ -3,13 +3,16 @@
  */
 
 //Imports
+import SearchParser from '~/search/parser';
 import generateNgrams from './ngrams';
 import mongoose from 'mongoose';
-import parser from '~/search/parser';
 import {And, Or} from '~/search/tokens';
 import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParanthesisExpressionCstChildren} from '~/search/cst';
 import {escapeRegExp} from 'lodash-es';
 import {tokenMatcher} from 'chevrotain';
+
+//Create the parser
+const parser = new SearchParser(false);
 
 /**
  * Search query interpreter parameters
@@ -57,7 +60,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
   doubleOperandBooleanExpression(children: DoubleOperandBooleanExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Recurse the left-hand side
-    let query = this.visit(children.lhs, param) as mongoose.FilterQuery<any>;
+    let result = this.visit(children.lhs, param) as mongoose.FilterQuery<any>;
 
     if (children.operator != null && children.rhs != null)
     {
@@ -70,9 +73,9 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
       //And
       if (tokenMatcher(operator!, And))
       {
-        query = {
+        result = {
           $and: [
-            query,
+            result,
             rhsResult
           ]
         };
@@ -80,26 +83,26 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
       //Or
       else if (tokenMatcher(operator!, Or))
       {
-        query = {
+        result = {
           $or: [
-            query,
+            result,
             rhsResult
           ]
         };
       }
     }
 
-    return query;
+    return result;
   }
 
   notExpression(children: NotExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Recurse the expression
-    const expressionResult = this.visit(children.expression, param);
+    const result = this.visit(children.expression, param);
 
     return {
       $nor: [
-        expressionResult
+        result
       ]
     };
   }
