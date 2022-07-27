@@ -80,7 +80,7 @@ const updateColumn = () => window.setTimeout(() =>
   >
     <template #default>
       <!-- Syntax highlights -->
-      <div class="highlights">
+      <div class="d-flex align-center highlights">
         <component :is="highlight" v-for="highlight in highlights[1]" :key="highlight" />
       </div>
     </template>

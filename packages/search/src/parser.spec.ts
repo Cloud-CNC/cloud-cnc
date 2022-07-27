@@ -3,13 +3,9 @@
  */
 
 //Imports
-import SearchParser from './parser';
-import createLexer from './lexer';
+import lexer from './lexer';
+import parser from './parser';
 import test from 'ava';
-
-//Create the lexer and parser
-const lexer = createLexer(true);
-const parser = new SearchParser(true);
 
 //Tests
 test('Parse AND', ctx =>
@@ -54,7 +50,7 @@ test('Parse NOT', ctx =>
   ctx.snapshot(cst);
 });
 
-test('Parse parantheses', ctx =>
+test('Parse parentheses', ctx =>
 {
   //Tokenize the text
   const lexerResult = lexer.tokenize('(abc AND def) OR ghi');
@@ -96,7 +92,7 @@ test('Parse double quoted literal string', ctx =>
   ctx.snapshot(cst);
 });
 
-test('Parse non-literal string', ctx =>
+test('Parse fuzzy string', ctx =>
 {
   //Tokenize the text
   const lexerResult = lexer.tokenize('not so literally');

@@ -3,11 +3,8 @@
  */
 
 //Imports
-import createLexer from './lexer';
+import lexer from './lexer';
 import test from 'ava';
-
-//Create the lexer
-const lexer = createLexer(true);
 
 //Tests
 test('Tokenize AND', ctx =>
@@ -37,7 +34,7 @@ test('Tokenize NOT', ctx =>
   ctx.snapshot(result);
 });
 
-test('Tokenize opening paranthesis', ctx =>
+test('Tokenize opening parenthesis', ctx =>
 {
   //Tokenize the text
   const result = lexer.tokenize('(');
@@ -46,7 +43,7 @@ test('Tokenize opening paranthesis', ctx =>
   ctx.snapshot(result);
 });
 
-test('Tokenize closing paranthesis', ctx =>
+test('Tokenize closing parenthesis', ctx =>
 {
   //Tokenize the text
   const result = lexer.tokenize(')');
@@ -82,7 +79,7 @@ test('Tokenize literal string', ctx =>
   ctx.snapshot(result);
 });
 
-test('Tokenize non-literal string', ctx =>
+test('Tokenize fuzzy string', ctx =>
 {
   //Tokenize the text
   const result = lexer.tokenize('not so literally');

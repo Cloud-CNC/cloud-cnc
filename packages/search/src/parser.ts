@@ -3,7 +3,7 @@
  */
 
 //Imports
-import {ClosingParanthesis, DoubleOperandBooleanOperator, Not, OpeningParanthesis, Quote, String, getAllTokens, NonSkippedWhitespace} from './tokens';
+import {allTokens, closingParenthesis, doubleOperandBooleanOperator, fuzzyString, literalString, not, openingParenthesis, whitespace} from './tokens';
 import {CstParser} from 'chevrotain';
 
 /**
@@ -12,41 +12,13 @@ import {CstParser} from 'chevrotain';
 class SearchParser extends CstParser
 {
   /**
-   * Whether or not to skip whitespace
-   */
-  private skipWhitespace: boolean;
-
-  /**
-   * Consumes a whitespace if appropriate
-   * @param index Consume index
-   * @param label Whitespace label
-   */
-  private consumeWhitespace(index = 0, label?: string)
-  {
-    //Consume the whitespace
-    if (!this.skipWhitespace)
-    {
-      this.consume(index, NonSkippedWhitespace, {
-        LABEL: label
-      });
-    }
-  }
-
-  /**
    * Search query parser constructor
-   * @param skipWhitespace Whether or not to skip whitespace
    * @returns Parser
    */
-  constructor(skipWhitespace: boolean)
+  constructor()
   {
-    //Get all tokens
-    const allTokens = getAllTokens(skipWhitespace);
-
     //Instantiate the parent
     super(allTokens);
-
-    //Store state
-    this.skipWhitespace = skipWhitespace;
 
     //Check the grammar
     this.performSelfAnalysis();
@@ -71,11 +43,15 @@ class SearchParser extends CstParser
     });
     this.MANY(() =>
     {
-      this.consumeWhitespace(1, 'beforeOperator');
-      this.CONSUME(DoubleOperandBooleanOperator, {
+      this.CONSUME1(whitespace, {
+        LABEL: 'beforeOperator'
+      });
+      this.CONSUME(doubleOperandBooleanOperator, {
         LABEL: 'operator'
       });
-      this.consumeWhitespace(2, 'afterOperator');
+      this.CONSUME2(whitespace, {
+        LABEL: 'afterOperator'
+      });
       this.SUBRULE(this.expression, {
         LABEL: 'rhs'
       });
@@ -84,10 +60,12 @@ class SearchParser extends CstParser
 
   private notExpression = this.RULE('notExpression', () =>
   {
-    this.CONSUME(Not, {
+    this.CONSUME(not, {
       LABEL: 'not'
     });
-    this.consumeWhitespace(0, 'whitespace');
+    this.CONSUME(whitespace, {
+      LABEL: 'whitespace'
+    });
     this.AT_LEAST_ONE(() =>
     {
       this.SUBRULE(this.expression, {
@@ -100,7 +78,7 @@ class SearchParser extends CstParser
   {
     this.OR([
       {
-        ALT: () => this.SUBRULE(this.paranthesisExpression)
+        ALT: () => this.SUBRULE(this.parenthesisExpression)
       },
       {
         ALT: () => this.SUBRULE(this.fuzzySearchExpression)
@@ -111,37 +89,34 @@ class SearchParser extends CstParser
     ]);
   });
 
-  private paranthesisExpression = this.RULE('paranthesisExpression', () =>
+  private parenthesisExpression = this.RULE('parenthesisExpression', () =>
   {
-    this.CONSUME(OpeningParanthesis, {
-      LABEL: 'openingParanthesis'
+    this.CONSUME(openingParenthesis, {
+      LABEL: 'openingParenthesis'
     });
     this.SUBRULE(this.expression);
-    this.CONSUME(ClosingParanthesis, {
-      LABEL: 'closingParanthesis'
+    this.CONSUME(closingParenthesis, {
+      LABEL: 'closingParenthesis'
     });
   });
 
   private fuzzySearchExpression = this.RULE('fuzzySearchExpression', () =>
   {
-    this.CONSUME(String, {
-      LABEL: 'string'
+    this.CONSUME(fuzzyString, {
+      LABEL: 'fuzzyString'
     });
   });
 
   private literalSearchExpression = this.RULE('literalSearchExpression', () =>
   {
-    this.CONSUME1(Quote, {
-      LABEL: 'openingQuote'
-    });
-    this.CONSUME2(String, {
-      LABEL: 'string'
-    });
-    this.CONSUME3(Quote, {
-      LABEL: 'closingQuote'
+    this.CONSUME(literalString, {
+      LABEL: 'literalString'
     });
   });
 }
 
+//Instantiate the parser
+const parser = new SearchParser();
+
 //Export
-export default SearchParser;
+export default parser;

@@ -3,15 +3,12 @@
  */
 
 //Imports
-import SearchParser from '~/search/parser';
-import {And, Or} from '~/search/tokens';
-import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParanthesisExpressionCstChildren} from '~/search/cst';
+import parser from '~/search/parser';
+import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParenthesisExpressionCstChildren} from '~/search/cst';
 import {Highlights} from './index';
+import {and, or} from '~/search/tokens';
 import {h} from 'vue';
 import {tokenMatcher} from 'chevrotain';
-
-//Create the parser
-const parser = new SearchParser(false);
 
 /**
  * Search query interpreter
@@ -67,7 +64,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
       const text = `${children.beforeOperator?.map(child => child.image).join('')}${operator?.image}${children.afterOperator?.map(child => child.image).join('')}`;
 
       //Supported operation
-      if (tokenMatcher(operator!, And) || tokenMatcher(operator!, Or))
+      if (tokenMatcher(operator!, and) || tokenMatcher(operator!, or))
       {
         //Update the result
         result = [
@@ -117,10 +114,10 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
       //Recurse
       return this.visit(children.literalSearchExpression);
     }
-    else if (children.paranthesisExpression != null)
+    else if (children.parenthesisExpression != null)
     {
       //Recurse
-      return this.visit(children.paranthesisExpression);
+      return this.visit(children.parenthesisExpression);
     }
     else
     {
@@ -133,21 +130,21 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     }
   }
 
-  paranthesisExpression(children: ParanthesisExpressionCstChildren): Highlights
+  parenthesisExpression(children: ParenthesisExpressionCstChildren): Highlights
   {
     //Recurse the expression
     const result = this.visit(children.expression) as Highlights;
 
     return [
-      `${children.openingParanthesis[0]!.image}${result[0]}${children.closingParanthesis[0]!.image}`,
+      `${children.openingParenthesis[0]!.image}${result[0]}${children.closingParenthesis[0]!.image}`,
       [
         h('span', {
           class: 'character'
-        }, children.openingParanthesis[0]!.image),
+        }, children.openingParenthesis[0]!.image),
         ...result[1],
         h('span', {
           class: 'character'
-        }, children.closingParanthesis[0]!.image)
+        }, children.closingParenthesis[0]!.image)
       ]
     ];
   }
@@ -155,7 +152,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
   fuzzySearchExpression(children: FuzzySearchExpressionCstChildren): Highlights
   {
     //Get the text
-    const text = children.string[0]!.image;
+    const text = children.fuzzyString[0]!.image;
 
     return [
       text,
@@ -170,7 +167,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
   literalSearchExpression(children: LiteralSearchExpressionCstChildren): Highlights
   {
     //Get the text
-    const text = `${children.openingQuote[0]!.image}${children.string[0]!.image}${children.closingQuote[0]!.image}`;
+    const text = children.literalString[0]!.image;
 
     return [
       text,

@@ -44,21 +44,21 @@ export interface AtomicExpressionCstNode extends CstNode
 }
 
 export type AtomicExpressionCstChildren = {
-  paranthesisExpression?: ParanthesisExpressionCstNode[];
+  parenthesisExpression?: ParenthesisExpressionCstNode[];
   fuzzySearchExpression?: FuzzySearchExpressionCstNode[];
   literalSearchExpression?: LiteralSearchExpressionCstNode[];
 };
 
-export interface ParanthesisExpressionCstNode extends CstNode
+export interface ParenthesisExpressionCstNode extends CstNode
 {
-  name: 'paranthesisExpression';
-  children: ParanthesisExpressionCstChildren;
+  name: 'parenthesisExpression';
+  children: ParenthesisExpressionCstChildren;
 }
 
-export type ParanthesisExpressionCstChildren = {
-  openingParanthesis: IToken[];
+export type ParenthesisExpressionCstChildren = {
+  openingParenthesis: IToken[];
   expression: ExpressionCstNode[];
-  closingParanthesis: IToken[];
+  closingParenthesis: IToken[];
 };
 
 export interface FuzzySearchExpressionCstNode extends CstNode
@@ -68,7 +68,7 @@ export interface FuzzySearchExpressionCstNode extends CstNode
 }
 
 export type FuzzySearchExpressionCstChildren = {
-  string: IToken[];
+  fuzzyString: IToken[];
 };
 
 export interface LiteralSearchExpressionCstNode extends CstNode
@@ -78,9 +78,7 @@ export interface LiteralSearchExpressionCstNode extends CstNode
 }
 
 export type LiteralSearchExpressionCstChildren = {
-  openingQuote: IToken[];
-  string: IToken[];
-  closingQuote: IToken[];
+  literalString: IToken[];
 };
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT>
@@ -89,7 +87,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT>
   doubleOperandBooleanExpression(children: DoubleOperandBooleanExpressionCstChildren, param?: IN): OUT;
   notExpression(children: NotExpressionCstChildren, param?: IN): OUT;
   atomicExpression(children: AtomicExpressionCstChildren, param?: IN): OUT;
-  paranthesisExpression(children: ParanthesisExpressionCstChildren, param?: IN): OUT;
+  parenthesisExpression(children: ParenthesisExpressionCstChildren, param?: IN): OUT;
   fuzzySearchExpression(children: FuzzySearchExpressionCstChildren, param?: IN): OUT;
   literalSearchExpression(children: LiteralSearchExpressionCstChildren, param?: IN): OUT;
 }

@@ -3,88 +3,77 @@
  */
 
 //Imports
-import {Lexer, createToken, tokenMatcher} from 'chevrotain';
-import {last} from 'lodash-es';
+import {Lexer, createToken} from 'chevrotain';
 
 //Patterns
-const WhitespacePattern = /\s+/;
-const AndPattern = /AND/;
-const OrPattern = /OR/;
-const NotPattern = /NOT/;
-const OpeningParanthesisPattern = /\(/;
-const ClosingParanthesisPattern = /\)/;
-const QuotePattern = /['"]/;
+const whitespacePattern = /\s+/;
+const andPattern = /AND/;
+const orPattern = /OR/;
+const notPattern = /NOT/;
+const openingParenthesisPattern = /\(/;
+const closingParenthesisPattern = /\)/;
+const literalStringPattern = /(['"])(?:.+?\1)/;
 
-const ClosingStringPatterns = [
-  AndPattern,
-  OrPattern,
-  NotPattern,
-  OpeningParanthesisPattern,
-  ClosingParanthesisPattern
+const fuzzyStringClosingPatterns = [
+  andPattern,
+  orPattern,
+  notPattern,
+  openingParenthesisPattern,
+  closingParenthesisPattern,
+  literalStringPattern
 ];
+
 // eslint-disable-next-line security-node/non-literal-reg-expr
-const ClosingStringPattern = new RegExp(`^(${ClosingStringPatterns.map(pattern => pattern.source).join('|')})`);
+const fuzzyStringClosingPattern = new RegExp(`^(?:${fuzzyStringClosingPatterns.map(pattern => pattern.source).join('|')})`);
 
 //Tokens
-export const NonSkippedWhitespace = createToken({
-  name: 'Whitespace',
-  pattern: WhitespacePattern,
+export const whitespace = createToken({
+  name: '[whitespace]',
+  pattern: whitespacePattern,
 });
 
-export const SkippedWhitespace = createToken({
-  name: 'Whitespace',
-  pattern: WhitespacePattern,
-  group: Lexer.SKIPPED
-});
-
-export const DoubleOperandBooleanOperator = createToken({
-  name: 'DoubleOperandBooleanOperator',
+export const doubleOperandBooleanOperator = createToken({
+  name: '[double operand boolean operator]',
   pattern: Lexer.NA
 });
 
-export const And = createToken({
-  name: 'And',
-  pattern: AndPattern,
-  categories: DoubleOperandBooleanOperator
+export const and = createToken({
+  name: 'AND',
+  pattern: andPattern,
+  categories: doubleOperandBooleanOperator
 });
 
-export const Or = createToken({
-  name: 'Or',
-  pattern: OrPattern,
-  categories: DoubleOperandBooleanOperator
+export const or = createToken({
+  name: 'OR',
+  pattern: orPattern,
+  categories: doubleOperandBooleanOperator
 });
 
-export const Not = createToken({
-  name: 'Not',
-  pattern: NotPattern
+export const not = createToken({
+  name: 'NOT',
+  pattern: notPattern
 });
 
-export const OpeningParanthesis = createToken({
-  name: 'OpeningParanthesis',
-  pattern: OpeningParanthesisPattern
+export const openingParenthesis = createToken({
+  name: '(',
+  pattern: openingParenthesisPattern
 });
 
-export const ClosingParanthesis = createToken({
-  name: 'ClosingParanthesis',
-  pattern: ClosingParanthesisPattern
+export const closingParenthesis = createToken({
+  name: ')',
+  pattern: closingParenthesisPattern
 });
 
-export const Quote = createToken({
-  name: 'Quote',
-  pattern: QuotePattern,
+export const literalString = createToken({
+  name: '[literal string]',
+  pattern: literalStringPattern
 });
 
-export const String = createToken({
-  name: 'String',
+export const fuzzyString = createToken({
+  name: '[fuzzy string]',
   pattern: {
-    exec: (text, offset, tokens) =>
+    exec: (text, offset) =>
     {
-      //Get the last token
-      const lastToken = last(tokens);
-
-      //Get if inside of a literal string
-      const inLiteral = lastToken != null && tokenMatcher(lastToken, Quote);
-
       //Iterate over remaining characters
       let result = '';
       for (let i = offset; i < text.length; i++)
@@ -93,14 +82,10 @@ export const String = createToken({
         const remainingText = text.substring(i);
 
         //End of string
-        if (
-          //End of literal string
-          (inLiteral && QuotePattern.test(text[i]!)) ||
-
-          //End of non-literal string
-          (!inLiteral && ClosingStringPattern.test(remainingText))
-        )
+        if (fuzzyStringClosingPattern.test(remainingText))
         {
+          // debugger;
+
           //Strip trailing whitespace
           result = result.trimEnd();
 
@@ -112,7 +97,7 @@ export const String = createToken({
           result += text[i];
         }
       }
-      
+
       return [result];
     }
   },
@@ -120,24 +105,20 @@ export const String = createToken({
   line_breaks: true
 });
 
-/**
- * Get all tokens
- * @param skipWhitespace Whether or not to skip whitespace
- * @returns All tokens
- */
-export const getAllTokens = (skipWhitespace: boolean) => [
+//All tokens (Order matters)
+export const allTokens = [
   //Whitespace
-  skipWhitespace ? SkippedWhitespace : NonSkippedWhitespace,
+  whitespace,
 
   //Keywords
-  DoubleOperandBooleanOperator,
-  And,
-  Or,
-  Not,
-  
+  doubleOperandBooleanOperator,
+  and,
+  or,
+  not,
+
   //Literals
-  OpeningParanthesis,
-  ClosingParanthesis,
-  Quote,
-  String
+  openingParenthesis,
+  closingParenthesis,
+  literalString,
+  fuzzyString
 ];

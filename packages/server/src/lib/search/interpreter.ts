@@ -3,16 +3,13 @@
  */
 
 //Imports
-import SearchParser from '~/search/parser';
 import generateNgrams from './ngrams';
 import mongoose from 'mongoose';
-import {And, Or} from '~/search/tokens';
-import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParanthesisExpressionCstChildren} from '~/search/cst';
+import parser from '~/search/parser';
+import {AtomicExpressionCstChildren, DoubleOperandBooleanExpressionCstChildren, ExpressionCstChildren, FuzzySearchExpressionCstChildren, ICstNodeVisitor, LiteralSearchExpressionCstChildren, NotExpressionCstChildren, ParenthesisExpressionCstChildren} from '~/search/cst';
+import {and, or} from '~/search/tokens';
 import {escapeRegExp} from 'lodash-es';
 import {tokenMatcher} from 'chevrotain';
-
-//Create the parser
-const parser = new SearchParser(false);
 
 /**
  * Search query interpreter parameters
@@ -71,7 +68,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
       const rhsResult = this.visit(children.rhs, param);
 
       //And
-      if (tokenMatcher(operator!, And))
+      if (tokenMatcher(operator!, and))
       {
         result = {
           $and: [
@@ -81,7 +78,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
         };
       }
       //Or
-      else if (tokenMatcher(operator!, Or))
+      else if (tokenMatcher(operator!, or))
       {
         result = {
           $or: [
@@ -119,10 +116,10 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
       //Recurse
       return this.visit(children.literalSearchExpression, param);
     }
-    else if (children.paranthesisExpression != null)
+    else if (children.parenthesisExpression != null)
     {
       //Recurse
-      return this.visit(children.paranthesisExpression, param);
+      return this.visit(children.parenthesisExpression, param);
     }
     else
     {
@@ -130,7 +127,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
     }
   }
 
-  paranthesisExpression(children: ParanthesisExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
+  parenthesisExpression(children: ParenthesisExpressionCstChildren, param?: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Recurse
     return this.visit(children.expression, param);
@@ -139,7 +136,7 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
   fuzzySearchExpression(children: FuzzySearchExpressionCstChildren, param: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Get the raw query
-    const raw = children.string[0]!.image;
+    const raw = children.fuzzyString[0]!.image;
 
     //Generate n-grams
     const ngrams = generateNgrams(raw, Math.min(raw.length, 3), 10, 250);
@@ -172,11 +169,14 @@ class SearchInterpreter extends parser.getBaseCstVisitorConstructor() implements
   literalSearchExpression(children: LiteralSearchExpressionCstChildren, param: SearchInterpreterParam): mongoose.FilterQuery<any>
   {
     //Get the raw query
-    const raw = children.string[0]!.image;
+    const raw = children.literalString[0]!.image;
+
+    //Strip quotes
+    const stripped = raw.length >= 2 ? raw.substring(1, raw.length - 1) : raw;
 
     //Escape the query
     // eslint-disable-next-line security-node/non-literal-reg-expr
-    const regex = new RegExp(escapeRegExp(raw));
+    const regex = new RegExp(escapeRegExp(stripped));
 
     if (param.fields.length == 1)
     {

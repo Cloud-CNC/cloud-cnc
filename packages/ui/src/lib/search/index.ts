@@ -3,14 +3,10 @@
  */
 
 //Imports
-import SearchParser from '~/search/parser';
-import createLexer from '~/search/lexer';
 import interpreter from './interpreter';
+import lexer from '~/search/lexer';
+import parser from '~/search/parser';
 import {VNode, h} from 'vue';
-
-//Create the lexer and parser
-const lexer = createLexer(false);
-const parser = new SearchParser(false);
 
 /**
  * Search highlights

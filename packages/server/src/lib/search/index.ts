@@ -3,14 +3,10 @@
  */
 
 //Imports
-import SearchParser from '~/search/parser';
-import createLexer from '~/search/lexer';
 import interpreter from './interpreter';
+import lexer from '~/search/lexer';
 import mongoose from 'mongoose';
-
-//Create the lexer and parser
-const lexer = createLexer(true);
-const parser = new SearchParser(true);
+import parser from '~/search/parser';
 
 /**
  * Generate a Mongoose query from the raw search against the specified field names

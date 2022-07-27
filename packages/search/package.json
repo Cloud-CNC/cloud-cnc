@@ -16,9 +16,7 @@
     "chevrotain": "^10.1.2"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.6",
-    "ava": "^4.3.0",
-    "lodash-es": "^4.17.21"
+    "ava": "^4.3.0"
   },
   "homepage": "https://cloud-cnc.github.io",
   "repository": {
