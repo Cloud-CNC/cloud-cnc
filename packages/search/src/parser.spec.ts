@@ -64,7 +64,7 @@ test('Parse parentheses', ctx =>
   ctx.snapshot(cst);
 });
 
-test('Parse single quoted literal string', ctx =>
+test('Parse single-quoted literal string', ctx =>
 {
   //Tokenize the text
   const lexerResult = lexer.tokenize('\'much OR literally\'');
@@ -78,10 +78,52 @@ test('Parse single quoted literal string', ctx =>
   ctx.snapshot(cst);
 });
 
-test('Parse double quoted literal string', ctx =>
+test('Parse single-quoted literal string containing a double-quote', ctx =>
+{
+  //Tokenize the text
+  const lexerResult = lexer.tokenize('\'mu"ch\'');
+
+  //Parse the tokens
+  parser.input = lexerResult.tokens;
+  const cst = parser.expression();
+
+  //Ensure the result is expected
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
+});
+
+test('Parse double-quoted literal string', ctx =>
 {
   //Tokenize the text
   const lexerResult = lexer.tokenize('"much OR literally"');
+
+  //Parse the tokens
+  parser.input = lexerResult.tokens;
+  const cst = parser.expression();
+
+  //Ensure the result is expected
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
+});
+
+test('Parse double-quoted literal string containing a single-quote', ctx =>
+{
+  //Tokenize the text
+  const lexerResult = lexer.tokenize('"mu\'ch"');
+
+  //Parse the tokens
+  parser.input = lexerResult.tokens;
+  const cst = parser.expression();
+
+  //Ensure the result is expected
+  ctx.snapshot(parser.errors);
+  ctx.snapshot(cst);
+});
+
+test('Parse literal string containing only a keyword', ctx =>
+{
+  //Tokenize the text
+  const lexerResult = lexer.tokenize('"OR"');
 
   //Parse the tokens
   parser.input = lexerResult.tokens;

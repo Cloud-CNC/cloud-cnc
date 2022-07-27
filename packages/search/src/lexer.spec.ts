@@ -52,28 +52,46 @@ test('Tokenize closing parenthesis', ctx =>
   ctx.snapshot(result);
 });
 
-test('Tokenize single quote', ctx =>
+test('Tokenize single-quoted literal string', ctx =>
 {
   //Tokenize the text
-  const result = lexer.tokenize('\'');
+  const result = lexer.tokenize('\'much\'');
 
   //Ensure the result is expected
   ctx.snapshot(result);
 });
 
-test('Tokenize double quote', ctx =>
+test('Tokenize single-quoted literal string containing a double-quote', ctx =>
 {
   //Tokenize the text
-  const result = lexer.tokenize('"');
+  const result = lexer.tokenize('\'mu"ch\'');
 
   //Ensure the result is expected
   ctx.snapshot(result);
 });
 
-test('Tokenize literal string', ctx =>
+test('Tokenize double-quoted literal string', ctx =>
 {
   //Tokenize the text
-  const result = lexer.tokenize('"much OR literally"');
+  const result = lexer.tokenize('"much"');
+
+  //Ensure the result is expected
+  ctx.snapshot(result);
+});
+
+test('Tokenize double-quoted literal string containing a single-quote', ctx =>
+{
+  //Tokenize the text
+  const result = lexer.tokenize('"mu\'ch"');
+
+  //Ensure the result is expected
+  ctx.snapshot(result);
+});
+
+test('Tokenize literal string containing only a keyword', ctx =>
+{
+  //Tokenize the text
+  const result = lexer.tokenize('"OR"');
 
   //Ensure the result is expected
   ctx.snapshot(result);
