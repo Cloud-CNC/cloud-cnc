@@ -5,6 +5,8 @@
 //Imports
 import App from './App.vue';
 import {createApp} from 'vue';
+
+//Dynamic imports
 const plugins = Object.values(import.meta.globEager('./plugins/**/*.ts'));
 
 //Create the app

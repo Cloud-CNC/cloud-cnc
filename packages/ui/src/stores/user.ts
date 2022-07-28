@@ -1,5 +1,5 @@
 /**
- * @fileoverview Theme store
+ * @fileoverview User store
  */
 
 //Imports

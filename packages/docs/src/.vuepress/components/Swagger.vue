@@ -13,7 +13,7 @@ const props = defineProps<{
 //Refs
 const element = ref();
 
-//Handlers
+//Lifecycle hooks
 onMounted(() =>
 {
   //Initialize Swagger
